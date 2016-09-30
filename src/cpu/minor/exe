@@ -1,0 +1,301 @@
+decode.cc:    inst->traceData = cpu.getTracer()->getInstRecord(curTick(),
+decode.cc:        cpu.getContext(inst->id.threadId),
+decode.cc:        inst->staticInst, inst->pc, static_inst);
+decode.cc:    if (inst->traceData)
+decode.cc:        inst->traceData->setFetchSeq(inst->id.execSeqNum);
+decode.cc:            if (inst->isBubble()) {
+decode.cc:                StaticInstPtr static_inst = inst->staticInst;
+decode.cc:                if (inst->isFault()) {
+decode.cc:                        inst->fault->name());
+decode.cc:                } else if (static_inst->isMacroop()) {
+decode.cc:                        decode_info.microopPC = inst->pc;
+decode.cc:                        static_inst->fetchMicroop(
+decode.cc:                    output_inst = new MinorDynInst(inst->id);
+decode.cc:                    output_inst->pc = decode_info.microopPC;
+decode.cc:                    output_inst->staticInst = static_micro_inst;
+decode.cc:                    output_inst->fault = NoFault;
+decode.cc:                    if (static_micro_inst->isLastMicroop()) {
+decode.cc:                        output_inst->predictedTaken = inst->predictedTaken;
+decode.cc:                        output_inst->predictedTarget = inst->predictedTarget;
+decode.cc:                        (static_micro_inst->isLastMicroop() ?
+decode.cc:                    static_micro_inst->advancePC(decode_info.microopPC);
+decode.cc:                    if (static_micro_inst->isLastMicroop()) {
+decode.cc:                output_inst->id.execSeqNum = decode_info.execSeqNum;
+dyn_inst.cc:        assert(bubbleInst->isBubble());
+dyn_inst.cc:        bubbleInst->incref();
+dyn_inst.cc:    return !(staticInst->isMicroop() && !staticInst->isLastMicroop());
+dyn_inst.cc:    return isInst() && staticInst->opClass() == No_OpClass;
+dyn_inst.cc:        os << inst.staticInst->getName();
+dyn_inst.cc:        unsigned int num_src_regs = staticInst->numSrcRegs();
+dyn_inst.cc:        unsigned int num_dest_regs = staticInst->numDestRegs();
+dyn_inst.cc:        if (!staticInst->isMacroop()) {
+dyn_inst.cc:                printRegName(regs_str, staticInst->srcRegIdx(src_reg));
+dyn_inst.cc:                printRegName(regs_str, staticInst->destRegIdx(dest_reg));
+dyn_inst.cc:                << std::setfill('0') << staticInst->machInst << std::dec;
+dyn_inst.cc:        staticInst->printFlags(flags, " ");
+dyn_inst.cc:            (staticInst->opClass() == No_OpClass ?
+dyn_inst.cc:                "(invalid)" : staticInst->disassemble(0,NULL)),
+dyn_inst.cc:            Enums::OpClassStrings[staticInst->opClass()],
+dyn_inst.hh:    bool isMemRef() const { return isInst() && staticInst->isMemRef(); }
+exec_context.hh:        DPRINTF(MinorExecute, "ExecContext setting PC: %s\n", inst->pc);
+exec_context.hh:        pcState(inst->pc);
+exec_context.hh:        inst->ea = ea;
+exec_context.hh:        return inst->ea;
+exec_context.hh:    { getCpuPtr()->armMonitor(inst->id.threadId, address); }
+exec_context.hh:    { return getCpuPtr()->mwait(inst->id.threadId, pkt); }
+exec_context.hh:    { return getCpuPtr()->mwaitAtomic(inst->id.threadId, tc, thread.dtb); }
+exec_context.hh:    { return getCpuPtr()->getCpuAddrMonitor(inst->id.threadId); }
+execute.cc:    ThreadContext *thread = cpu.getContext(inst->id.threadId);
+execute.cc:    const TheISA::PCState &pc_before = inst->pc;
+execute.cc:        !inst->isFault() &&
+execute.cc:        inst->isLastOpInInst() &&
+execute.cc:        (inst->staticInst->isSerializeAfter() ||
+execute.cc:            inst->staticInst->isIprAccess());
+execute.cc:        TheISA::advancePC(target, inst->staticInst);
+execute.cc:    if (inst->predictedTaken && !force_branch) {
+execute.cc:                inst->pc.instAddr(), inst->predictedTarget.instAddr(), *inst);
+execute.cc:        } else if (inst->predictedTarget == target) {
+execute.cc:                inst->pc.instAddr(), inst->predictedTarget.instAddr(), *inst);
+execute.cc:                    inst->pc.instAddr(), inst->predictedTarget.instAddr(),
+execute.cc:            inst->pc.instAddr(), target.instAddr(), *inst);
+execute.cc:    updateBranchData(inst->id.threadId, reason, inst, target, branch);
+execute.cc:            (inst->isBubble() ? executeInfo[tid].lastPredictionSeqNum
+execute.cc:                : inst->id.predictionSeqNum),
+execute.cc:    ThreadID thread_id = inst->id.threadId;
+execute.cc:    bool is_load = inst->staticInst->isLoad();
+execute.cc:    bool is_store = inst->staticInst->isStore();
+execute.cc:    bool is_prefetch = inst->staticInst->isDataPrefetch();
+execute.cc:        if (inst->staticInst->isPrefetch()) {
+execute.cc:            fault->invoke(thread, inst->staticInst);
+execute.cc:        fault = inst->staticInst->completeAcc(packet, &context,
+execute.cc:            inst->traceData);
+execute.cc:            fault->invoke(thread, inst->staticInst);
+execute.cc:    if (inst->traceData) {
+execute.cc:        inst->traceData->setPredicate((use_context_predicate ?
+execute.cc:        ThreadContext *thread = cpu.getContext(inst->id.threadId);
+execute.cc:        ExecContext context(cpu, *cpu.threads[inst->id.threadId],
+execute.cc:        Fault init_fault = inst->staticInst->initiateAcc(&context,
+execute.cc:            inst->traceData);
+execute.cc:            if (inst->traceData)
+execute.cc:                inst->traceData->setPredicate(passed_predicate);
+execute.cc:        Fault fault = inst->fault;
+execute.cc:        if (inst->isBubble()) {
+execute.cc:        } else if (inst->id.streamSeqNum != thread.streamSeqNum) {
+execute.cc:                bool fu_is_capable = (!inst->isFault() ?
+execute.cc:                    fu->provides(inst->staticInst->opClass()) : true);
+execute.cc:                if (inst->isNoCostInst()) {
+execute.cc:                    DPRINTF(MinorExecute, "Issuing %s to %d\n", inst->id, noCostFUIndex);
+execute.cc:                    inst->fuIndex = noCostFUIndex;
+execute.cc:                    inst->extraCommitDelay = Cycles(0);
+execute.cc:                    inst->extraCommitDelayExpr = NULL;
+execute.cc:                    MinorFUTiming *timing = (!inst->isFault() ?
+execute.cc:                        fu->findTiming(inst->staticInst) : NULL);
+execute.cc:                        issued_mem_ref = inst->isMemRef();
+execute.cc:                        inst->fuIndex = fu_index;
+execute.cc:                        inst->extraCommitDelay = extra_dest_retire_lat;
+execute.cc:                        inst->extraCommitDelayExpr =
+execute.cc:                                inst->instToWaitFor =
+execute.cc:                                    inst->instToWaitFor)
+execute.cc:                                    inst->instToWaitFor =
+execute.cc:                                        *inst, inst->instToWaitFor);
+execute.cc:                                inst->canEarlyIssue = true;
+execute.cc:            if (DTRACE(MinorTrace) && !inst->isBubble())
+execute.cc:                inst->minorTraceInst(*this);
+execute.cc:            if (!discarded && inst->isInst() &&
+execute.cc:                inst->staticInst->isMemBarrier())
+execute.cc:            if (inst->traceData && setTraceTimeOnIssue) {
+execute.cc:                inst->traceData->setWhen(curTick());
+execute.cc:            } else if (!inst->isBubble()) {
+execute.cc:    assert(!inst->isFault());
+execute.cc:    MinorThread *thread = cpu.threads[inst->id.threadId];
+execute.cc:    if (!inst->staticInst->isMicroop() || inst->staticInst->isLastMicroop())
+execute.cc:        cpu.comInstEventQueue[inst->id.threadId]->serviceEvents(thread->numInst);
+execute.cc:    cpu.stats.committedInstType[inst->id.threadId]
+execute.cc:                               [inst->staticInst->opClass()]++;
+execute.cc:    if (inst->traceData)
+execute.cc:        inst->traceData->setCPSeq(thread->numOp);
+execute.cc:    cpu.probeInstCommit(inst->staticInst);
+execute.cc:    ThreadID thread_id = inst->id.threadId;
+execute.cc:    } else if (inst->isFault()) {
+execute.cc:            inst->fault->name());
+execute.cc:        fault = inst->fault;
+execute.cc:        inst->fault->invoke(thread, NULL);
+execute.cc:    } else if (inst->staticInst->isMemRef()) {
+execute.cc:                inst->canEarlyIssue = false;
+execute.cc:    } else if (inst->isInst() && inst->staticInst->isMemBarrier() &&
+execute.cc:    } else if (inst->isInst() && inst->staticInst->isQuiesce()
+execute.cc:        fault = inst->staticInst->execute(&context,
+execute.cc:            inst->traceData);
+execute.cc:        if (inst->traceData)
+execute.cc:            inst->traceData->setPredicate(context.readPredicate());
+execute.cc:            fault->invoke(thread, inst->staticInst);
+execute.cc:        executeInfo[thread_id].lastPredictionSeqNum = inst->id.predictionSeqNum;
+execute.cc:        if (!inst->isFault() &&
+execute.cc:            head_inflight_inst->inst->id.execSeqNum;
+execute.cc:        MinorDynInstPtr inst = head_inflight_inst->inst;
+execute.cc:            (inst->inLSQ ? lsq.findResponse(inst) : NULL);
+execute.cc:            discard_inst = inst->id.streamSeqNum !=
+execute.cc:                FUPipeline *fu = funcUnits[head_mem_ref_inst->fuIndex];
+execute.cc:                if (!fu_inst->isBubble() &&
+execute.cc:                    !fu_inst->inLSQ &&
+execute.cc:                    fu_inst->canEarlyIssue &&
+execute.cc:                    ex_info.streamSeqNum == fu_inst->id.streamSeqNum &&
+execute.cc:                    head_exec_seq_num > fu_inst->instToWaitFor)
+execute.cc:                        *(fu_inst), fu_inst->instToWaitFor);
+execute.cc:            if (!completed_inst && inst->isNoCostInst()) {
+execute.cc:            if (!completed_inst && !inst->inLSQ) {
+execute.cc:                    funcUnits[inst->fuIndex]->front();
+execute.cc:                InstSeqNum fu_inst_seq_num = fu_inst.inst->id.execSeqNum;
+execute.cc:                if (fu_inst.inst->isBubble()) {
+execute.cc:                } else if (fu_inst.inst->id == inst->id)  {
+execute.cc:                discard_inst = inst->id.streamSeqNum !=
+execute.cc:                    if (inst->extraCommitDelayExpr) {
+execute.cc:                        TimingExprEvalContext context(inst->staticInst,
+execute.cc:                        uint64_t extra_delay = inst->extraCommitDelayExpr->
+execute.cc:                            inst->extraCommitDelay += Cycles(extra_delay);
+execute.cc:                        inst->extraCommitDelayExpr = NULL;
+execute.cc:                    if (inst->extraCommitDelay != Cycles(0)) {
+execute.cc:                        inst->minimumCommitCycle = cpu.curCycle() +
+execute.cc:                            inst->extraCommitDelay;
+execute.cc:                        inst->extraCommitDelay = Cycles(0);
+execute.cc:                    if (!inst->isFault() && inst->isMemRef() &&
+execute.cc:                            inst->id.execSeqNum &&
+execute.cc:                    } else if (inst->minimumCommitCycle > now) {
+execute.cc:                            *inst, inst->minimumCommitCycle - now);
+execute.cc:                    if (inst->fuIndex != noCostFUIndex) {
+execute.cc:                        DPRINTF(MinorExecute, "Unstalling %d for inst %s\n", inst->fuIndex, inst->id);
+execute.cc:                        funcUnits[inst->fuIndex]->stalled = false;
+execute.cc:            inst->fuIndex = 0;
+execute.cc:            inst->inLSQ = true;
+execute.cc:        if (completed_inst && inst->isMemRef()) {
+execute.cc:            ex_info.lastCommitWasEndOfMacroop = inst->isFault() ||
+execute.cc:                inst->isLastOpInInst();
+execute.cc:            ex_info.lastPredictionSeqNum = inst->id.predictionSeqNum;
+execute.cc:            if (inst->isInst() && inst->staticInst->isMemBarrier()) {
+execute.cc:            scoreboard[thread_id].clearInstDests(inst, inst->isMemRef());
+execute.cc:            bool is_no_cost_inst = inst->isNoCostInst();
+execute.cc:            if (inst->traceData) {
+execute.cc:                    inst->traceData->setWhen(curTick());
+execute.cc:                inst->traceData->dump();
+execute.cc:                for (int i = 0; i < inst->staticInst->numSrcRegs(); i++) {
+execute.cc:                    if(inst->staticInst->srcRegIdx(i) < TheISA::NumIntRegs) {
+execute.cc:                        DPRINTF(ShsTemp, "Src Arch Reg %d\n", inst->staticInst->srcRegIdx(i));
+execute.cc:                for (int i = 0; i < inst->staticInst->numDestRegs(); i++) {
+execute.cc:                    if(inst->staticInst->destRegIdx(i) < TheISA::NumIntRegs) {
+execute.cc:                        DPRINTF(ShsTemp, "Dest Arch Reg %d\n", inst->staticInst->destRegIdx(i));
+execute.cc:            if (inst->isFault()) {
+execute.cc:            } else if (!inst->isBubble()) {
+execute.cc:            if (!fu->stalled && fu->provides(inst->staticInst->opClass()) &&
+execute.cc:                scoreboard[inst->id.threadId].canInstIssue(inst,
+execute.cc:                    cpu.getContext(inst->id.threadId))) {
+execute.cc:            if (head_inst.inst->isNoCostInst()) {
+execute.cc:                FUPipeline *fu = funcUnits[head_inst.inst->fuIndex];
+execute.cc:                     fu->front().inst->id == head_inst.inst->id) ||
+execute.cc:            MinorDynInstPtr inst = head_inflight_inst->inst;
+execute.cc:                (!inst->inLSQ || (lsq.findResponse(inst) != NULL));
+execute.cc:            if (!inst->inLSQ) {
+execute.cc:                    FUPipeline *fu = funcUnits[head_mem_ref_inst->fuIndex];
+execute.cc:                        !fu_inst->isBubble() &&
+execute.cc:                         fu_inst->id.threadId == tid &&
+execute.cc:                         !fu_inst->inLSQ &&
+execute.cc:                         fu_inst->canEarlyIssue &&
+execute.cc:                         inst->id.execSeqNum > fu_inst->instToWaitFor;
+execute.cc:                bool can_execute_fu_inst = inst->fuIndex == noCostFUIndex;
+execute.cc:                        inst->fuIndex != noCostFUIndex)
+execute.cc:                    QueuedInst& fu_inst = funcUnits[inst->fuIndex]->front();
+execute.cc:                    can_execute_fu_inst = !fu_inst.inst->isBubble() &&
+execute.cc:                        fu_inst.inst->id == inst->id;
+execute.cc:    return inst->id.streamSeqNum == executeInfo[inst->id.threadId].streamSeqNum;
+execute.cc:    if (!executeInfo[inst->id.threadId].inFlightInsts->empty())
+execute.cc:        ret = executeInfo[inst->id.threadId].inFlightInsts->front().inst->id == inst->id;
+fetch2.cc:    if (inst->isFault() || !inst->triedToPredict)
+fetch2.cc:        branchPredictor.squash(inst->id.fetchSeqNum,
+fetch2.cc:            branch.target, true, inst->id.threadId);
+fetch2.cc:        branchPredictor.update(inst->id.fetchSeqNum,
+fetch2.cc:            inst->id.threadId);
+fetch2.cc:        branchPredictor.squash(inst->id.fetchSeqNum,
+fetch2.cc:            branch.target /* Not used */, false, inst->id.threadId);
+fetch2.cc:        branchPredictor.squash(inst->id.fetchSeqNum,
+fetch2.cc:            branch.target, true, inst->id.threadId);
+fetch2.cc:    Fetch2ThreadInfo &thread = fetchInfo[inst->id.threadId];
+fetch2.cc:    TheISA::PCState inst_pc = inst->pc;
+fetch2.cc:    assert(!inst->predictedTaken);
+fetch2.cc:    if (inst->staticInst->isControl() ||
+fetch2.cc:        inst->staticInst->isSyscall())
+fetch2.cc:        inst->triedToPredict = true;
+fetch2.cc:        if (branchPredictor.predict(inst->staticInst,
+fetch2.cc:            inst->id.fetchSeqNum, inst_pc,
+fetch2.cc:            inst->id.threadId))
+fetch2.cc:            inst->predictedTaken = true;
+fetch2.cc:            inst->predictedTarget = inst_pc;
+fetch2.cc:    if (inst->predictedTaken) {
+fetch2.cc:        thread.expectedStreamSeqNum = inst->id.streamSeqNum;
+fetch2.cc:            inst->id.threadId,
+fetch2.cc:            inst->id.streamSeqNum, thread.predictionSeqNum + 1,
+fetch2.cc:            inst->predictedTarget, inst);
+fetch2.cc:            *inst, inst->predictedTarget, thread.predictionSeqNum);
+fetch2.cc:                /* Set the inputIndex to be the MachInst-aligned offset
+fetch2.cc:                dyn_inst->id.fetchSeqNum = fetch_info.fetchSeqNum;
+fetch2.cc:                dyn_inst->id.predictionSeqNum = fetch_info.predictionSeqNum;
+fetch2.cc:                assert(dyn_inst->id.execSeqNum == 0);
+fetch2.cc:                dyn_inst->pc = fetch_info.pc;
+fetch2.cc:                dyn_inst->fault = line_in->fault;
+fetch2.cc:                    "%d: %s\n", output_index, dyn_inst->fault->name());
+fetch2.cc:                    dyn_inst->id.fetchSeqNum = fetch_info.fetchSeqNum;
+fetch2.cc:                    dyn_inst->id.predictionSeqNum = fetch_info.predictionSeqNum;
+fetch2.cc:                    assert(dyn_inst->id.execSeqNum == 0);
+fetch2.cc:                    dyn_inst->staticInst = decoded_inst;
+fetch2.cc:                    dyn_inst->pc = fetch_info.pc;
+fetch2.cc:                if (DTRACE(MinorTrace) && !dyn_inst->isFault() &&
+fetch2.cc:                    dyn_inst->staticInst->isMacroop())
+fetch2.cc:                    dyn_inst->minorTraceInst(*this);
+func_unit.cc:    inst->reportData(os);
+func_unit.cc:    TheISA::ExtMachInst mach_inst = inst->machInst;
+func_unit.cc:        if (timing.provides(inst->opClass()) &&
+func_unit.cc:                i, timing.description, inst->disassemble(0), mach_inst,
+func_unit.cc:            inst->disassemble(0), mach_inst);
+func_unit.hh:    bool isBubble() const { return inst->isBubble(); }
+lsq.cc:    return inst->isInst() && inst->staticInst->isMemBarrier();
+lsq.cc:    inst->reportData(os);
+lsq.cc:        inst->id.execSeqNum >= lastMemBarrier[inst->id.threadId];
+lsq.cc:        lastMemBarrier[inst->id.threadId] = 0;
+lsq.cc:        inst->id.threadId);
+lsq.cc:        inst->id.threadId);
+lsq.cc:            slot->inst->id.threadId == request->inst->id.threadId) {
+lsq.cc:        if (!inst->inStoreBuffer) {
+lsq.cc:        if (request->inst->staticInst->isPrefetch()) {
+lsq.cc:        SimpleThread &thread = *cpu.threads[request->inst->id.threadId];
+lsq.cc:        if (request->inst->id == inst->id) {
+lsq.cc:    request->inst->inStoreBuffer = true;
+lsq.cc:    if (inst->traceData)
+lsq.cc:        inst->traceData->setMem(addr, size, flags);
+lsq.cc:    int cid = cpu.threads[inst->id.threadId]->getTC()->contextId();
+lsq.cc:        inst->pc.instAddr());
+lsq.cc:    assert(inst->isInst() && inst->staticInst->isMemBarrier());
+lsq.cc:    assert(inst->id.execSeqNum > lastMemBarrier[inst->id.threadId]);
+lsq.cc:    lastMemBarrier[inst->id.threadId] = inst->id.execSeqNum;
+lsq.cc:    ThreadID req_tid = request->inst->id.threadId;
+pipe_data.cc:        inst->reportData(os);
+pipe_data.hh:        /* Suspend fetching for this thread (inst->id.threadId).
+scoreboard.cc:    if (inst->isFault())
+scoreboard.cc:    StaticInstPtr staticInst = inst->staticInst;
+scoreboard.cc:    unsigned int num_dests = staticInst->numDestRegs();
+scoreboard.cc:            staticInst->destRegIdx(dest_index), thread_context);
+scoreboard.cc:            inst->flatDestRegIdx[dest_index] = reg;
+scoreboard.cc:            if (inst->id.execSeqNum > writingInst[index]) {
+scoreboard.cc:                writingInst[index] = inst->id.execSeqNum;
+scoreboard.cc:                fuIndices[index] = inst->fuIndex;
+scoreboard.cc:            inst->flatDestRegIdx[dest_index] = TheISA::ZeroReg;
+scoreboard.cc:    if (inst->isFault())
+scoreboard.cc:    StaticInstPtr staticInst = inst->staticInst;
+scoreboard.cc:    unsigned int num_srcs = staticInst->numSrcRegs();
+scoreboard.cc:        RegIndex reg = flattenRegIndex(staticInst->srcRegIdx(src_index),
+scoreboard.cc:    if (inst->isFault())
+scoreboard.cc:    StaticInstPtr staticInst = inst->staticInst;
+scoreboard.cc:    unsigned int num_dests = staticInst->numDestRegs();
+scoreboard.cc:        RegIndex reg = inst->flatDestRegIdx[dest_index];
+scoreboard.cc:    if (inst->isFault())
+scoreboard.cc:    StaticInstPtr staticInst = inst->staticInst;
+scoreboard.cc:    unsigned int num_srcs = staticInst->numSrcRegs();
+scoreboard.cc:        RegIndex reg = flattenRegIndex(staticInst->srcRegIdx(src_index),
+scoreboard.cc:                staticInst->disassemble(0), num_srcs, num_relative_latencies);
