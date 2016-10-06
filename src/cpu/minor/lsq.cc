@@ -49,6 +49,7 @@
 #include "cpu/minor/pipeline.hh"
 #include "debug/Activity.hh"
 #include "debug/MinorMem.hh"
+#include "debug/ShsTemp.hh"
 
 namespace Minor
 {
@@ -1660,4 +1661,118 @@ LSQ::threadSnoop(LSQRequestPtr request)
     }
 }
 
+//HwiSoo, temporal function for checking values
+void
+LSQ::checkLSQData()
+{
+	if (requests.empty())
+	{
+		//DPRINTF(ShsTemp, "LSQ: requests are empty!\n");		
+	}
+	else
+	{
+		LSQRequestPtr target=requests.front();
+		
+		if(target->isLoad)
+			DPRINTF(ShsTemp, "LSQ:requests:isLoad: TRUE\n");
+		else
+			DPRINTF(ShsTemp, "LSQ:requests:isLoad: FALSE\n");
+		
+		if(target->data==NULL)
+			DPRINTF(ShsTemp, "LSQ:requests:data: NULL\n");
+		else
+			DPRINTF(ShsTemp, "LSQ:requests:data: %d\n", sizeof(*(target->data)));
+		
+		DPRINTF(ShsTemp, "LSQ:requests:inst %x\n", target->inst);
+		
+		if(target->request.hasVaddr())
+			DPRINTF(ShsTemp, "LSQ:requests:request.getVaddr() %x\n", target->request.getVaddr());
+		else
+			DPRINTF(ShsTemp, "LSQ:requests:request.getVaddr() No vaddr\n");
+		
+		
+		if(target->request.hasPaddr())
+			DPRINTF(ShsTemp, "LSQ:requests:request.getPaddr() %x\n", target->request.getPaddr());
+		else
+			DPRINTF(ShsTemp, "LSQ:requests:request.getPaddr() No paddr\n");
+		
+		if(target->request.hasPC())
+			DPRINTF(ShsTemp, "LSQ:requests:request.getPC() %x\n", target->request.getPC());
+		else
+			DPRINTF(ShsTemp, "LSQ:requests:request.getPC() No PC\n");
+		
+		if(target->request.hasInstSeqNum())
+			DPRINTF(ShsTemp, "LSQ:requests:request.getReqInstSeqNum() %d\n", target->request.getReqInstSeqNum());
+		else
+			DPRINTF(ShsTemp, "LSQ:requests:request.getReqInstSeqNum()No InstSeqNum\n");
+		
+		if(target->request.hasSize())
+			DPRINTF(ShsTemp, "LSQ:requests:request.getSize() %d\n", target->request.getSize());
+		else
+			DPRINTF(ShsTemp, "LSQ:requests:request.getSize() No Size\n");
+		
+		
+		//DPRINTF(ShsTemp, "LSQ:packet->addr:%x\n", target->packet->getAddr()); //Error. finding way to check
+
+	}
+	
+	
+	
+	if (transfers.empty())
+	{
+		//DPRINTF(ShsTemp, "LSQ: requests are empty!\n");		
+	}
+	else
+	{
+		LSQRequestPtr target=transfers.front();
+		
+		if(target->isLoad)
+			DPRINTF(ShsTemp, "LSQ:transfers.isLoad: TRUE\n");
+		else
+			DPRINTF(ShsTemp, "LSQ:transfers.isLoad: FALSE\n");
+		
+		if(target->data==NULL)
+			DPRINTF(ShsTemp, "LSQ:transfers.data: NULL\n");
+		else
+			DPRINTF(ShsTemp, "LSQ:transfers.data: %d\n", sizeof(*(target->data)));
+		
+		DPRINTF(ShsTemp, "LSQ:transfers.inst %x\n", target->inst);
+		
+		if(target->request.hasVaddr())
+			DPRINTF(ShsTemp, "LSQ:transfers.request.getVaddr() %x\n", target->request.getVaddr());
+		else
+			DPRINTF(ShsTemp, "LSQ:transfers.request.getVaddr() No vaddr\n");
+		
+		if(target->request.hasPaddr())
+			DPRINTF(ShsTemp, "LSQ:transfers.request.getPaddr() %x\n", target->request.getPaddr());
+		else
+			DPRINTF(ShsTemp, "LSQ:transfers.request.getPaddr() No paddr\n");
+		
+		if(target->request.hasPC())
+			DPRINTF(ShsTemp, "LSQ:transfers.request.getPC() %x\n", target->request.getPC());
+		else
+			DPRINTF(ShsTemp, "LSQ:transfers.request.getPC() No PC\n");
+		
+		if(target->request.hasInstSeqNum())
+			DPRINTF(ShsTemp, "LSQ:transfers.request.getReqInstSeqNum() %d\n", target->request.getReqInstSeqNum()); //error!
+		else
+			DPRINTF(ShsTemp, "LSQ:transfers.request.getReqInstSeqNum()No InstSeqNum\n");
+		
+		if(target->request.hasSize())
+			DPRINTF(ShsTemp, "LSQ:transfers:request.getSize() %d\n", target->request.getSize());
+		else
+			DPRINTF(ShsTemp, "LSQ:transfers:request.getSize() No Size\n");
+		
+		//DPRINTF(ShsTemp, "LSQ:packet->addr:%x\n", target->packet->getAddr()); //Error. finding way to check
+
+	}
+	
+	
+	
+	
+	
+	
 }
+
+}
+

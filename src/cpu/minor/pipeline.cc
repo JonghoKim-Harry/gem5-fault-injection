@@ -142,6 +142,12 @@ Pipeline::evaluate()
     }
     */
     cpu.injectFaultRegFunc();
+	
+	//HwiSoo, Temporal checking for lsq values
+	if(curTick()%5000 == 0)
+		execute.getLSQ().checkLSQData();
+	
+	
 
     /* Note that it's important to evaluate the stages in order to allow
      *  'immediate', 0-time-offset TimeBuffer activity to be visible from

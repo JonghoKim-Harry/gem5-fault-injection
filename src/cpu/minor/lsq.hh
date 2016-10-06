@@ -728,6 +728,11 @@ class LSQ : public Named
     MinorCPU::MinorCPUPort &getDcachePort() { return dcachePort; }
 
     void minorTrace() const;
+	
+	
+	
+	//HwiSoo, temporal function for checking values
+	void checkLSQData();
 };
 
 /** Make a suitable packet for the given request.  If the request is a store,
