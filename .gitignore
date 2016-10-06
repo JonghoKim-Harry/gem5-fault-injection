@@ -1,0 +1,6 @@
+*.pyc
+tags
+build
+*.swp
+m5out
+parsetab.py

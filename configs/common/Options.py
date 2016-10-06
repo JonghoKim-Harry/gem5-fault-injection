@@ -148,11 +148,11 @@ def addCommonOptions(parser):
     parser.add_option("--injectLoc", type="int", default="0",
                       help = "Bit location to inject fault")
     parser.add_option("--injectArch", type="choice", default="NO",
-                      choices = ["Reg", "NO"],
+                      choices = ["Reg", "FU", "NO"],
                       help = "Which architecture do you want to inject fautls?  - Default: No injection")
     parser.add_option("--checkArch", type="choice", default="NO",
-                      choices = ["Reg", "NO"],
-                      help = "Which architecture do you want to check fautls?  - Default: No injection")    
+                      choices = ["Reg", "FU", "NO"],
+                      help = "Which architecture do you want to check fautls?  - Default: No injection")
 
     # dist-gem5 options
     parser.add_option("--dist", action="store_true",

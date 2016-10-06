@@ -93,6 +93,15 @@ class Scoreboard : public Named
      *  register value */
     std::vector<InstSeqNum> writingInst;
 
+    //ybkim
+    bool injectFault; //Inject a fault if this flag is set
+    bool isFaultyIndexNotCleared; //Fault is injected but is not cleard by clearInstDests()
+    InstSeqNum faultyInstNum; //Instruction sequence number which a fault is injected
+    unsigned int injectLoc;
+    void injectFaultToIndex(InstSeqNum execSeqNum, Index &index);
+    void adjustFaultyIndex(InstSeqNum execSeqNum, Index &index);
+    Index getFlippedIndex(Index index);
+
   public:
     Scoreboard(const std::string &name) :
         Named(name),
@@ -102,7 +111,10 @@ class Scoreboard : public Named
         numUnpredictableResults(numRegs, 0),
         fuIndices(numRegs, 0),
         returnCycle(numRegs, Cycles(0)),
-        writingInst(numRegs, 0)
+        writingInst(numRegs, 0),
+        //ybkim
+        injectFault(false),
+        isFaultyIndexNotCleared(false)
     { }
 
   public:

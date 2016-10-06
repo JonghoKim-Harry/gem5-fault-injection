@@ -91,7 +91,9 @@ Execute::Execute(const std::string &name_,
     executeInfo(params.numThreads, ExecuteThreadInfo(params.executeCommitLimit)),
     interruptPriority(0),
     issuePriority(0),
-    commitPriority(0)
+    commitPriority(0),
+    //ybkim
+    injectLoc(params.injectLoc)
 {
     if (commitLimit < 1) {
         fatal("%s: executeCommitLimit must be >= 1 (%d)\n", name_,
@@ -1864,5 +1866,20 @@ Execute::getDcachePort()
 {
     return lsq.getDcachePort();
 }
+
+
+//ybkim
+bool
+Execute::injectFaultToFu() {
+    //Returns true if the fault is successfully injected
+    int injectThread = 0;
+    //Check only injectTime since once this function return true, it should not be called again
+    if (curTick() < cpu.injectTime)
+        return false;
+    scoreboard[injectThread].injectFault = true;
+    scoreboard[injectThread].injectLoc = injectLoc;
+    return true;
+}
+
 
 }

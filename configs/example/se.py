@@ -254,8 +254,13 @@ for i in xrange(np):
         system.cpu[i].injectFaultReg = 1;
     if options.checkArch == "Reg":
         system.cpu[i].checkFaultReg = 1;
-    
-		
+    #ybkim
+    if options.injectArch == "FU":
+        system.cpu[i].injectFaultFu = 1;
+    if options.checkArch == "FU":
+        system.cpu[i].checkFaultFu = 1;
+
+
     system.cpu[i].createThreads()
 
 if options.ruby:

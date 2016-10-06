@@ -261,6 +261,10 @@ class FUPipeline : public FUPipelineBase, public FuncUnit
 
     /** Step the pipeline.  Allow multiple steps? */
     void advance();
+
+    //ybkim
+    //Don't call this function; we don't inject fault into the FUs
+    void flipBit(unsigned int injectLoc);
 };
 
 }

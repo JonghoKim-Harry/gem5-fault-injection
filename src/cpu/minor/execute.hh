@@ -350,6 +350,10 @@ class Execute : public Named
     /** Like the drain interface on SimObject */
     unsigned int drain();
     void drainResume();
+
+    //ybkim
+    bool injectFaultToFu();
+    unsigned int injectLoc;
 };
 
 }

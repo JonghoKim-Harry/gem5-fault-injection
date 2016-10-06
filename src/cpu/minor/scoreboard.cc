@@ -128,6 +128,8 @@ Scoreboard::markupInstDests(MinorDynInstPtr inst, Cycles retire_time,
         Index index;
 
         if (findIndex(reg, index)) {
+            //ybkim
+            if (injectFault) injectFaultToIndex(inst->id.execSeqNum, index);
             if (mark_unpredictable)
                 numUnpredictableResults[index]++;
 
@@ -198,6 +200,8 @@ Scoreboard::clearInstDests(MinorDynInstPtr inst, bool clear_unpredictable)
         Index index;
 
         if (findIndex(reg, index)) {
+            //ybkim
+            if (isFaultyIndexNotCleared) adjustFaultyIndex(inst->id.execSeqNum, index);
             if (clear_unpredictable && numUnpredictableResults[index] != 0)
                 numUnpredictableResults[index] --;
 
@@ -319,5 +323,40 @@ Scoreboard::minorTrace() const
 
     MINORTRACE("busy=%s\n", result_stream.str());
 }
+
+
+//ybkim
+void
+Scoreboard::injectFaultToIndex(InstSeqNum execSeqNum, Index &index) {
+    printf("Tick: %ld, Inject a fault to inst %ld, scoreboard index was %d\n",
+            curTick(), execSeqNum, index);
+    index = getFlippedIndex(index);
+    printf("Index is changed to %d\n", index);
+    faultyInstNum = execSeqNum;
+    injectFault = false;
+    isFaultyIndexNotCleared = true;
+}
+
+
+void
+Scoreboard::adjustFaultyIndex(InstSeqNum execSeqNum, Index &index) {
+    printf("Tick: %ld, inst %ld clear index %d; Faulty bit is not cleared yet\n",
+            curTick(), execSeqNum, index);
+    if (execSeqNum == faultyInstNum) {
+        printf("Clear faulty bit (inst %ld, index: %d)\n", execSeqNum, index);
+        index = getFlippedIndex(index);
+        printf("Clear index %d instead of the original one\n", index);
+        isFaultyIndexNotCleared = false;
+    }
+}
+
+
+Scoreboard::Index
+Scoreboard::getFlippedIndex(Index index) {
+    unsigned int loc = injectLoc % (8 * sizeof(Index));
+    Index mask = 1 << loc;
+    return (index ^ mask) % numRegs; //Force the flipped value reside in 0 ~ numRegs-1
+}
+
 
 }

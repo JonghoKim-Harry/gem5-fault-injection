@@ -57,7 +57,11 @@ MinorCPU::MinorCPU(MinorCPUParams *params) :
     injectReg(false),
     checkReg(false),
     //traceReg(false),
-    checkFaultReg(params->checkFaultReg)    //HwiSoo: 0->No check, 1-> Check
+    checkFaultReg(params->checkFaultReg),    //HwiSoo: 0->No check, 1-> Check
+    //ybkim
+    injectFaultToFu(params->injectFaultFu),
+    isFaultInjectedToFu(false)
+
 {
     //YOHAN
     Callback *cb = new MakeCallback<MinorCPU, &MinorCPU::exitCallback>(this);

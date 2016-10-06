@@ -146,8 +146,11 @@ Pipeline::evaluate()
 	//HwiSoo, Temporal checking for lsq values
 	if(curTick()%5000 == 0)
 		execute.getLSQ().checkLSQData();
-	
-	
+
+    //ybkim: Fault injection on FU
+    //TODO: move these flags to the pipeline
+    if (!cpu.isFaultInjectedToFu && cpu.injectFaultToFu)
+        cpu.isFaultInjectedToFu = execute.injectFaultToFu();
 
     /* Note that it's important to evaluate the stages in order to allow
      *  'immediate', 0-time-offset TimeBuffer activity to be visible from

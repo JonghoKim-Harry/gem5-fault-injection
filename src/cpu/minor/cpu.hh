@@ -123,9 +123,13 @@ class MinorCPU : public BaseCPU
     bool injectReg;
     bool checkReg;
     //bool traceReg; // Trace behaviors of fault injected register
-
     unsigned checkFaultReg;
-    
+
+    //ybkim
+    unsigned injectFaultFu;
+    bool injectFaultToFu;
+    bool isFaultInjectedToFu;
+
     void exitCallback();    
 
     std::map<int, uint64_t> faultyRegs;

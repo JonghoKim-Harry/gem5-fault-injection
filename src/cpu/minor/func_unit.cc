@@ -198,6 +198,20 @@ FUPipeline::advance()
     FUPipelineBase::advance();
 }
 
+//ybkim
+void
+FUPipeline::flipBit(unsigned int injectLoc) {
+    unsigned int index = injectLoc / (8 * sizeof(*data));
+    unsigned int loc = injectLoc % (8 * sizeof(*data));
+    // set bit of loc = 1 and others = 0
+    unsigned char mask = (unsigned char)1 << loc;
+    char flipped = data[index] ^ mask;
+    printf("fu size: %d\n", size);
+    printf("data[%d] - loc: %d, mask: %d, before flip: %d, after flip: %d\n",
+            index, loc, mask, data[index], flipped);
+    data[index] = flipped;
+}
+
 MinorFUTiming *
 FUPipeline::findTiming(const StaticInstPtr &inst)
 {
