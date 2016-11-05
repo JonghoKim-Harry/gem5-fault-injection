@@ -282,6 +282,9 @@ class MinorCPU(BaseCPU):
     injectTime = Param.UInt64(0, "Time to inject fault")
     injectLoc = Param.Unsigned(0, "Bit location to inject fault")
 
+    # JONGHO
+    injectComp = Param.String('', 'The compenent you want inject fault into')
+
     checkFaultReg = Param.Unsigned(0, "Check a single-bit fault in Register or not (0: NO, 1: Yes)")
     #ybkim
     injectFaultFu = Param.Unsigned(0, "Inject a single-bit fault in Functional unit or not (0: NO, 1: Yes)")

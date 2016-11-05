@@ -250,6 +250,7 @@ for i in xrange(np):
     #HwiSoo, variables for injecting faults
     system.cpu[i].injectTime = options.injectTime;
     system.cpu[i].injectLoc = options.injectLoc;
+    system.cpu[i].injectComp = options.injectComp;  # JONGHO
     if options.injectArch == "Reg":
         system.cpu[i].injectFaultReg = 1;
     if options.checkArch == "Reg":

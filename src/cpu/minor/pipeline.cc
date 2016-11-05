@@ -50,6 +50,8 @@
 #include "debug/Quiesce.hh"
 #include "debug/ShsTemp.hh"
 
+// JONGHO
+#include "softerror.hh"
 
 namespace Minor
 {
@@ -103,6 +105,23 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
     if (params.executeBranchDelay < 1) {
         fatal("%s: executeBranchDelay must be >= 1\n",
             cpu.name(), params.executeBranchDelay);
+    }
+
+    // JONGHO
+    if(params.injectComp == "f1ToF2") {
+        DPRINTF(FI, "Hello, I'm f1ToF2!\n");
+    }
+    else if(params.injectComp == "f2ToD") {
+        DPRINTF(FI, "Hello, I'm f2ToD!\n");
+    }
+    else if(params.injectComp == "dToE") {
+        DPRINTF(FI, "Hello, I'm dToE!\n");
+    }
+    else if(params.injectComp == "eToF1") {
+        DPRINTF(FI, "Hello, I'm eToF1!\n");
+    }
+    else if(params.injectComp == "f2ToF1") {
+        DPRINTF(FI, "Hello, I'm f2ToF1!\n");
     }
 }
 
