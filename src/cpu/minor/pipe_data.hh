@@ -69,19 +69,31 @@ class BranchData /* : public ReportIF, public BubbleIF */
 {
   public:
     // JONGHO
-    /*
     bool injectFault(unsigned int loc)
     {
-        if(!isBranch())
+        if(!isBranch()) {
+            DPRINTF(FI, "Empty Injection: Instruction is not branch\n");
             return false;
-        
+        }
+    
+        /** These values are all unavailable when it is not branch */
+        // Address of instruction which cause branch
+        const Addr addr = inst->pc.pc();
+        // Binary of instruction which cause branch
+        const ExtMachInst bin = inst->staticInst->machInst;
+
+        // Golden Target Address
         const Addr golden_addr = target.pc();
-        const Addr faulty_addr = BITFLIP(golden_addr, loc%32);
-        DPRINTF(FI, "Target Addr: %#x -> %#x\n", golden_addr, faulty_addr);
+
+        // Bit Flip
+        target.set(BITFLIP(golden_addr, loc%32));
+
+        // Faulty Target Address
+        const Addr faulty_addr = target.pc();
+        DPRINTF(FI, "Fault Injection - Flip bit[%u] of target address - %#x:\t%#x (target: %#x -> %#x)\n", loc%32, addr, bin, golden_addr, faulty_addr);
 
         return true;
     }
-    */
 
     enum Reason
     {

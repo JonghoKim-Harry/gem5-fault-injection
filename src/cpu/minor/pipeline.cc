@@ -119,16 +119,12 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
     else if(params.injectComp == "dToE") {
     }
     */
-    /*
     else if(params.injectComp == "eToF1") {
         fetch1.registerInj(params.injectTime, params.injectLoc, SoftError::ETOF1);
     }
-    */
-    /*
     else if(params.injectComp == "f2ToF1") {
         fetch1.registerInj(params.injectTime, params.injectLoc, SoftError::F2TOF1);
     }
-    */
 }
 
 void

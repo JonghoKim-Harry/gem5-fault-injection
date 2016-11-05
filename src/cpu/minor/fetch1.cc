@@ -570,9 +570,21 @@ Fetch1::processResponse(Fetch1::FetchRequestPtr response,
 void
 Fetch1::evaluate()
 {
-    const BranchData &execute_branch = *inp.outputWire;
-    const BranchData &fetch2_branch = *prediction.outputWire;
+    // JONGHO: Make it non-const
+    //const BranchData &execute_branch = *inp.outputWire;
+    //const BranchData &fetch2_branch = *prediction.outputWire;
+    BranchData &execute_branch = *inp.outputWire;
+    BranchData &fetch2_branch = *prediction.outputWire;
     ForwardLineData &line_out = *out.inputWire;
+
+    // JONGHO
+    if(injReady()) {
+        injDone = true;
+        if(injComp == SoftError::ETOF1)
+            injReallyDone = execute_branch.injectFault(injLoc);
+        else if(injComp == SoftError::F2TOF1)
+            injReallyDone = fetch2_branch.injectFault(injLoc);
+    }
 
     assert(line_out.isBubble());
 
