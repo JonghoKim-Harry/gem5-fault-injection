@@ -192,10 +192,14 @@ Decode::evaluate()
                         output_inst->predictedTaken = inst->predictedTaken;
                         output_inst->predictedTarget = inst->predictedTarget;
                     }
+                    // JONGHO: More Logging
+                    ExtMachInst bin = output_inst->staticInst->machInst;
 
-                    DPRINTF(Decode, "Microop decomposition inputIndex:"
+                    // JONGHO: More Logging
+                    DPRINTF(Decode, "Microop decomposition\t%#x inputIndex:"
                         " %d output_index: %d lastMicroop: %s microopPC:"
                         " %d.%d inst: %d\n",
+                        bin,
                         decode_info.inputIndex, output_index,
                         (static_micro_inst->isLastMicroop() ?
                             "true" : "false"),
@@ -216,8 +220,13 @@ Decode::evaluate()
                     }
                 } else {
                     /* Doesn't need decomposing, pass on instruction */
-                    DPRINTF(Decode, "Passing on inst: %s inputIndex:"
+                    // JONGHO: More Logging
+                    ExtMachInst bin = output_inst->staticInst->machInst;
+
+                    // JONGHO: More Logging
+                    DPRINTF(Decode, "Passing on inst\t%#x: %s inputIndex:"
                         " %d output_index: %d\n",
+                        bin,
                         *output_inst, decode_info.inputIndex, output_index);
 
                     parent_static_inst = static_inst;

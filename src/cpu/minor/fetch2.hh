@@ -53,6 +53,9 @@
 #include "cpu/pred/bpred_unit.hh"
 #include "params/MinorCPU.hh"
 
+//JONGHO
+#include "softerror.hh"
+
 namespace Minor
 {
 
@@ -93,6 +96,23 @@ class Fetch2 : public Named
   public:
     /* Public so that Pipeline can pass it to Fetch1 */
     std::vector<InputBuffer<ForwardLineData>> inputBuffer;
+
+    // JONGHO
+    bool injReady() { return injRegistered && (!injDone) && curTick() >= injTime; }
+    void registerInj(unsigned int time, unsigned int loc, SoftError::InjComp comp)
+    {
+        injRegistered = true;
+        injTime = time;
+        injLoc = loc % 512;
+        injComp = comp;
+        DPRINTF(FI, "Injection Registered\n");
+    }
+
+    bool injRegistered = false;
+    bool injDone = false;
+    unsigned int injTime;
+    unsigned int injLoc;
+    SoftError::InjComp injComp;
 
   protected:
     /** Data members after this line are cycle-to-cycle state */

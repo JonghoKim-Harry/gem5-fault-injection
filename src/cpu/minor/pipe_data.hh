@@ -56,6 +56,10 @@
 #include "cpu/minor/dyn_inst.hh"
 #include "cpu/base.hh"
 
+// JONGHO
+#include "softerror.hh"
+#include "debug/FI.hh"
+
 namespace Minor
 {
 
@@ -64,6 +68,21 @@ namespace Minor
 class BranchData /* : public ReportIF, public BubbleIF */
 {
   public:
+    // JONGHO
+    /*
+    bool injectFault(unsigned int loc)
+    {
+        if(!isBranch())
+            return false;
+        
+        const Addr golden_addr = target.pc();
+        const Addr faulty_addr = BITFLIP(golden_addr, loc%32);
+        DPRINTF(FI, "Target Addr: %#x -> %#x\n", golden_addr, faulty_addr);
+
+        return true;
+    }
+    */
+
     enum Reason
     {
         /* *** No change of stream (information to branch prediction) */
@@ -218,6 +237,18 @@ class ForwardLineData /* : public ReportIF, public BubbleIF */
     ~ForwardLineData() { line = NULL; }
 
   public:
+    // JONGHO
+    void injectFault(unsigned int loc)
+    {
+        unsigned int offset = 4 * (loc / 32);
+        const uint32_t golden_bin = *(uint32_t *)&line[offset];
+        Addr addr = lineBaseAddr + offset;
+
+        line[loc/8] = BITFLIP(line[loc/8], loc%8);
+        const uint32_t faulty_bin = *(uint32_t *)&line[offset];
+        DPRINTF(FI, "Fault Injection - %#x:\t%#x -> %#x\n", addr, golden_bin, faulty_bin);
+    }
+
     /** This is a fault, not a line */
     bool isFault() const { return fault != NoFault; }
 

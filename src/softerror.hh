@@ -2,7 +2,7 @@
 #define __SOFTERROR_HH__
 
 
-#define BITFLIP(data, bit) data ^ (1 << bit)
+#define BITFLIP(data, bit) (data ^ (1 << bit))
 
 namespace SoftError
 {

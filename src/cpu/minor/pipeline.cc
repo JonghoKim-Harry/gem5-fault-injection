@@ -109,20 +109,26 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
 
     // JONGHO
     if(params.injectComp == "f1ToF2") {
-        DPRINTF(FI, "Hello, I'm f1ToF2!\n");
+        fetch2.registerInj(cpu.injectTime, cpu.injectLoc, SoftError::F1TOF2);
     }
+    /*
     else if(params.injectComp == "f2ToD") {
-        DPRINTF(FI, "Hello, I'm f2ToD!\n");
     }
+    */
+    /*
     else if(params.injectComp == "dToE") {
-        DPRINTF(FI, "Hello, I'm dToE!\n");
     }
+    */
+    /*
     else if(params.injectComp == "eToF1") {
-        DPRINTF(FI, "Hello, I'm eToF1!\n");
+        fetch1.registerInj(params.injectTime, params.injectLoc, SoftError::ETOF1);
     }
+    */
+    /*
     else if(params.injectComp == "f2ToF1") {
-        DPRINTF(FI, "Hello, I'm f2ToF1!\n");
+        fetch1.registerInj(params.injectTime, params.injectLoc, SoftError::F2TOF1);
     }
+    */
 }
 
 void

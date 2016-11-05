@@ -230,8 +230,16 @@ void
 Fetch2::evaluate()
 {
     /* Push input onto appropriate input buffer */
-    if (!inp.outputWire->isBubble())
+    if (!inp.outputWire->isBubble()) {
+        // JONGHO
+        if(injReady() && injComp == SoftError::F1TOF2) {
+            injDone = true;
+            ForwardLineData& line = *inp.outputWire;
+            line.injectFault(injLoc);
+        }
+
         inputBuffer[inp.outputWire->id.threadId].setTail(*inp.outputWire);
+    }
 
     ForwardInstData &insts_out = *out.inputWire;
     BranchData prediction;
