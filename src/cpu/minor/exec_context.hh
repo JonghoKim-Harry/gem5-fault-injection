@@ -126,12 +126,20 @@ class ExecContext : public ::ExecContext
     readIntRegOperand(const StaticInst *si, int idx) override
     {
         //YOHAN: Behaviors of corrupted register
+        //uint64_t flipped_data;
         if(cpu.traceReg && (cpu.injectLoc/32) == si->srcRegIdx(idx)) {
-            DPRINTF(FI, "Corrupted reg %d is read by %s\n", si->srcRegIdx(idx), si->getName());
-            cpu.traceReg = false;
+            DPRINTF(FI, "Corrupted reg %d is read by %s %#x\n", si->srcRegIdx(idx), si->getName(), si->machInst);
+            //cpu.traceReg = false;
+            cpu.instRead = true;
+            //flipped_data = thread.readIntReg(si->srcRegIdx(idx));
+			//cpu.instRead = true;
+            //thread.setIntReg(si->srcRegIdx(idx), cpu.originalRegData);
         }
-		
+        
+        //else
+        //    flipped_data = thread.readIntReg(si->srcRegIdx(idx));
         return thread.readIntReg(si->srcRegIdx(idx));
+        //return flipped_data;
     }
 
     TheISA::FloatReg

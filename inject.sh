@@ -1,4 +1,4 @@
-bench_home="/home/yonsei_dclab/yohan/miBench"
+bench_home="/home/yohan/miBench"
 
 case "$2" in
 hello )
