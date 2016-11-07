@@ -241,6 +241,8 @@ class StaticInst : public RefCounted, public StaticInstFlags
     /**
      * Internal function to generate disassembly string.
      */
+    // JONGHO: Make it "public" to do logging
+  public:
     virtual std::string
     generateDisassembly(Addr pc, const SymbolTable *symtab) const = 0;
 

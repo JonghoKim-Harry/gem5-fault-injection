@@ -53,6 +53,32 @@
 // JONGHO
 #include "softerror.hh"
 
+namespace SoftError
+{
+    /** Flags: All default values are "FALSE" */
+    bool injRegistered = false;
+    bool injDone = false;
+
+    /** Injection Info */
+    unsigned int injTime;
+    unsigned int injLoc;
+    InjComp injComp;
+    unsigned int injWait;
+
+    /** (Default value of wait_count) = 0 */
+    void registerInj(unsigned int time, unsigned int loc, InjComp comp, unsigned int wait_count)
+    {
+        injRegistered = true;
+        injTime = time;
+        injLoc = loc;
+        injComp = comp;
+        injWait = wait_count;
+    }
+
+    bool timeToInject() { return injRegistered && (!injDone) && curTick() >= injTime; }
+    bool injReady() { return timeToInject() && (injWait == 0); }
+}
+
 namespace Minor
 {
 
@@ -109,12 +135,11 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
 
     // JONGHO
     if(params.injectComp == "f1ToF2") {
-        fetch2.registerInj(cpu.injectTime, cpu.injectLoc, SoftError::F1TOF2);
+        fetch2.registerInj(params.injectTime, params.injectLoc, SoftError::F1TOF2);
     }
-    /*
     else if(params.injectComp == "f2ToD") {
+        SoftError::registerInj(params.injectTime, params.injectLoc%32, SoftError::F2TOD, params.injectLoc/32);
     }
-    */
     /*
     else if(params.injectComp == "dToE") {
     }

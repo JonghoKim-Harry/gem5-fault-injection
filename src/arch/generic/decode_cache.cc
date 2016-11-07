@@ -34,6 +34,11 @@
 #include "config/the_isa.hh"
 #include "cpu/static_inst.hh"
 
+// JONGHO
+#include "base/loader/symtab.hh"
+#include "softerror.hh"
+#include "debug/FI.hh"
+
 namespace GenericISA
 {
 
@@ -41,6 +46,23 @@ StaticInstPtr
 BasicDecodeCache::decode(TheISA::Decoder *decoder,
         TheISA::ExtMachInst mach_inst, Addr addr)
 {
+    // JONGHO
+    if(SoftError::timeToInject() && SoftError::injComp == SoftError::F2TOD) {
+        if(SoftError::injReady()) {
+            SoftError::injDone = true;
+            const TheISA::ExtMachInst golden_bin = mach_inst;
+            mach_inst = BITFLIP(mach_inst, SoftError::injLoc);
+            const TheISA::ExtMachInst faulty_bin = mach_inst;
+
+            /** */
+            std::string golden_inst = decoder->decodeInst(golden_bin)->generateDisassembly(addr, debugSymbolTable); 
+            std::string faulty_inst = decoder->decodeInst(faulty_bin)->generateDisassembly(addr, debugSymbolTable); 
+            DPRINTF(FI, "Fault Injection into 'f2ToD' - Bit[%u] Flipped, %#x:\t\t%#x  %s -> %#x  %s\n", SoftError::injLoc, addr, golden_bin, golden_inst, faulty_bin, faulty_inst);
+        }
+        else
+            SoftError::injWait -= 1;
+    }
+
     StaticInstPtr &si = decodePages.lookup(addr);
     if (si && (si->machInst == mach_inst))
         return si;
