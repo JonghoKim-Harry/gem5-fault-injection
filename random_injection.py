@@ -10,11 +10,11 @@ start = sys.argv[4]
 end = sys.argv[5]
 
 if(bench == 'hello'):
-	runtime = 29995000
+	runtime = 1203432
 elif(bench == 'matmul'):
 	runtime = 101952000
 elif(bench == 'stringsearch'):
-	runtime = 162835000 #valid
+	runtime = 162835000 #valid for DC LAB server
 elif(bench == 'susan'):
 	runtime = 2368994000
 elif(bench == 'gsm'):
@@ -44,8 +44,8 @@ for i in range(int(start), int(end)):
 		injectLoc = random.randrange(1,15)
 	
 	injectTime = random.randrange(0,runtime)
-	#injectTime = 21000685
-	#injectLoc = 10
+	injectTime = 145745500
+	injectLoc = 164
 	f = open(str(bench) + "/val_" + str(injectArch)+"_"+str(start)+"_"+str(end)+".txt", 'a') 
 	
 	f.write(str(injectTime) + "\t" + str(injectLoc) + "\t")

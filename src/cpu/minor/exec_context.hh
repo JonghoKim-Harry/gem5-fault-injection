@@ -126,20 +126,24 @@ class ExecContext : public ::ExecContext
     readIntRegOperand(const StaticInst *si, int idx) override
     {
         //YOHAN: Behaviors of corrupted register
-        //uint64_t flipped_data;
+        uint64_t flipped_data;
         if(cpu.traceReg && (cpu.injectLoc/32) == si->srcRegIdx(idx)) {
-            DPRINTF(FI, "Corrupted reg %d is read by %s %#x\n", si->srcRegIdx(idx), si->getName(), si->machInst);
+            DPRINTF(FI, "Corrupted reg %d is read by %s %#x\n", si->srcRegIdx(idx), si->getName(), inst->id);
+            //DPRINTF(FI, "inst id is %#x, machInst is %#x\n", inst->id, inst->staticInst->machInst);
             //cpu.traceReg = false;
             cpu.instRead = true;
-            //flipped_data = thread.readIntReg(si->srcRegIdx(idx));
+            flipped_data = thread.readIntReg(si->srcRegIdx(idx));
 			//cpu.instRead = true;
-            //thread.setIntReg(si->srcRegIdx(idx), cpu.originalRegData);
+			if(curTick() == 145750000) {
+				thread.setIntReg(si->srcRegIdx(idx), cpu.originalRegData);
+				cpu.traceReg = false;
+			}
         }
         
-        //else
-        //    flipped_data = thread.readIntReg(si->srcRegIdx(idx));
-        return thread.readIntReg(si->srcRegIdx(idx));
-        //return flipped_data;
+        else
+            flipped_data = thread.readIntReg(si->srcRegIdx(idx));
+        //return thread.readIntReg(si->srcRegIdx(idx));
+        return flipped_data;
     }
 
     TheISA::FloatReg
