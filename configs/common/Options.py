@@ -158,7 +158,6 @@ def addCommonOptions(parser):
                       help = "Want to correct register data after injection? - Default: No correction")
     parser.add_option("--correctTime", type="int", default="0",
                       help = "Time to correct fault in RF")
-
     # JONGHO
     parser.add_option('--injectComp', type='string', default='NO_INJECTION',
                       help='The component you want to inject fault into')
