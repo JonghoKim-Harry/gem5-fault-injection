@@ -94,11 +94,12 @@ class Scoreboard : public Named
     std::vector<InstSeqNum> writingInst;
 
     //ybkim
+	int numUserIntRegs; //Number of user-level registers
     bool injectFault; //Inject a fault if this flag is set
     bool isFaultyIndexNotCleared; //Fault is injected but is not cleard by clearInstDests()
     InstSeqNum faultyInstNum; //Instruction sequence number which a fault is injected
     unsigned int injectLoc;
-    void injectFaultToIndex(InstSeqNum execSeqNum, Index &index);
+    void injectFaultToIndex(MinorDynInstPtr inst, InstSeqNum execSeqNum, Index &index);
     void adjustFaultyIndex(InstSeqNum execSeqNum, Index &index);
     Index getFlippedIndex(Index index);
 
@@ -113,6 +114,7 @@ class Scoreboard : public Named
         returnCycle(numRegs, Cycles(0)),
         writingInst(numRegs, 0),
         //ybkim
+		numUserIntRegs(15),
         injectFault(false),
         isFaultyIndexNotCleared(false)
     { }

@@ -246,18 +246,24 @@ class SimpleThread : public ThreadState
     //
     uint64_t readIntReg(int reg_idx)
     {
-		//YOHAN: Behaviors of corrupted register (syscall)
-        if(baseCpu->traceReg && injectIdx == reg_idx) {
+        //YOHAN: Behaviors of corrupted register (syscall)
+        //int flatIndex = isa->flattenIntIndex(reg_idx);
+        //uint64_t flipped_data(readIntRegFlat(flatIndex));
+        if(baseCpu->traceReg && injectIdx == reg_idx && !baseCpu->instRead) {
             DPRINTF(FI, "Corrupted reg %d is read by syscall\n", reg_idx);
-            baseCpu->traceReg = false;
+            //baseCpu->traceReg = false;
+            //setIntReg(reg_idx, baseCpu->originalRegData);
         }
-		
+        
+        baseCpu->instRead = false;
         int flatIndex = isa->flattenIntIndex(reg_idx);
         assert(flatIndex < TheISA::NumIntRegs);
         uint64_t regVal(readIntRegFlat(flatIndex));
         DPRINTF(IntRegs, "Reading int reg %d (%d) as %#x.\n",
                 reg_idx, flatIndex, regVal);
+        //        reg_idx, flatIndex, flipped_data);
         return regVal;
+        //return flipped_data;
     }
 
     FloatReg readFloatReg(int reg_idx)

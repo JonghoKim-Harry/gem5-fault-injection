@@ -1,0 +1,18 @@
+decode.cc:        inst->traceData->setFetchSeq(inst->id.execSeqNum);
+exe:decode.cc:        inst->traceData->setFetchSeq(inst->id.execSeqNum);
+exe:execute.cc:        inst->traceData->setPredicate((use_context_predicate ?
+exe:execute.cc:                inst->traceData->setPredicate(passed_predicate);
+exe:execute.cc:                inst->traceData->setWhen(curTick());
+exe:execute.cc:        inst->traceData->setCPSeq(thread->numOp);
+exe:execute.cc:            inst->traceData->setPredicate(context.readPredicate());
+exe:execute.cc:                    inst->traceData->setWhen(curTick());
+exe:execute.cc:                inst->traceData->dump();
+exe:lsq.cc:        inst->traceData->setMem(addr, size, flags);
+execute.cc:        inst->traceData->setPredicate((use_context_predicate ?
+execute.cc:                inst->traceData->setPredicate(passed_predicate);
+execute.cc:                inst->traceData->setWhen(curTick());
+execute.cc:        inst->traceData->setCPSeq(thread->numOp);
+execute.cc:            inst->traceData->setPredicate(context.readPredicate());
+execute.cc:                    inst->traceData->setWhen(curTick());
+execute.cc:                inst->traceData->dump();
+lsq.cc:        inst->traceData->setMem(addr, size, flags);

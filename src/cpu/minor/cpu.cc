@@ -60,8 +60,10 @@ MinorCPU::MinorCPU(MinorCPUParams *params) :
     checkFaultReg(params->checkFaultReg),    //HwiSoo: 0->No check, 1-> Check
     //ybkim
     injectFaultToFu(params->injectFaultFu),
-    isFaultInjectedToFu(false)
-
+    isFaultInjectedToFu(false),
+    //YOHAN
+    correctTime(params->correctTime),
+    correctRf(params->correctRf)
 {
     //YOHAN
     Callback *cb = new MakeCallback<MinorCPU, &MinorCPU::exitCallback>(this);
@@ -399,5 +401,5 @@ void
 MinorCPU::exitCallback()
 {
     if(traceReg && injectReg)
-		DPRINTF(FI, "Corrupted reg %d is unused\n", injectLoc/32);
+        DPRINTF(FI, "Corrupted reg %d is unused\n", injectLoc/32);
 }

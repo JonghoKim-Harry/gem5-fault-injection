@@ -129,6 +129,10 @@ class MinorCPU : public BaseCPU
     unsigned injectFaultFu;
     bool injectFaultToFu;
     bool isFaultInjectedToFu;
+    
+    //YOHAN
+    uint64_t correctTime;
+    bool correctRf;
 
     void exitCallback();    
 

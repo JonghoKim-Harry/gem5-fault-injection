@@ -581,6 +581,7 @@ class BaseCPU : public MemObject
 
   public:
 	bool traceReg; // YOHAN: Trace behaviors of fault injected register
+    bool instRead; //YOHAN: Corrupted data is read by insructions, not syscall
 
   public:
     void armMonitor(ThreadID tid, Addr address);

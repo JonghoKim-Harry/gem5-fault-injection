@@ -153,6 +153,11 @@ def addCommonOptions(parser):
     parser.add_option("--checkArch", type="choice", default="NO",
                       choices = ["Reg", "FU", "NO"],
                       help = "Which architecture do you want to check fautls?  - Default: No injection")
+    parser.add_option("--correctRf", type="choice", default="NO",
+                      choices = ["YES", "NO"],
+                      help = "Want to correct register data after injection? - Default: No correction")
+    parser.add_option("--correctTime", type="int", default="0",
+                      help = "Time to correct fault in RF")
 
     # JONGHO
     parser.add_option('--injectComp', type='string', default='NO_INJECTION',

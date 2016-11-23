@@ -8,5 +8,5 @@ Non-recursive bit count by bytes (BW) > Time:   0.001 sec.; Bits: 1280734
 Non-recursive bit count by bytes (AR) > Time:   0.001 sec.; Bits: 1095696
 Shift and count bits                  > Time:   0.011 sec.; Bits: 1237855
 
-Best  > Non-recursive bit count by bytes (BW)
+Best  > Non-recursive bit count by bytes (AR)
 Worst > Shift and count bits

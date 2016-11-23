@@ -1392,6 +1392,8 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     inst->traceData->setWhen(curTick());
                 inst->traceData->dump();
             }
+			
+			//DPRINTF(FI, "InstId: %#x\n", inst->id);
 
             if (completed_mem_ref)
                 num_mem_refs_committed++;

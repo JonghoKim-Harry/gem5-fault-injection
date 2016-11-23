@@ -42,6 +42,7 @@
 #include "cpu/reg_class.hh"
 #include "debug/MinorScoreboard.hh"
 #include "debug/MinorTiming.hh"
+#include "debug/FI.hh" //YOHAN: Debug flag for fault inejction
 
 namespace Minor
 {
@@ -128,8 +129,8 @@ Scoreboard::markupInstDests(MinorDynInstPtr inst, Cycles retire_time,
         Index index;
 
         if (findIndex(reg, index)) {
-            //ybkim
-            if (injectFault) injectFaultToIndex(inst->id.execSeqNum, index);
+            //ybkim: Fault injection into scorebarod when register index is in user-level integer registers
+            if (injectFault && index < numUserIntRegs) injectFaultToIndex(inst, inst->id.execSeqNum, index);
             if (mark_unpredictable)
                 numUnpredictableResults[index]++;
 
@@ -325,13 +326,13 @@ Scoreboard::minorTrace() const
 }
 
 
-//ybkim
+//ybkim: Fault injection into scoreboard
 void
-Scoreboard::injectFaultToIndex(InstSeqNum execSeqNum, Index &index) {
-    printf("Tick: %ld, Inject a fault to inst %ld, scoreboard index was %d\n",
-            curTick(), execSeqNum, index);
+Scoreboard::injectFaultToIndex(MinorDynInstPtr inst, InstSeqNum execSeqNum, Index &index) {
+    Index prev_index = index;
     index = getFlippedIndex(index);
-    printf("Index is changed to %d\n", index);
+    DPRINTF(FI, "Flipping scoreboard inst %ld %s index from %d to %d\n", 
+        execSeqNum, inst->staticInst->getName(), prev_index, index);
     faultyInstNum = execSeqNum;
     injectFault = false;
     isFaultyIndexNotCleared = true;
@@ -340,12 +341,12 @@ Scoreboard::injectFaultToIndex(InstSeqNum execSeqNum, Index &index) {
 
 void
 Scoreboard::adjustFaultyIndex(InstSeqNum execSeqNum, Index &index) {
-    printf("Tick: %ld, inst %ld clear index %d; Faulty bit is not cleared yet\n",
-            curTick(), execSeqNum, index);
+    DPRINTF(FI, "Not clearing scoreboard inst %ld index %d\n", execSeqNum, index);
     if (execSeqNum == faultyInstNum) {
-        printf("Clear faulty bit (inst %ld, index: %d)\n", execSeqNum, index);
+        //printf("Clear faulty bit (inst %ld, index: %d)\n", execSeqNum, index);
         index = getFlippedIndex(index);
-        printf("Clear index %d instead of the original one\n", index);
+        DPRINTF(FI, "Clearing scoreboard inst %ld index %d\n", execSeqNum, index);
+        //printf("Clear index %d instead of the original one\n", index);
         isFaultyIndexNotCleared = false;
     }
 }
@@ -353,9 +354,10 @@ Scoreboard::adjustFaultyIndex(InstSeqNum execSeqNum, Index &index) {
 
 Scoreboard::Index
 Scoreboard::getFlippedIndex(Index index) {
-    unsigned int loc = injectLoc % (8 * sizeof(Index));
-    Index mask = 1 << loc;
-    return (index ^ mask) % numRegs; //Force the flipped value reside in 0 ~ numRegs-1
+    //unsigned int loc = injectLoc % (8 * sizeof(Index));
+    //Index mask = 1 << loc;
+    //return (index ^ mask) % numUserIntRegs; //Force the flipped value reside in 0 ~ numRegs-1
+    return (index + injectLoc) % numUserIntRegs;
 }
 
 
