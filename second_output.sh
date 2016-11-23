@@ -17,7 +17,7 @@ num_procs=1									# Number of processors
 gemv_exec_path=./build/$1/gem5.opt		# Path to gemv executable
 config_path=./configs/example/se.py		# Path to config file
 
-$gemv_exec_path -d $2/$6 -re --stdout-file=simout_$5 --stderr-file=simerr_$5 --debug-file=FI_$5 --stats-file=stats_$5 --debug-flags=FI $config_path --cpu-type=$cpu_type --caches -n $num_procs -c "$bench_home/$bench" -o "$options" --injectArch=$6 --injectTime=$3 --injectLoc=$4 -m $7
+$gemv_exec_path -d $2/$6 -re --stdout-file=simout_$5_$9 --stderr-file=simerr_$5_$9 --debug-file=FI_$5_$9 --stats-file=stats_$5_$9 --debug-flags=FI $config_path --cpu-type=$cpu_type --caches -n $num_procs -c "$bench_home/$bench" -o "$options" --injectArch=$6 --injectTime=$3 --injectLoc=$4 -m $7 --correctRf=YES --correctTime=$10
 
 
 if cmp -s ./$2/$6/result_$8 golden_output_$2

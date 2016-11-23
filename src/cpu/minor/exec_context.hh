@@ -133,11 +133,12 @@ class ExecContext : public ::ExecContext
             //cpu.traceReg = false;
             cpu.instRead = true;
             flipped_data = thread.readIntReg(si->srcRegIdx(idx));
-			//cpu.instRead = true;
-			if(curTick() == 145750000) {
-				thread.setIntReg(si->srcRegIdx(idx), cpu.originalRegData);
-				cpu.traceReg = false;
-			}
+            //cpu.instRead = true;
+            if(curTick() >= cpu.correctTime && cpu.correctRf) {
+                cpu.traceReg = false;
+                thread.setIntReg(si->srcRegIdx(idx), cpu.originalRegData);
+                DPRINTF(FI, "Corrupted reg %d is corrected\n", si->srcRegIdx(idx));
+            }
         }
         
         else
@@ -168,7 +169,7 @@ class ExecContext : public ::ExecContext
             DPRINTF(FI, "Corrupted reg %d is overwritten by %s\n", si->destRegIdx(idx), si->getName());
             cpu.traceReg = false;
         }
-		
+        
         thread.setIntReg(si->destRegIdx(idx), val);
     }
 

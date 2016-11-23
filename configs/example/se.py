@@ -248,18 +248,21 @@ for i in xrange(np):
         system.cpu[i].addCheckerCpu()
 
     #HwiSoo, variables for injecting faults
-    system.cpu[i].injectTime = options.injectTime;
-    system.cpu[i].injectLoc = options.injectLoc;
+    system.cpu[i].injectTime = options.injectTime
+    system.cpu[i].injectLoc = options.injectLoc
     if options.injectArch == "Reg":
-        system.cpu[i].injectFaultReg = 1;
+        system.cpu[i].injectFaultReg = 1
     if options.checkArch == "Reg":
-        system.cpu[i].checkFaultReg = 1;
+        system.cpu[i].checkFaultReg = 1
     #ybkim
     if options.injectArch == "FU":
-        system.cpu[i].injectFaultFu = 1;
+        system.cpu[i].injectFaultFu = 1
     if options.checkArch == "FU":
-        system.cpu[i].checkFaultFu = 1;
-
+        system.cpu[i].checkFaultFu = 1
+    #YOHAN
+    if options.correctRf == "YES":
+        system.cpu[i].correctRf = True
+    system.cpu[i].correctTime = options.correctTime
 
     system.cpu[i].createThreads()
 
