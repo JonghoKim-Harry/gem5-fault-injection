@@ -1,3 +1,7 @@
+/**
+ *  This file is created by Jongho Kim.
+ */
+
 #ifndef __SOFTERROR_HH__
 #define __SOFTERROR_HH__
 

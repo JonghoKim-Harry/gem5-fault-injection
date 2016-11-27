@@ -54,7 +54,7 @@
 #include "mem/packet.hh"
 
 // JONGHO
-#include "softerror.hh"
+#include "base/softerror.hh"
 
 namespace Minor
 {

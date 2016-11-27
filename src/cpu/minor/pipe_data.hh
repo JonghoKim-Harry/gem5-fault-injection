@@ -57,7 +57,7 @@
 #include "cpu/base.hh"
 
 // JONGHO
-#include "softerror.hh"
+#include "base/softerror.hh"
 #include "debug/FI.hh"
 
 namespace Minor

@@ -54,7 +54,7 @@
 #include "params/MinorCPU.hh"
 
 //JONGHO
-#include "softerror.hh"
+#include "base/softerror.hh"
 
 namespace Minor
 {

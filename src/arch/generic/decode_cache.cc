@@ -36,7 +36,7 @@
 
 // JONGHO
 #include "base/loader/symtab.hh"
-#include "softerror.hh"
+#include "base/softerror.hh"
 #include "debug/FI.hh"
 
 namespace GenericISA

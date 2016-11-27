@@ -51,7 +51,7 @@
 #include "debug/ShsTemp.hh"
 
 // JONGHO
-#include "softerror.hh"
+#include "base/softerror.hh"
 
 namespace SoftError
 {
