@@ -67,9 +67,10 @@ if 'MinorCPU' in env['CPU_MODELS']:
     DebugFlag('MinorScoreboard', 'Minor Execute register scoreboard')
     DebugFlag('MinorTrace', 'MinorTrace cycle-by-cycle state trace')
     DebugFlag('MinorTiming', 'Extra timing for instructions')
-    DebugFlag('ShsTemp', 'Temporal Debug Flag')
-    DebugFlag('FI', 'Fault injection')
     DebugFlag('Completion', 'Completed Instruction')    # JONGHO
+    DebugFlag('ShsTemp', 'Need to be deleted')
+    DebugFlag('FI', 'Fault Injection')
+    DebugFlag('FIProfiling', 'Profiling for LSQ')
 
     CompoundFlag('Minor', [
         'MinorCPU', 'MinorExecute', 'MinorInterrupt', 'MinorMem',

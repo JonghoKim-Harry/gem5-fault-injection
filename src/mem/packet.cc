@@ -55,6 +55,7 @@
 #include "base/misc.hh"
 #include "base/trace.hh"
 #include "mem/packet.hh"
+#include "debug/FI.hh"
 
 using namespace std;
 
@@ -414,4 +415,71 @@ Packet::PrintReqState::printObj(Printable *obj)
 {
     printLabels();
     obj->print(os, verbosity, curPrefix());
+}
+
+
+//HwiSoo, function for fault injection
+
+void
+Packet::flipData (unsigned int injectIndex, unsigned int injectBit)
+{
+    DPRINTF(FI, "LSQ FI : to packet data: injectIndex : %d, injectBit : %d\n"
+    , injectIndex, injectBit);
+    if (!hasData())
+    {
+        DPRINTF(FI, "LSQ FI : to packet data: No Data\n");
+        return;
+    }
+    else if (injectIndex>=size)
+    {
+        DPRINTF(FI, "LSQ FI : Size is smaller than target index\n");
+        return;
+    }
+    else
+    {
+        DPRINTF(FI, "LSQ FI : to packet : size: %d, byte: %d, bit: %d,\n"
+        , size,injectIndex, injectBit);
+        uint8_t originalByte = data[injectIndex];
+        uint8_t flipByte = 1;
+        data[injectIndex] = originalByte ^ (flipByte << (injectBit));
+
+        //uint64_t bit_flip = intRegs[injectLoc/32] ^ (1UL << (injectLoc%32));
+        DPRINTF(FI, "LSQ FI : to packet data : 0x%x to 0x%x\n"
+        , originalByte, data[injectIndex]);
+    }
+
+}
+
+void
+Packet::flipAddr (unsigned int injectLoc)
+{
+    DPRINTF(FI, "LSQ FI : to packet addr: injectLoc : %d\n", injectLoc);
+    if (!flags.isSet(VALID_ADDR))
+    {
+        DPRINTF(FI, "LSQ FI : to packet addr: invalid addr\n");
+        return;
+    }
+    else
+    {
+        uint32_t originalAddr = addr;
+        uint32_t bit_flip = originalAddr ^ (1UL << (injectLoc%32));
+        addr = bit_flip;
+        DPRINTF(FI, "LSQ FI : Flipping address of packet from %x to %x\n"\
+        , originalAddr, addr);
+    }
+
+}
+
+void
+Packet::flipSetAddr(unsigned int newAddr)
+{
+    if (!flags.isSet(VALID_ADDR))
+    {
+        DPRINTF(FI, "LSQ FI : to packet addr: invalid addr\n");
+        return;
+    }
+    uint32_t originalAddr = addr;
+    addr=newAddr;
+    DPRINTF(FI, "LSQ FI : (flipSet) Flipping address of packet from %x to %x\n"
+    , originalAddr, addr);
 }

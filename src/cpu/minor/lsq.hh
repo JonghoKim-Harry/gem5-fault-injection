@@ -183,7 +183,10 @@ class LSQ : public Named
         };
 
         LSQRequestState state;
-
+            //HwiSoo
+            virtual void faultInjectionToFragments(uint32_t element
+            , uint32_t loc) = 0;
+            virtual bool hasDataInFragments(int injectByte) = 0;
       protected:
         /** BaseTLB::Translation interface */
         void markDelayed() { }
@@ -296,7 +299,9 @@ class LSQ : public Named
         /** Keep the given packet as the response packet
          *  LSQRequest::packet */
         void retireResponse(PacketPtr packet_) { }
-
+                //HwiSoo
+                void faultInjectionToFragments(uint32_t element, uint32_t loc);
+                bool hasDataInFragments(int injectByte);
       public:
         SpecialDataRequest(LSQ &port_, MinorDynInstPtr inst_) :
             /* Say this is a load, not actually relevant */
@@ -363,7 +368,9 @@ class LSQ : public Named
         /** Keep the given packet as the response packet
          *  LSQRequest::packet */
         void retireResponse(PacketPtr packet_);
-
+                //HwiSoo
+                void faultInjectionToFragments(uint32_t element, uint32_t loc);
+                bool hasDataInFragments(int injectByte);
       public:
         SingleDataRequest(LSQ &port_, MinorDynInstPtr inst_,
             bool isLoad_, PacketDataPtr data_ = NULL, uint64_t *res_ = NULL) :
@@ -421,7 +428,9 @@ class LSQ : public Named
         /** TLB response interface */
         void finish(const Fault &fault_, RequestPtr request_,
                     ThreadContext *tc, BaseTLB::Mode mode);
-
+                //HwiSoo
+                void faultInjectionToFragments(uint32_t element, uint32_t loc);
+                bool hasDataInFragments(int injectByte);
       public:
         SplitDataRequest(LSQ &port_, MinorDynInstPtr inst_,
             bool isLoad_, PacketDataPtr data_ = NULL,
@@ -531,6 +540,7 @@ class LSQ : public Named
 
         /** Report queue contents for MinorTrace */
         void minorTrace() const;
+
     };
 
   protected:
@@ -729,10 +739,14 @@ class LSQ : public Named
 
     void minorTrace() const;
 	
-	
-	
-	//HwiSoo, temporal function for checking values
-	void checkLSQData();
+
+    //HwiSoo : LSQ FI, fault injection to LSQ
+    void injectFaultLSQFunc();
+
+
+        //HwiSoo
+        void FIProfiling();
+
 };
 
 /** Make a suitable packet for the given request.  If the request is a store,

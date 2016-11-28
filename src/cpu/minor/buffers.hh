@@ -415,6 +415,10 @@ class Queue : public Named, public Reservable
 
     virtual ~Queue() { }
 
+        //HwiSoo
+    int size(){return queue.size();}
+    ElemType getElement(int index){return queue[index];}
+
   public:
     /** Push an element into the buffer if it isn't a bubble.  Bubbles are
      *  just discarded.  It is assummed that any push into a queue with

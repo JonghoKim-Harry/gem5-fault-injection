@@ -170,28 +170,11 @@ Pipeline::minorTrace() const
 void
 Pipeline::evaluate()
 {
-    //HwiSoo, Test for parameters
-    /*
-    if((cpu.checkFaultReg==1 || cpu.injectFaultReg==1)&&curTick()>=cpu.injectTime) {	    
-        if(cpu.injectFaultReg == 1) {
-            DPRINTF(ShsTemp, "%d %d %d %ld %d \n", cpu.numThreads, cpu.injectFaultReg, cpu.injectTime, cpu.injectLoc, cpu.checkFaultReg);
-            cpu.injectReg=true;
-        }
-        else
-            cpu.checkReg=true;
-
-        if(cpu.injectReg)
-            cpu.injectFaultReg = 0;
-        else {
-            //
-        }
-    }
-    */
     cpu.injectFaultRegFunc();
-	
-	//HwiSoo, Temporal checking for lsq values
-	if(curTick()%5000 == 0)
-		execute.getLSQ().checkLSQData();
+
+        //HwiSoo
+        execute.getLSQ().injectFaultLSQFunc();
+    execute.getLSQ().FIProfiling();
 
     //ybkim: Fault injection on FU
     //TODO: move these flags to the pipeline

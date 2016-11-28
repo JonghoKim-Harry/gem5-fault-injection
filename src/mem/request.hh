@@ -869,6 +869,10 @@ class Request
     {
         return _memSpaceConfigFlags.isSet(ARG_SEGMENT);
     }
+    //HwiSoo, function for fault injection
+    void flipPaddr(int injectLoc);
+    void flipVaddr(int injectLoc);
+    void flipSetPaddr(int newPaddr);
 };
 
 #endif // __MEM_REQUEST_HH__
