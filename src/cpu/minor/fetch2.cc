@@ -482,6 +482,12 @@ Fetch2::evaluate()
                 {
                     dyn_inst->minorTraceInst(*this);
                 }
+
+                // JONGHO
+                if (SoftError::injDone && (!SoftError::faulty_inst_id_tracked)) {
+                    SoftError::faulty_inst_id_tracked = true;
+                    SoftError::faulty_inst_id = dyn_inst->id;
+                }
             }
 
             /* Remember the streamSeqNum of this line so we can tell when

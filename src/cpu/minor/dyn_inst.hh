@@ -136,6 +136,37 @@ class InstId
 
         return ret;
     }
+
+    // JONGHO
+    InstId(const InstId& copy):
+        threadId(copy.threadId), streamSeqNum(copy.streamSeqNum),
+        predictionSeqNum(copy.predictionSeqNum),
+        lineSeqNum(copy.lineSeqNum), fetchSeqNum(copy.fetchSeqNum),
+        execSeqNum(copy.execSeqNum)
+    {}
+
+    // JONGHO
+    InstId& operator= (const InstId& copy)
+    {
+        threadId = copy.threadId;
+        streamSeqNum = copy.streamSeqNum;
+        predictionSeqNum = copy.predictionSeqNum;
+        lineSeqNum = copy.lineSeqNum;
+        fetchSeqNum = copy.fetchSeqNum;
+        execSeqNum = copy.execSeqNum;
+        return *this;
+    }
+
+    // JONGHO
+    bool pseudo_equal(const InstId& rhs)
+    {
+        return (threadId == rhs.threadId &&
+                streamSeqNum == rhs.streamSeqNum &&
+                predictionSeqNum == rhs.predictionSeqNum &&
+                lineSeqNum == rhs.lineSeqNum &&
+                fetchSeqNum == rhs.fetchSeqNum);
+    }
+
 };
 
 /** Print this id in the usual slash-separated format expected by

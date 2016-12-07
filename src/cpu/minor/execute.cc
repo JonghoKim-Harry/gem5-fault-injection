@@ -60,6 +60,7 @@
 // JONGHO
 #include "base/loader/symtab.hh"
 #include "debug/Completion.hh"
+#include "base/softerror.hh"
 
 namespace Minor
 {
@@ -1332,22 +1333,24 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
             }
         }
 
+        // JONGHO
+        if (SoftError::faulty_inst_id_tracked && (!SoftError::faulty_inst_id_logged) && SoftError::faulty_inst_id.pseudo_equal(inst->id)) {
+            DPRINTF(FI, "Faulty Inst Detected @ Execute\n");
+            if(completed_inst) {
+                SoftError::faulty_inst_id_logged = true;
+                if(!discard_inst)
+                    DPRINTF(FI, "Faulty Inst Executed\n");
+                /*
+                else
+                    DPRINTF(FI, "Faulty Inst Discarded\n");
+                */
+            }
+        }
+
         if (completed_inst && !(issued_mem_ref && fault == NoFault)) {
             /* Note that this includes discarded insts */
             DPRINTF(MinorExecute, "Completed inst: %s\n", *inst);
-            
-            // JONGHO
-            if(inst && inst->pc.instAddr() && inst->staticInst) {
-                Addr addr = inst->pc.instAddr();
-                std::string my_inst = inst->staticInst->generateDisassembly(addr, debugSymbolTable);
-                DPRINTF(Completion, ">> Completed inst %#x: %s\n", addr, my_inst);
-                if(discard_inst) {
-                    DPRINTF(Completion, "<< Discarded inst %#x: %s\n", addr, my_inst);
-                }
-            }
-
-
-
+ 
             /* Got to the end of a full instruction? */
             ex_info.lastCommitWasEndOfMacroop = inst->isFault() ||
                 inst->isLastOpInInst();
@@ -1393,8 +1396,6 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                 inst->traceData->dump();
             }
 			
-			//DPRINTF(FI, "InstId: %#x\n", inst->id);
-
             if (completed_mem_ref)
                 num_mem_refs_committed++;
 
