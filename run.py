@@ -196,15 +196,19 @@ class ExpManager:
             ##
             #  Read debug file
             #
+            executed = 'Not Executed'
             with open(outdir + '/' + 'debug_' + str(idx), 'r') as debug_read:
-                inst_before = debug_read.readline().strip().split('>')[0].strip()
-                mnemonic = inst_before.split(':')[-1].strip().split()[1]
+                for line in debug_read:
+                    if 'Executed' in line:
+                        executed = 'Executed'
 
             # <F/NF> <stage> <inst> <target> <runtime> <bench name>
-            para2 = '\t'.join([isFailure, 'f2ToD', '', mnemonic, runtime_100, bench_name])
+            #para2 = '\t'.join([isFailure, 'f2ToD', '', mnemonic, runtime_100, bench_name])
+            para2 = '\t'.join([isFailure, 'f2ToD', '', runtime_100, bench_name, executed])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]) + '\n')
+
         digest.close()
 
 
