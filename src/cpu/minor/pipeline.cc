@@ -80,7 +80,7 @@ namespace SoftError
 
     bool timeToInject() { return injRegistered && (!injDone) && curTick() >= injTime; }
     bool injReady() { return timeToInject() && (injWait == 0); }
-}
+} /** namespace SoftError */
 
 namespace Minor
 {

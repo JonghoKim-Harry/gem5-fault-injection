@@ -58,9 +58,10 @@
 #include "debug/FI.hh" //YOHAN
 
 // JONGHO
-#include "base/loader/symtab.hh"
 #include "debug/Completion.hh"
+#include "debug/InstInfo.hh"
 #include "base/softerror.hh"
+#include "base/instinfo.hh"
 
 namespace Minor
 {
@@ -1396,6 +1397,9 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                 inst->traceData->dump();
             }
 			
+            // JONGHO
+            InstInfo::print_instinfo(inst);
+
             if (completed_mem_ref)
                 num_mem_refs_committed++;
 

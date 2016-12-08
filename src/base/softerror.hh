@@ -2,8 +2,8 @@
  *  This file is created by Jongho Kim.
  */
 
-#ifndef __SOFTERROR_HH__
-#define __SOFTERROR_HH__
+#ifndef __BASE_SOFTERROR_HH__
+#define __BASE_SOFTERROR_HH__
 
 #include "sim/core.hh"
 #include "cpu/minor/dyn_inst.hh"
@@ -41,6 +41,6 @@ namespace SoftError
     void registerInj(unsigned int time, unsigned int loc, InjComp comp, unsigned int wait_count=0);
     bool timeToInject();
     bool injReady();
-}
+} // namespace SoftError
 
-#endif /** __SOFTERROR_HH__ */
+#endif // __BASE_SOFTERROR_HH__
