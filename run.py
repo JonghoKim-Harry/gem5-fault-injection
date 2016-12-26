@@ -220,6 +220,7 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--index', action='store', nargs=2, help='Experiment Number')
     parser.add_argument('-f', '--flag', action='store', nargs='*', help='All gem5 debug flags')
     parser.add_argument('--inject', action='store', nargs=2, help='Injection <time> <location>')
+    parser.add_argument('--comp2', action='store', default='f2ToD', help='Injection to: f1ToF2 | f2ToD | dToE | f2ToF1 | eToF1')
 
     ##
     #  End parsing & Run gem5
@@ -230,6 +231,6 @@ if __name__ == '__main__':
         ExpManager.run_golden(args.bench_name, args.flag)
     elif args.inject:
         # Non-random Fault Injection
-        ExpManager.inject_single(args.inject[0], args.inject[1], 'PipeReg', 'f2ToD', 'inject', args.bench_name, args.flag)
+        ExpManager.inject_single(args.inject[0], args.inject[1], 'PipeReg', args.comp2, 'inject', args.bench_name, args.flag)
     else:
-        ExpManager.inject_random('PipeReg', 'f2ToD', args.index[0], args.index[1], args.bench_name, args.flag)
+        ExpManager.inject_random('PipeReg', args.comp2, args.index[0], args.index[1], args.bench_name, args.flag)
