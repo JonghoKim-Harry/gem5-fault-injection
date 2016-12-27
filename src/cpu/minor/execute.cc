@@ -538,7 +538,15 @@ Execute::issue(ThreadID thread_id)
     ForwardInstData *insts_in = getInput(thread_id);
     if(injReady()) {
         injDone = true;
-        bool actual_inj = insts_in->insts[0]->injectFault(injLoc);
+        unsigned int inst_idx = (injLoc%24) > 11 ? 1 : 0;
+        if(injLoc%12 <= 3)
+            DPRINTF(FI, "Try to flip destination register index of inst[%u]...\n", inst_idx);
+        else if(4 <= injLoc%12 && injLoc%12 <= 7)
+            DPRINTF(FI, "Try to flip 1st source register index of inst[%u]...\n", inst_idx);
+        else
+            DPRINTF(FI, "Try to flip 2nd source register index of inst[%u]...\n", inst_idx);
+
+        bool actual_inj = insts_in->insts[inst_idx]->injectFault(injLoc);
         DPRINTF(FI, "Injection: %s\n", actual_inj ? "Actual Injection" : "Empty Injection");
     }
 
