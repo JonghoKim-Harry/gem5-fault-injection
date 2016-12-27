@@ -203,8 +203,7 @@ class ExpManager:
                         executed = 'Executed'
 
             # <F/NF> <stage> <inst> <target> <runtime> <bench name>
-            #para2 = '\t'.join([isFailure, 'f2ToD', '', mnemonic, runtime_100, bench_name])
-            para2 = '\t'.join([isFailure, 'f2ToD', '', runtime_100, bench_name, executed])
+            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, executed])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]) + '\n')
