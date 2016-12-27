@@ -6,8 +6,12 @@
 #define __BASE_SOFTERROR_HH__
 
 #include "sim/core.hh"
-#include "cpu/minor/dyn_inst.hh"
-#define BITFLIP(data, bit) (data ^ (1 << bit))
+#define BITFLIP(data, bit) (data ^ (1 << (bit)))
+
+namespace Minor
+{
+    class InstId;
+}
 
 namespace SoftError
 {
@@ -20,10 +24,6 @@ namespace SoftError
         F2TOF1,
         NUM_INJCOMP
     } InjComp;
-
-    /**
-     *  The global variables below are declared in <cpu/minor/pipeline.cc>
-     */
 
     /** Flags */
     extern bool injRegistered;

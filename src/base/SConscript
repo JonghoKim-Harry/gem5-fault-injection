@@ -71,6 +71,9 @@ Source('loader/symtab.cc')
 
 Source('stats/text.cc')
 
+# JONGHO
+Source('softerror.cc')
+
 DebugFlag('Annotate', "State machine annotation debugging")
 DebugFlag('AnnotateQ', "State machine annotation queue debugging")
 DebugFlag('AnnotateVerbose', "Dump all state machine annotation details")
