@@ -217,6 +217,8 @@ class StaticInst : public RefCounted, public StaticInstFlags
     /// The binary machine instruction.
     const ExtMachInst machInst;
 
+    // JONGHO
+    bool injectFault(unsigned int loc);
   protected:
 
     /// See destRegIdx().

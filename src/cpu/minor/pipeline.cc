@@ -114,10 +114,9 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
     else if(params.injectComp == "f2ToD") {
         SoftError::registerInj(params.injectTime, params.injectLoc%32, SoftError::F2TOD, params.injectLoc/32);
     }
-    /*
     else if(params.injectComp == "dToE") {
+        execute.registerInj(params.injectTime, params.injectLoc);
     }
-    */
     else if(params.injectComp == "eToF1") {
         fetch1.registerInj(params.injectTime, params.injectLoc, SoftError::ETOF1);
     }

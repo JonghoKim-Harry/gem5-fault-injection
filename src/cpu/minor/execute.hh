@@ -208,7 +208,9 @@ class Execute : public Named
 
     /** Get a piece of data to work on from the inputBuffer, or 0 if there
      *  is no data. */
-    const ForwardInstData *getInput(ThreadID tid);
+    // JONGHO
+    ForwardInstData *getInput(ThreadID tid);
+    //const ForwardInstData *getInput(ThreadID tid);
 
     /** Pop an element off the input buffer, if there are any */
     void popInput(ThreadID tid);
@@ -354,6 +356,14 @@ class Execute : public Named
     //ybkim
     bool injectFaultToFu();
     unsigned int injectLoc;
+
+    // JONGHO
+    bool injRegistered = false;
+    bool injDone = false;
+    unsigned int injTime;
+    unsigned int injLoc;
+    void registerInj(unsigned int time, unsigned int loc);
+    bool injReady() const;
 };
 
 }

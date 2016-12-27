@@ -199,7 +199,9 @@ Execute::Execute(const std::string &name_,
     }
 }
 
-const ForwardInstData *
+// JONGHO
+ForwardInstData *
+//const ForwardInstData *
 Execute::getInput(ThreadID tid)
 {
     /* Get a line from the inputBuffer to work with */
@@ -531,7 +533,15 @@ cyclicIndexDec(unsigned int index, unsigned int cycle_size)
 unsigned int
 Execute::issue(ThreadID thread_id)
 {
-    const ForwardInstData *insts_in = getInput(thread_id);
+    // JONGHO
+    //const ForwardInstData *insts_in = getInput(thread_id);
+    ForwardInstData *insts_in = getInput(thread_id);
+    if(injReady()) {
+        injDone = true;
+        bool actual_inj = insts_in->insts[0]->injectFault(injLoc);
+        DPRINTF(FI, "Injection: %s\n", actual_inj ? "Actual Injection" : "Empty Injection");
+    }
+
     ExecuteThreadInfo &thread = executeInfo[thread_id];
 
     /* Early termination if we have no instructions */
@@ -1904,5 +1914,18 @@ Execute::injectFaultToFu() {
     return true;
 }
 
+// JONGHO
+void Execute::registerInj(unsigned int time, unsigned int loc) {
+
+    injRegistered = true;
+    injTime = time;
+    injLoc = loc;
+}
+
+// JONGHO
+bool Execute::injReady() const {
+
+    return injRegistered && (!injDone) && (curTick() >= injTime);
+}
 
 }

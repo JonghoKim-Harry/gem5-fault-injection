@@ -34,6 +34,10 @@
 #include "cpu/static_inst.hh"
 #include "sim/core.hh"
 
+// JONGHO
+#include "base/softerror.hh"        // BITFLIP(data, bit)
+#include "debug/FI.hh"
+
 StaticInstPtr StaticInst::nullStaticInstPtr;
 
 using namespace std;
@@ -108,4 +112,67 @@ StaticInst::printFlags(std::ostream &outs,
             printed_a_flag = true;
         }
     }
+}
+
+// JONGHO
+bool StaticInst::injectFault(unsigned int loc) {
+
+    unsigned int num_destreg = 0, num_srcreg = 0;
+    for(int j=0; j<_numDestRegs; j++)
+        if(_destRegIdx[j] < 16)
+            ++num_destreg;
+    for(int j=0; j<_numSrcRegs; j++)
+        if(_srcRegIdx[j] < 16)
+            ++num_srcreg;
+
+    // We assume that there are at most one dest reg and two src regs
+    assert(num_destreg <= 1 && num_srcreg <= 2);
+
+    unsigned int idx = loc%12;
+    if(idx <= 3) {
+        // Flip destination register index
+        if(num_destreg == 0)
+            return false;
+        for(int j=0; j<_numDestRegs; j++) {
+            if(_destRegIdx[j] < 16) {
+                const RegIndex golden = _destRegIdx[j];
+                _destRegIdx[j] = BITFLIP(_destRegIdx[j], idx%4);
+                DPRINTF(FI, "Flip DestRegIdx:\treg%u -> reg%u\n", golden, _destRegIdx[j]);
+                break;
+            }
+        }
+    }
+    else if(4 <= idx && idx <= 7) {
+        // Flip 1st source register index
+        if(num_srcreg == 0)
+            return false;
+        for(int j=0; j<_numSrcRegs; j++) {
+            if(_srcRegIdx[j] < 16) {
+                RegIndex golden = _srcRegIdx[j];
+                _srcRegIdx[j] = BITFLIP(_srcRegIdx[j], idx%4);
+                DPRINTF(FI, "Flip 1st SrcRegIdx:\treg%u -> reg%u\n", golden, _srcRegIdx[j]);
+                break;
+            }
+        }
+    }
+    else if(8 <= idx && idx <= 11) {
+        // Flip 2nd source register index
+        if(num_srcreg <= 1)
+            return false;
+        for(int j=0, k=0; j<_numSrcRegs; j++) {
+            if(_srcRegIdx[j] < 16) {
+                ++k;
+                if(k==2) {
+                    RegIndex golden = _srcRegIdx[j];
+                    _srcRegIdx[j] = BITFLIP(_srcRegIdx[j], idx%4);
+                    DPRINTF(FI, "Flip 2nd SrcRegIdx:\treg%u -> reg%u\n", golden, _srcRegIdx[j]);
+                    break;
+                }
+            }
+        }
+    }
+    else
+        return false;
+
+    return true;
 }

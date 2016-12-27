@@ -302,6 +302,9 @@ class MinorDynInst : public RefCounted
     void reportData(std::ostream &os) const;
 
     ~MinorDynInst();
+
+    // JONGHO
+    bool injectFault(unsigned int loc);
 };
 
 /** Print a summary of the instruction */
