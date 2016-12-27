@@ -147,6 +147,10 @@ class ExpManager:
         exp_info = '_'.join([bench_name, comp_info, str(start_idx), str(end_idx)])
         digest = open(bench_name + '/' + 'digest_' + exp_info + '.txt', 'w')
 
+        #  Write headline of digest
+        digest.write('\t'.join(['exp#', 'time', 'bit', 'F/NF', 'comp2', 'runtime', 'benchmark', 'exec?', 'actual?', 'etc']) + '\n')
+        digest.write('-' * 80 + '\n')
+
         #  Iterating several experiments
         for idx in range(int(start_idx), int(end_idx)+1):
             #  Pick random numbers
@@ -196,14 +200,21 @@ class ExpManager:
             ##
             #  Read debug file
             #
-            executed = 'Not Executed'
+            #executed = '[Executed | Not-executed]'
+            executed = '-'
+            actual_inject = True
+            etc = ''
             with open(outdir + '/' + 'debug_' + str(idx), 'r') as debug_read:
                 for line in debug_read:
                     if 'Executed' in line:
                         executed = 'Executed'
-
+                    if 'Empty' in line:
+                        actual_inject = False
+                    if 'Flip' in line:
+                        etc = line.split(':')[-2].split()[-1] + line.split(':')[-1].strip()
+                        
             # <F/NF> <stage> <inst> <target> <runtime> <bench name>
-            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, executed])
+            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, executed, str(actual_inject), etc])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]) + '\n')
