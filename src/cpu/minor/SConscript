@@ -71,6 +71,7 @@ if 'MinorCPU' in env['CPU_MODELS']:
     DebugFlag('FI', 'Fault injection')
     DebugFlag('Completion', 'Completed Instruction')            # JONGHO
     DebugFlag('InstInfo', 'Instruct Information such as *OpClass*') # JONGHO
+    DebugFlag('PrintAllFU', 'Print all FU at the initialization stage') # JONGHO
 
     CompoundFlag('Minor', [
         'MinorCPU', 'MinorExecute', 'MinorInterrupt', 'MinorMem',

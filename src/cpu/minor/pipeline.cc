@@ -52,6 +52,7 @@
 
 // JONGHO
 #include "base/softerror.hh"
+#include "debug/PrintAllFU.hh"
 
 namespace Minor
 {
@@ -87,6 +88,12 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
         params.executeBranchDelay)))),
     needToSignalDrained(false)
 {
+    // JONGHO: Print all FUs if the debug flag "PrintAllFU" is set
+    if(DTRACE(PrintAllFU)) {
+        std::ostream& debug_file = Trace::output();
+        execute.printAllFU(debug_file);
+    }
+
     if (params.fetch1ToFetch2ForwardDelay < 1) {
         fatal("%s: fetch1ToFetch2ForwardDelay must be >= 1 (%d)\n",
             cpu.name(), params.fetch1ToFetch2ForwardDelay);

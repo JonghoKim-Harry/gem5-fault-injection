@@ -121,6 +121,10 @@ class Execute : public Named
     /** The execution functional units */
     std::vector<FUPipeline *> funcUnits;
 
+  // JONGHO
+  public:
+    void printAllFU(std::ostream& os) const;
+
   public: /* Public for Pipeline to be able to pass it to Decode */
     std::vector<InputBuffer<ForwardInstData>> inputBuffer;
 

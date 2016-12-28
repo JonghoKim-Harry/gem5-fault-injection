@@ -62,6 +62,7 @@
 #include "debug/InstInfo.hh"
 #include "base/softerror.hh"
 #include "base/instinfo.hh"
+//#include "enums/OpClass.hh"
 
 namespace Minor
 {
@@ -1934,6 +1935,19 @@ void Execute::registerInj(unsigned int time, unsigned int loc) {
 bool Execute::injReady() const {
 
     return injRegistered && (!injDone) && (curTick() >= injTime);
+}
+
+// JONGHO
+void Execute::printAllFU(std::ostream& os) const {
+
+    os << "Number of FU = " << numFuncUnits << std::endl;
+    for(int j=0; j<numFuncUnits; j++) {
+        std::vector<bool> table = funcUnits[j]->description.opClasses->capabilityList;
+        os << "FU" << (j+1) << ":\t";
+        for(int k=0; k<Enums::Num_OpClass; k++)
+            os << table[k];
+        os << std::endl;
+    }
 }
 
 }
