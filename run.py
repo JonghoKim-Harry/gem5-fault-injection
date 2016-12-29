@@ -111,7 +111,10 @@ class ExpManager:
         stderr_file = '--stderr-file=' + 'simerr_' + str(idx)
         stats_file = '--stats-file=' + 'stats_' + str(idx)
         debug_file = '--debug-file=' + 'debug_' + str(idx)
-        debug_flags = '--debug-flags=' + ','.join(flag)
+        if flag:
+            debug_flags = '--debug-flags=' + ','.join(flag)
+        else:
+            debug_flags = ''
         gem5_option = ' '.join([redirection, outdir, stdout_file, stderr_file, stats_file, debug_file, debug_flags])
 
         #  gem5 script option
