@@ -73,6 +73,7 @@ Source('stats/text.cc')
 
 # JONGHO
 Source('softerror.cc')
+Source('instinfo.cc')
 
 DebugFlag('Annotate', "State machine annotation debugging")
 DebugFlag('AnnotateQ', "State machine annotation queue debugging")
