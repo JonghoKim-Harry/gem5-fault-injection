@@ -58,7 +58,7 @@ class ExpManager:
     BIT_LENGTH = {
         'f1ToF2': 512,       # 64 Byte = 512 bit
         'f2ToD': 64,
-        'dToE': 64,
+        'dToE': 1920,
         'eToF1': 32,
         'f2ToF1': 32
     }
@@ -207,6 +207,7 @@ class ExpManager:
             executed = '-'
             actual_inject = True
             etc = ''
+            inject_at = ''
             with open(outdir + '/' + 'debug_' + str(idx), 'r') as debug_read:
                 for line in debug_read:
                     if 'Executed' in line:
@@ -215,9 +216,11 @@ class ExpManager:
                         actual_inject = False
                     if 'Flip' in line:
                         etc = line.split(':')[-2].split()[-1] + line.split(':')[-1].strip()
+                    if 'Injection' in line:
+                        inject_at = '@' + line.split('@')[1].split()[0]
                         
             # <F/NF> <stage> <inst> <target> <runtime> <bench name>
-            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, executed, str(actual_inject), etc])
+            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, executed, str(actual_inject), etc, inject_at])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]) + '\n')
@@ -233,7 +236,7 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--index', action='store', nargs=2, help='Experiment Number')
     parser.add_argument('-f', '--flag', action='store', nargs='*', help='All gem5 debug flags')
     parser.add_argument('--inject', action='store', nargs=2, help='Injection <time> <location>')
-    parser.add_argument('--comp2', action='store', default='f2ToD', help='Injection to: f1ToF2 | f2ToD | dToE | f2ToF1 | eToF1')
+    parser.add_argument('--comp2', action='store', help='Injection to: f1ToF2 | f2ToD | dToE | f2ToF1 | eToF1')
 
     ##
     #  End parsing & Run gem5

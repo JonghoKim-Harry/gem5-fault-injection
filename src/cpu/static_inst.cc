@@ -35,7 +35,6 @@
 #include "sim/core.hh"
 
 // JONGHO
-#include "base/softerror.hh"        // BITFLIP(data, bit)
 #include "debug/FI.hh"
 
 StaticInstPtr StaticInst::nullStaticInstPtr;
@@ -117,6 +116,16 @@ StaticInst::printFlags(std::ostream &outs,
 // JONGHO
 bool StaticInst::injectFault(unsigned int loc) {
 
+    if(isMicroop()) {
+        uint8_t *target_byte = (uint8_t *)uop_data_byte(loc);
+        *target_byte = BITFLIP(*target_byte, loc%8);
+        DPRINTF(FI, "Flip bit[%u] of %s:%s\n", loc%8, uop_type(), uop_data_name(loc));
+    }
+    else {
+    }
+
+    return true;
+    /*
     unsigned int num_destreg = 0, num_srcreg = 0;
     for(int j=0; j<_numDestRegs; j++)
         if(_destRegIdx[j] < 16)
@@ -175,4 +184,5 @@ bool StaticInst::injectFault(unsigned int loc) {
         return false;
 
     return true;
+    */
 }

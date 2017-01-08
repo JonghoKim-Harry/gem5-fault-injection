@@ -537,18 +537,11 @@ Execute::issue(ThreadID thread_id)
     // JONGHO
     //const ForwardInstData *insts_in = getInput(thread_id);
     ForwardInstData *insts_in = getInput(thread_id);
-    if(injReady()) {
-        injDone = true;
-        unsigned int inst_idx = (injLoc%24) > 11 ? 1 : 0;
-        if(injLoc%12 <= 3)
-            DPRINTF(FI, "Try to flip destination register index of inst[%u]...\n", inst_idx);
-        else if(4 <= injLoc%12 && injLoc%12 <= 7)
-            DPRINTF(FI, "Try to flip 1st source register index of inst[%u]...\n", inst_idx);
-        else
-            DPRINTF(FI, "Try to flip 2nd source register index of inst[%u]...\n", inst_idx);
-
-        bool actual_inj = insts_in->insts[inst_idx]->injectFault(injLoc);
-        DPRINTF(FI, "Injection: %s\n", actual_inj ? "Actual Injection" : "Empty Injection");
+    if(SoftError::timeToInject() && SoftError::injComp == SoftError::DTOE) {
+        SoftError::injDone = true;
+        DPRINTF(FI, "Fault Injection into dToE @issue\n");
+        unsigned int inst_idx = (injLoc%1920) >= 960 ? 1 : 0;
+        insts_in->insts[inst_idx]->injectFault(injLoc);
     }
 
     ExecuteThreadInfo &thread = executeInfo[thread_id];

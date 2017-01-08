@@ -122,7 +122,9 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
         SoftError::registerInj(params.injectTime, params.injectLoc%32, SoftError::F2TOD, params.injectLoc/32);
     }
     else if(params.injectComp == "dToE") {
-        execute.registerInj(params.injectTime, params.injectLoc);
+        const unsigned GCM = 8*3*5*8;   // 960
+        SoftError::registerInj(params.injectTime, params.injectLoc%GCM, SoftError::DTOE, params.injectLoc/GCM);
+        //execute.registerInj(params.injectTime, params.injectLoc);
     }
     else if(params.injectComp == "eToF1") {
         fetch1.registerInj(params.injectTime, params.injectLoc, SoftError::ETOF1);

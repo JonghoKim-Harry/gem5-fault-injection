@@ -46,6 +46,9 @@
 #include "cpu/thread_context.hh"
 #include "enums/StaticInstFlags.hh"
 
+// JONGHO
+#include "base/softerror.hh"        // BITFLIP(data, bit)
+
 // forward declarations
 class Packet;
 
@@ -74,6 +77,7 @@ class StaticInst : public RefCounted, public StaticInstFlags
     virtual uint8_t uop_data_bitlen() const { return 255; }
     virtual void *uop_data_byte(unsigned int loc) { return NULL; }
     virtual std::string uop_data_name(unsigned int loc) { return ""; }
+    bool injectFault(unsigned int loc);
 
     /// Binary extended machine instruction type.
     typedef TheISA::ExtMachInst ExtMachInst;
@@ -224,8 +228,6 @@ class StaticInst : public RefCounted, public StaticInstFlags
     /// The binary machine instruction.
     const ExtMachInst machInst;
 
-    // JONGHO
-    bool injectFault(unsigned int loc);
   protected:
 
     /// See destRegIdx().

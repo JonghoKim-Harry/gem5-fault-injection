@@ -47,7 +47,10 @@ BasicDecodeCache::decode(TheISA::Decoder *decoder,
         TheISA::ExtMachInst mach_inst, Addr addr)
 {
     // JONGHO
-    if(SoftError::timeToInject() && SoftError::injComp == SoftError::F2TOD) {
+    if(     SoftError::timeToInject() &&
+            (SoftError::injComp == SoftError::F2TOD ||
+                (SoftError::injComp == SoftError::DTOE &&
+                (!decoder->decodeInst(mach_inst)->isMacroop())))) {
         if(SoftError::injReady()) {
             SoftError::injDone = true;
             const TheISA::ExtMachInst golden_bin = mach_inst;
@@ -57,7 +60,10 @@ BasicDecodeCache::decode(TheISA::Decoder *decoder,
             /** */
             std::string golden_inst = decoder->decodeInst(golden_bin)->generateDisassembly(addr, debugSymbolTable); 
             std::string faulty_inst = decoder->decodeInst(faulty_bin)->generateDisassembly(addr, debugSymbolTable); 
-            DPRINTF(FI, "Fault Injection into 'f2ToD' - Bit[%u] Flipped, %#x:\t\t%#x  %s -> %#x  %s\n", SoftError::injLoc, addr, golden_bin, golden_inst, faulty_bin, faulty_inst);
+            if(SoftError::injComp == SoftError::F2TOD)
+                DPRINTF(FI, "Fault Injection into f2ToD @decoder - Bit[%u] Flipped, %#x:\t\t%#x  %s -> %#x  %s\n", SoftError::injLoc, addr, golden_bin, golden_inst, faulty_bin, faulty_inst);
+            else
+                DPRINTF(FI, "Fault Injection into dToE @decoder - Bit[%u] Flipped, %#x:\t\t%#x  %s -> %#x  %s\n", SoftError::injLoc, addr, golden_bin, golden_inst, faulty_bin, faulty_inst);
         }
         else
             SoftError::injWait -= 1;
