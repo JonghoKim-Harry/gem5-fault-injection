@@ -83,6 +83,14 @@ namespace InstInfo
     }
               
     void print_instinfo(const Minor::MinorDynInstPtr& inst) {
+        /**
+         *  CAUTION
+         *
+         *    Note that isMacroop() is used in decode stage, then the
+         *    'macroop' flag will set to 0 whether the instruction is
+         *    macro op or not. So, after decode stage, the isMacroop() method
+         *    is invalid
+         */
 
         if(DTRACE(InstInfo)) {
             StaticInstPtr static_inst = inst->staticInst;
@@ -91,14 +99,16 @@ namespace InstInfo
             debug_file  << "Instruction Information from Debug Flag \"InstInfo\"" << std::endl
                         << disassemble(inst) << std::endl
                         << "\t" << *inst << std::endl
-                        << "\t0x" << std::hex << static_inst->machInst << std::dec << std::endl
-                        << "\tOpClass: " << opclass2string(static_inst->opClass()) << std::endl
-                        << "\tOP Type: " << (static_inst->isMicroop() ? "Micro OP" : "Single Inst") << std::endl;
+                        << "\tOpClass:\t" << opclass2string(static_inst->opClass()) << std::endl
+                        << "\tOP Type:\t" << (static_inst->isMicroop() ? "uop" : "single instruction");
 
-            if (static_inst->isMicroop()) {
-            
-                debug_file << "#(uop) = " << static_inst->numMicroops << std::endl;
+            if(static_inst->isMicroop()) {
+                // TODO: Do Something
+                debug_file  << " (" << static_inst->uop_type() <<")" << std::endl
+                            << "\t\t* uop data #(bit):\t" << (static_inst->uop_data_bitlen() == 255 ? "N/A" : std::to_string(unsigned(static_inst->uop_data_bitlen()))) << std::endl
+                            << "\t\t* uop data list:\t" << static_inst->uop_data_list();
             }
+            debug_file << std::endl;
 
             /** Print source registers among R0 ~ R15 */
             int count = 0;

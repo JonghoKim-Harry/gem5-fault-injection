@@ -60,7 +60,9 @@ MacroMemOp::MacroMemOp(const char *mnem, ExtMachInst machInst,
     PredMacroOp(mnem, machInst, __opClass)
 {
     uint32_t regs = reglist;
-    uint32_t ones = number_of_ones(reglist);
+    // JONGHO
+    //uint32_t ones = number_of_ones(reglist);
+    const uint32_t ones = number_of_ones(reglist);
     uint32_t mem_ops = ones;
 
     // Copy the base address register if we overwrite it, or if this instruction
@@ -81,7 +83,6 @@ MacroMemOp::MacroMemOp(const char *mnem, ExtMachInst machInst,
     } else {
         numMicroops = ones + (writeback ? 1 : 0);
     }
-
     microOps = new StaticInstPtr[numMicroops];
 
     uint32_t addr = 0;

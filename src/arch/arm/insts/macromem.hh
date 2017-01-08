@@ -64,7 +64,15 @@ number_of_ones(int32_t val)
  * Base class for Memory microops
  */
 class MicroOp : public PredOp
-{
+{ 
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroOp";
+    }
+
   protected:
     MicroOp(const char *mnem, ExtMachInst machInst, OpClass __opClass)
             : PredOp(mnem, machInst, __opClass)
@@ -87,12 +95,21 @@ class MicroOp : public PredOp
 
 class MicroOpX : public ArmStaticInst
 {
-  protected:
+   // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroOpX";
+    }
+
+ protected:
     MicroOpX(const char *mnem, ExtMachInst machInst, OpClass __opClass)
             : ArmStaticInst(mnem, machInst, __opClass)
     {}
 
   public:
+
     void
     advancePC(PCState &pcState) const
     {
@@ -110,8 +127,16 @@ class MicroOpX : public ArmStaticInst
  * Microops for Neon loads/stores
  */
 class MicroNeonMemOp : public MicroOp
-{
-  protected:
+{ 
+   // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroNeonMemOp";
+    }
+
+ protected:
     RegIndex dest, ura;
     uint32_t imm;
     unsigned memAccessFlags;
@@ -130,7 +155,15 @@ class MicroNeonMemOp : public MicroOp
  */
 class MicroNeonMixOp : public MicroOp
 {
-  protected:
+   // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroNeonMixOp";
+    }
+
+ protected:
     RegIndex dest, op1;
     uint32_t step;
 
@@ -144,7 +177,15 @@ class MicroNeonMixOp : public MicroOp
 
 class MicroNeonMixLaneOp : public MicroNeonMixOp
 {
-  protected:
+   // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroNeonMixLaneOp";
+    }
+
+ protected:
     unsigned lane;
 
     MicroNeonMixLaneOp(const char *mnem, ExtMachInst machInst,
@@ -161,7 +202,15 @@ class MicroNeonMixLaneOp : public MicroNeonMixOp
  */
 class MicroNeonMixOp64 : public MicroOp
 {
-  protected:
+   // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroNeonMixOp64";
+    }
+
+ protected:
     RegIndex dest, op1;
     uint8_t eSize, dataSize, numStructElems, numRegs, step;
 
@@ -178,7 +227,15 @@ class MicroNeonMixOp64 : public MicroOp
 
 class MicroNeonMixLaneOp64 : public MicroOp
 {
-  protected:
+   // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroNeonMixLaneOp64";
+    }
+
+ protected:
     RegIndex dest, op1;
     uint8_t eSize, dataSize, numStructElems, lane, step;
     bool replicate;
@@ -200,7 +257,15 @@ class MicroNeonMixLaneOp64 : public MicroOp
  */
 class VldMultOp64 : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "VldMultOp64";
+    }
+
+ protected:
     uint8_t eSize, dataSize, numStructElems, numRegs;
     bool wb;
 
@@ -212,7 +277,15 @@ class VldMultOp64 : public PredMacroOp
 
 class VstMultOp64 : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "VstMultOp64";
+    }
+
+ protected:
     uint8_t eSize, dataSize, numStructElems, numRegs;
     bool wb;
 
@@ -224,7 +297,15 @@ class VstMultOp64 : public PredMacroOp
 
 class VldSingleOp64 : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "VldSingleOp64";
+    }
+
+ protected:
     uint8_t eSize, dataSize, numStructElems, index;
     bool wb, replicate;
 
@@ -236,7 +317,15 @@ class VldSingleOp64 : public PredMacroOp
 
 class VstSingleOp64 : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "VstSingleOp64";
+    }
+
+ protected:
     uint8_t eSize, dataSize, numStructElems, index;
     bool wb, replicate;
 
@@ -253,7 +342,51 @@ class VstSingleOp64 : public PredMacroOp
  */
 class MicroSetPCCPSR : public MicroOp
 {
-    protected:
+  // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroSetPCCPSR";
+    }
+  
+    std::string uop_data_list() const override
+    {
+        return "RegIndex ura, RegIndex urb, RegIndex urc";
+    }
+  
+    uint8_t uop_data_bitlen() const override
+    {
+        return 8 * (sizeof(ura) + sizeof(urb) + sizeof(urc));
+    }
+
+    void *uop_data_byte(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return &ura + (pos/8);
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return &urb + ((pos - sizeof(ura))/8);
+        else if (sizeof(ura) + sizeof(urb) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc))
+            return &urc + ((pos - sizeof(ura) - sizeof(urb))/8);
+        else
+            return NULL;
+    }
+
+    std::string uop_data_name(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return "ura";
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return "urb";
+        else if (sizeof(ura) + sizeof(urb) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc))
+            return "urc";
+        else
+            return "";
+    }
+
+  protected:
     IntRegIndex ura, urb, urc;
 
     MicroSetPCCPSR(const char *mnem, ExtMachInst machInst, OpClass __opClass,
@@ -270,7 +403,48 @@ class MicroSetPCCPSR : public MicroOp
  * Microops of the form IntRegA = IntRegB
  */
 class MicroIntMov : public MicroOp
-{
+{ 
+  // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroIntMov";
+    }
+  
+    std::string uop_data_list() const override
+    {
+        return "RegIndex ura, RegIndex urb";
+    }
+  
+    uint8_t uop_data_bitlen() const override
+    {
+        return 8 * (sizeof(ura) + sizeof(urb));
+    }
+
+    void *uop_data_byte(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return &ura + (pos/8);
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return &urb + ((pos - sizeof(ura))/8);
+        else
+            return NULL;
+
+    }
+
+    std::string uop_data_name(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return "ura";
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return "urb";
+        else
+            return "";
+    }
+
   protected:
     RegIndex ura, urb;
 
@@ -289,6 +463,50 @@ class MicroIntMov : public MicroOp
  */
 class MicroIntImmOp : public MicroOp
 {
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroIntImmOp";
+    }
+  
+    std::string uop_data_list() const override
+    {
+        return "RegIndex ura, RegIndex urb, int32 imm";
+    }
+  
+    uint8_t uop_data_bitlen() const override
+    {
+        return 8 * (sizeof(ura) + sizeof(urb) + sizeof(imm));
+    }
+
+    void *uop_data_byte(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return &ura + (pos/8);
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return &urb + ((pos - sizeof(ura))/8);
+        else if (sizeof(ura) + sizeof(urb) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(imm))
+            return &imm + ((pos - sizeof(ura) - sizeof(urb))/8);
+        else
+            return NULL;
+    }
+
+    std::string uop_data_name(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return "ura";
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return "urb";
+        else if (sizeof(ura) + sizeof(urb) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(imm))
+            return "imm";
+        else
+            return "";
+    }
+
   protected:
     RegIndex ura, urb;
     int32_t imm;
@@ -305,7 +523,15 @@ class MicroIntImmOp : public MicroOp
 
 class MicroIntImmXOp : public MicroOpX
 {
-  protected:
+   // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroOpX";
+    }
+
+ protected:
     RegIndex ura, urb;
     int64_t imm;
 
@@ -324,6 +550,50 @@ class MicroIntImmXOp : public MicroOpX
  */
 class MicroIntOp : public MicroOp
 {
+  // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroIntOp";
+    }
+  
+    std::string uop_data_list() const override
+    {
+        return "RegIndex ura, RegIndex urb, RegIndex urc";
+    }
+  
+    uint8_t uop_data_bitlen() const override
+    {
+        return 8 * (sizeof(ura) + sizeof(urb) + sizeof(urc));
+    }
+
+    void *uop_data_byte(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return &ura + (pos/8);
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return &urb + ((pos - sizeof(ura))/8);
+        else if (sizeof(ura) + sizeof(urb) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc))
+            return &urc + ((pos - sizeof(ura) - sizeof(urb))/8);
+        else
+            return NULL;
+    }
+
+    std::string uop_data_name(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return "ura";
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return "urb";
+        else if (sizeof(ura) + sizeof(urb) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc))
+            return "urc";
+        else
+            return "";
+    }
+
   protected:
     RegIndex ura, urb, urc;
 
@@ -339,6 +609,58 @@ class MicroIntOp : public MicroOp
 
 class MicroIntRegXOp : public MicroOp
 {
+  // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroIntRegXOp";
+    }
+  
+    std::string uop_data_list() const override
+    {
+        return "RegIndex ura, RegIndex urb, RegIndex urc, ArmExtendType type, uint32 shiftAmt";
+    }
+  
+    uint8_t uop_data_bitlen() const override
+    {
+        return 8 * (sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(type) + sizeof(shiftAmt));
+    }
+
+    void *uop_data_byte(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return &ura + (pos/8);
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return &urb + ((pos - sizeof(ura))/8);
+        else if (sizeof(ura) + sizeof(urb) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc))
+            return &urc + ((pos - sizeof(ura) - sizeof(urb))/8);
+        else if (sizeof(ura) + sizeof(urb) + sizeof(urc) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(type))
+            return &type + ((pos - sizeof(ura) - sizeof(urb) - sizeof(urc))/8);
+        else if (sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(type) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(type) + sizeof(shiftAmt))
+            return &shiftAmt + ((pos - sizeof(ura) - sizeof(urb) - sizeof(urc) - sizeof(type))/8);
+        else
+            return NULL;
+    }
+
+    std::string uop_data_name(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return "ura";
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return "urb";
+        else if (sizeof(ura) + sizeof(urb) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc))
+            return "urc";
+        else if (sizeof(ura) + sizeof(urb) + sizeof(urc) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(type))
+            return "type";
+        else if (sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(type) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(type) + sizeof(shiftAmt))
+            return "shiftAmt";
+        else
+            return "";
+    }
+
   protected:
     RegIndex ura, urb, urc;
     ArmExtendType type;
@@ -361,6 +683,58 @@ class MicroIntRegXOp : public MicroOp
  */
 class MicroIntRegOp : public MicroOp
 {
+  // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroIntRegOp";
+    }
+
+    std::string uop_data_list() const override
+    {
+        return "RegIndex ura, RegIndex urb, RegIndex urc, int32 shiftAmt, ArmShiftType shiftType";
+    }
+  
+    uint8_t uop_data_bitlen() const override
+    {
+        return 8 * (sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(shiftAmt) + sizeof(shiftType));
+    }
+
+    void *uop_data_byte(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return &ura + (pos/8);
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return &urb + ((pos - sizeof(ura))/8);
+        else if (sizeof(ura) + sizeof(urb) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc))
+            return &urc + ((pos - sizeof(ura) - sizeof(urb))/8);
+        else if (sizeof(ura) + sizeof(urb) + sizeof(urc) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(shiftAmt))
+            return &shiftAmt + ((pos - sizeof(ura) - sizeof(urb) - sizeof(urc))/8);
+        else if (sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(shiftAmt) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(shiftAmt) + sizeof(shiftType))
+            return &shiftType + ((pos - sizeof(ura) - sizeof(urb) - sizeof(urc) - sizeof(shiftAmt))/8);
+        else
+            return NULL;
+    }
+
+    std::string uop_data_name(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return "ura";
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return "urb";
+        else if (sizeof(ura) + sizeof(urb) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc))
+            return "urc";
+        else if (sizeof(ura) + sizeof(urb) + sizeof(urc) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(shiftAmt))
+            return "shiftAmt";
+        else if (sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(shiftAmt) <= pos && pos < sizeof(ura) + sizeof(urb) + sizeof(urc) + sizeof(shiftAmt) + sizeof(shiftType))
+            return "shiftType";
+        else
+            return "";
+    }
+
   protected:
     RegIndex ura, urb, urc;
     int32_t shiftAmt;
@@ -381,6 +755,47 @@ class MicroIntRegOp : public MicroOp
  */
 class MicroMemOp : public MicroIntImmOp
 {
+  // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroMemOp";
+    }
+  
+    std::string uop_data_list() const override
+    {
+        return "flag up, flags memAccessFlags";
+    }
+  
+    uint8_t uop_data_bitlen() const override
+    {
+        return 8 * (sizeof(up) + sizeof(memAccessFlags));
+    }
+
+    void *uop_data_byte(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(up))
+            return &up + (pos/8);
+        else if (sizeof(up) <= pos && pos < sizeof(up) + sizeof(memAccessFlags))
+            return &memAccessFlags + ((pos - sizeof(up))/8);
+        else
+            return NULL;
+
+    }
+
+    std::string uop_data_name(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(ura))
+            return "ura";
+        else if (sizeof(ura) <= pos && pos < sizeof(ura) + sizeof(urb))
+            return "urb";
+        else
+            return "";
+    }
+    
   protected:
     bool up;
     unsigned memAccessFlags;
@@ -397,6 +812,63 @@ class MicroMemOp : public MicroIntImmOp
 
 class MicroMemPairOp : public MicroOp
 {
+  // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MicroMemPairOp";
+    }
+  
+    std::string uop_data_list() const override
+    {
+        return "RegIndex dest, RegIndex dest2, RegIndex urb, flag up, int32 imm, flags memAccessFlags";
+    }
+  
+    uint8_t uop_data_bitlen() const override
+    {
+        return 8 * (sizeof(dest) + sizeof(dest2) + sizeof(urb) + sizeof(up) + sizeof(imm) + sizeof(memAccessFlags));
+    }
+
+    void *uop_data_byte(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(dest))
+            return &dest + (pos/8);
+        else if (sizeof(dest) <= pos && pos < sizeof(dest) + sizeof(dest2))
+            return &dest2 + ((pos - sizeof(dest))/8);
+        else if (sizeof(dest) + sizeof(dest2) <= pos && pos < sizeof(dest) + sizeof(dest2) + sizeof(urb))
+            return &urb + ((pos - sizeof(dest) - sizeof(dest2))/8);
+        else if (sizeof(dest) + sizeof(dest2) + sizeof(urb) <= pos && pos < sizeof(dest) + sizeof(dest2) + sizeof(urb) + sizeof(up))
+            return &up + ((pos - sizeof(dest) - sizeof(dest2) - sizeof(urb))/8);
+        else if (sizeof(dest) + sizeof(dest2) + sizeof(urb) + sizeof(up) <= pos && pos < sizeof(dest) + sizeof(dest2) + sizeof(urb) + sizeof(up) + sizeof(imm))
+            return &imm + ((pos - sizeof(dest) - sizeof(dest2) - sizeof(urb) - sizeof(up))/8);
+        else if (sizeof(dest) + sizeof(dest2) + sizeof(urb) + sizeof(up) + sizeof(imm) <= pos && pos < sizeof(dest) + sizeof(dest2) + sizeof(urb) + sizeof(up) + sizeof(imm) + sizeof(memAccessFlags))
+            return &memAccessFlags + ((pos - sizeof(dest) - sizeof(dest2) - sizeof(urb) - sizeof(up) - sizeof(imm))/8);
+        else
+            return NULL;
+
+    }
+
+    std::string uop_data_name(unsigned int loc) override
+    {
+        const unsigned int pos = loc % uop_data_bitlen();
+        if(pos < sizeof(dest))
+            return "dest";
+        else if (sizeof(dest) <= pos && pos < sizeof(dest) + sizeof(dest2))
+            return "dest2";
+         else if (sizeof(dest) + sizeof(dest2) <= pos && pos < sizeof(dest) + sizeof(dest2) + sizeof(urb))
+            return "urb";
+        else if (sizeof(dest) + sizeof(dest2) + sizeof(urb) <= pos && pos < sizeof(dest) + sizeof(dest2) + sizeof(urb) + sizeof(up))
+            return "up";
+        else if (sizeof(dest) + sizeof(dest2) + sizeof(urb) + sizeof(up) <= pos && pos < sizeof(dest) + sizeof(dest2) + sizeof(urb) + sizeof(up) + sizeof(imm))
+            return "imm";
+        else if (sizeof(dest) + sizeof(dest2) + sizeof(urb) + sizeof(up) + sizeof(imm) <= pos && pos < sizeof(dest) + sizeof(dest2) + sizeof(urb) + sizeof(up) + sizeof(imm) + sizeof(memAccessFlags))
+            return "memAccessFlags";
+       else
+            return "";
+    }
+
   protected:
     RegIndex dest, dest2, urb;
     bool up;
@@ -420,7 +892,15 @@ class MicroMemPairOp : public MicroOp
  */
 class MacroMemOp : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MacroMemOp";
+    }
+
+ protected:
     MacroMemOp(const char *mnem, ExtMachInst machInst, OpClass __opClass,
                IntRegIndex rn, bool index, bool up, bool user,
                bool writeback, bool load, uint32_t reglist);
@@ -431,7 +911,15 @@ class MacroMemOp : public PredMacroOp
  */
 class PairMemOp : public PredMacroOp
 {
+    // JONGHO
   public:
+  
+    std::string uop_type() const override
+    {
+        return "PairMemOp";
+    }
+
+ public:
     enum AddrMode {
         AddrMd_Offset,
         AddrMd_PreIndex,
@@ -447,28 +935,60 @@ class PairMemOp : public PredMacroOp
 
 class BigFpMemImmOp : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "BigFpMemImmOp";
+    }
+
+ protected:
     BigFpMemImmOp(const char *mnem, ExtMachInst machInst, OpClass __opClass,
                   bool load, IntRegIndex dest, IntRegIndex base, int64_t imm);
 };
 
 class BigFpMemPostOp : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "BigFpMemPostOp";
+    }
+
+ protected:
     BigFpMemPostOp(const char *mnem, ExtMachInst machInst, OpClass __opClass,
                    bool load, IntRegIndex dest, IntRegIndex base, int64_t imm);
 };
 
 class BigFpMemPreOp : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "BigFpMemPreOp";
+    }
+
+ protected:
     BigFpMemPreOp(const char *mnem, ExtMachInst machInst, OpClass __opClass,
                   bool load, IntRegIndex dest, IntRegIndex base, int64_t imm);
 };
 
 class BigFpMemRegOp : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "BigFpMemRegOp";
+    }
+
+ protected:
     BigFpMemRegOp(const char *mnem, ExtMachInst machInst, OpClass __opClass,
                   bool load, IntRegIndex dest, IntRegIndex base,
                   IntRegIndex offset, ArmExtendType type, int64_t imm);
@@ -476,7 +996,15 @@ class BigFpMemRegOp : public PredMacroOp
 
 class BigFpMemLitOp : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "BigFpMemLitOp";
+    }
+
+ protected:
     BigFpMemLitOp(const char *mnem, ExtMachInst machInst, OpClass __opClass,
                   IntRegIndex dest, int64_t imm);
 };
@@ -486,7 +1014,15 @@ class BigFpMemLitOp : public PredMacroOp
  */
 class VldMultOp : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "VldMultOp";
+    }
+
+ protected:
     VldMultOp(const char *mnem, ExtMachInst machInst, OpClass __opClass,
               unsigned elems, RegIndex rn, RegIndex vd, unsigned regs,
               unsigned inc, uint32_t size, uint32_t align, RegIndex rm);
@@ -494,7 +1030,15 @@ class VldMultOp : public PredMacroOp
 
 class VldSingleOp : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "VldSingleOp";
+    }
+
+ protected:
     VldSingleOp(const char *mnem, ExtMachInst machInst, OpClass __opClass,
                 bool all, unsigned elems, RegIndex rn, RegIndex vd,
                 unsigned regs, unsigned inc, uint32_t size,
@@ -506,7 +1050,15 @@ class VldSingleOp : public PredMacroOp
  */
 class VstMultOp : public PredMacroOp
 {
-  protected:
+     // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "VstMultOp";
+    }
+
+ protected:
     VstMultOp(const char *mnem, ExtMachInst machInst, OpClass __opClass,
               unsigned width, RegIndex rn, RegIndex vd, unsigned regs,
               unsigned inc, uint32_t size, uint32_t align, RegIndex rm);
@@ -514,7 +1066,15 @@ class VstMultOp : public PredMacroOp
 
 class VstSingleOp : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "VstSingleOp";
+    }
+
+ protected:
     VstSingleOp(const char *mnem, ExtMachInst machInst, OpClass __opClass,
                 bool all, unsigned elems, RegIndex rn, RegIndex vd,
                 unsigned regs, unsigned inc, uint32_t size,
@@ -526,7 +1086,15 @@ class VstSingleOp : public PredMacroOp
  */
 class MacroVFPMemOp : public PredMacroOp
 {
-  protected:
+    // JONGHO
+  public:
+  
+    std::string uop_type() const override
+    {
+        return "MacroVFPMemOp";
+    }
+
+ protected:
     MacroVFPMemOp(const char *mnem, ExtMachInst machInst, OpClass __opClass,
                   IntRegIndex rn, RegIndex vd, bool single, bool up,
                   bool writeback, bool load, uint32_t offset);
