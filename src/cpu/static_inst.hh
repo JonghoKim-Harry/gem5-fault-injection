@@ -235,6 +235,8 @@ class StaticInst : public RefCounted, public StaticInstFlags
     /// See srcRegIdx().
     RegIndex _srcRegIdx[MaxInstSrcRegs];
 
+    // JONGHO: Make mnemonic public
+  public:
     /**
      * Base mnemonic (e.g., "add").  Used by generateDisassembly()
      * methods.  Also useful to readily identify instructions from

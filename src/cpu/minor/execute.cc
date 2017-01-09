@@ -539,8 +539,12 @@ Execute::issue(ThreadID thread_id)
     ForwardInstData *insts_in = getInput(thread_id);
     if(SoftError::timeToInject() && SoftError::injComp == SoftError::DTOE) {
         SoftError::injDone = true;
-        DPRINTF(FI, "Fault Injection into dToE @issue\n");
         unsigned int inst_idx = (injLoc%1920) >= 960 ? 1 : 0;
+        const std::string mnemonic = insts_in->insts[inst_idx]->staticInst->mnemonic;
+        if(!mnemonic.empty())
+            DPRINTF(FI, "Fault Injection into dToE @issue - mnemonic: %s\n", mnemonic);
+        else
+            DPRINTF(FI, "Fault Injection into dToE @issue - mnemonic: ?\n");
         insts_in->insts[inst_idx]->injectFault(injLoc);
     }
 

@@ -207,6 +207,7 @@ class ExpManager:
             executed = '-'
             actual_inject = True
             etc = ''
+            mnemonic = ''
             inject_at = ''
             with open(outdir + '/' + 'debug_' + str(idx), 'r') as debug_read:
                 for line in debug_read:
@@ -214,13 +215,15 @@ class ExpManager:
                         executed = 'Executed'
                     if 'Empty' in line:
                         actual_inject = False
-                    if 'Flip' in line:
-                        etc = line.split(':')[-2].split()[-1] + line.split(':')[-1].strip()
+                    if 'mnemonic' in line:
+                        mnemonic = line.split('mnemonic:')[1].split()[0]
                     if 'Injection' in line:
                         inject_at = '@' + line.split('@')[1].split()[0]
+                    if 'Flip' in line:
+                        etc = line.split(':')[-2].split()[-1] + line.split(':')[-1].strip()
                         
             # <F/NF> <stage> <inst> <target> <runtime> <bench name>
-            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, executed, str(actual_inject), etc, inject_at])
+            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, executed, str(actual_inject), mnemonic, inject_at, etc])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]) + '\n')

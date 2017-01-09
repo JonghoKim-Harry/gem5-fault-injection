@@ -60,10 +60,11 @@ BasicDecodeCache::decode(TheISA::Decoder *decoder,
             /** */
             std::string golden_inst = decoder->decodeInst(golden_bin)->generateDisassembly(addr, debugSymbolTable); 
             std::string faulty_inst = decoder->decodeInst(faulty_bin)->generateDisassembly(addr, debugSymbolTable); 
+            const std::string mnemonic = decoder->decodeInst(golden_bin)->mnemonic;
             if(SoftError::injComp == SoftError::F2TOD)
-                DPRINTF(FI, "Fault Injection into f2ToD @decoder - Bit[%u] Flipped, %#x:\t\t%#x  %s -> %#x  %s\n", SoftError::injLoc, addr, golden_bin, golden_inst, faulty_bin, faulty_inst);
+                DPRINTF(FI, "Fault Injection into f2ToD @decoder - mnemonic: %s - Bit[%u] Flipped, %#x:\t\t%#x  %s -> %#x  %s\n", mnemonic, SoftError::injLoc, addr, golden_bin, golden_inst, faulty_bin, faulty_inst);
             else
-                DPRINTF(FI, "Fault Injection into dToE @decoder - Bit[%u] Flipped, %#x:\t\t%#x  %s -> %#x  %s\n", SoftError::injLoc, addr, golden_bin, golden_inst, faulty_bin, faulty_inst);
+                DPRINTF(FI, "Fault Injection into dToE @decoder - mnemonic: %s - Bit[%u] Flipped, %#x:\t\t%#x  %s -> %#x  %s\n", mnemonic, SoftError::injLoc, addr, golden_bin, golden_inst, faulty_bin, faulty_inst);
         }
         else
             SoftError::injWait -= 1;
