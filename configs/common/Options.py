@@ -148,11 +148,14 @@ def addCommonOptions(parser):
     parser.add_option("--injectLoc", type="int", default="0",
                       help = "Bit location to inject fault")
     parser.add_option("--injectArch", type="choice", default="NO",
-                      choices = ["Reg", "FU", "NO", "PipeReg"],
-                      help = "Which architecture do you want to inject fautls?  - Default: No injection")
+                      choices = ["Reg", "FU", "NO", "PipeReg", "LSQ"],
+                      help = """
+                      Which architecture do you want to inject fautls?
+                      - Default: No injection""")
     parser.add_option("--checkArch", type="choice", default="NO",
-                      choices = ["Reg", "FU", "NO"],
-                      help = "Which architecture do you want to check fautls?  - Default: No injection")
+                      choices = ["Reg", "FU", "LSQ", "NO"],
+                      help = """Which architecture do you want to check fautls?
+                      - Default: No injection""")
     parser.add_option("--correctRf", type="choice", default="NO",
                       choices = ["YES", "NO"],
                       help = "Want to correct register data after injection? - Default: No correction")
@@ -161,6 +164,7 @@ def addCommonOptions(parser):
     # JONGHO
     parser.add_option('--injectComp', type='string', default='NO_INJECTION',
                       help='The component you want to inject fault into')
+    # HwiSoo
 
     # dist-gem5 options
     parser.add_option("--dist", action="store_true",

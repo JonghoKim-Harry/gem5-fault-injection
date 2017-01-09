@@ -1033,6 +1033,16 @@ class Packet : public Printable
             std::memcpy(getPtr<uint8_t>(), p, getSize());
     }
 
+    //HwiSoo, function for fault injection
+    void
+    flipData (unsigned int injectIndex, unsigned int injectBit);
+
+        void
+        flipAddr (unsigned int injectLoc);
+
+        void
+        flipSetAddr (unsigned int newAddr);
+
     /**
      * Copy data into the packet from the provided block pointer,
      * which is aligned to the given block size.

@@ -68,6 +68,7 @@ Source('tport.cc')
 Source('xbar.cc')
 Source('hmc_controller.cc')
 Source('serial_link.cc')
+Source('request.cc')
 
 if env['TARGET_ISA'] != 'null':
     Source('fs_translating_port_proxy.cc')
@@ -107,6 +108,7 @@ DebugFlag('StackDist')
 DebugFlag("DRAMSim2")
 DebugFlag('HMCController')
 DebugFlag('SerialLink')
+
 
 DebugFlag("MemChecker")
 DebugFlag("MemCheckerMonitor")

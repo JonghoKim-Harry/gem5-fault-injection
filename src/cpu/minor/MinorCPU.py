@@ -290,3 +290,10 @@ class MinorCPU(BaseCPU):
     injectFaultFu = Param.Unsigned(0, "Inject a single-bit fault in Functional unit or not (0: NO, 1: Yes)")
     correctRf = Param.Bool(False, "Correct register data after fault injection")
     correctTime = Param.UInt64(0, "Time to correct fault")
+
+    #HwiSoo, injectFaultLSQ;
+    injectFaultLSQ = Param.Unsigned(0
+    , "Inject a single-bit fault in LSQ or not (0: NO, 1: Yes)")
+    checkFaultLSQ = Param.Unsigned(0
+    , "Check a single-bit fault in LSQ or not (0: NO, 1: Yes)")
+

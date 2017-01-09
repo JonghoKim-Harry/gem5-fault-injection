@@ -134,12 +134,19 @@ class MinorCPU : public BaseCPU
     uint64_t correctTime;
     bool correctRf;
 
-    void exitCallback();    
+        //HwiSoo
+        unsigned injectFaultLSQ;
+    unsigned checkFaultLSQ;
+    unsigned LSQEntrySize;
+
+    bool injectLSQ;
+    bool checkLSQ;
+
+    void exitCallback();
 
     std::map<int, uint64_t> faultyRegs;
-    //HwiSoo End
-    
-    
+
+
 
   protected:
      /** Return a reference to the data port. */

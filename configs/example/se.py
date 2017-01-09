@@ -268,6 +268,11 @@ for i in xrange(np):
         system.cpu[i].correctRf = True
     system.cpu[i].correctTime = options.correctTime
 
+            #hwisoo
+    if options.injectArch == "LSQ":
+        system.cpu[i].injectFaultLSQ = 1;
+    if options.checkArch == "LSQ":
+        system.cpu[i].checkFaultLSQ = 1;
     system.cpu[i].createThreads()
 
 if options.ruby:

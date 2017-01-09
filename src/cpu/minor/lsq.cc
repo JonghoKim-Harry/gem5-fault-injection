@@ -48,8 +48,9 @@
 #include "cpu/minor/lsq.hh"
 #include "cpu/minor/pipeline.hh"
 #include "debug/Activity.hh"
+#include "debug/FI.hh"
+#include "debug/FIProfiling.hh"
 #include "debug/MinorMem.hh"
-#include "debug/ShsTemp.hh"
 
 namespace Minor
 {
@@ -1343,6 +1344,7 @@ LSQ::LSQ(std::string name_, std::string dcache_port_name_,
     if ((lineWidth & (lineWidth - 1)) != 0) {
         fatal("%s: lineWidth: %d must be a power of 2\n", name(), lineWidth);
     }
+
 }
 
 LSQ::~LSQ()
@@ -1661,118 +1663,363 @@ LSQ::threadSnoop(LSQRequestPtr request)
     }
 }
 
-//HwiSoo, temporal function for checking values
+
+
+
+
+//HwiSoo, fault injection function
 void
-LSQ::checkLSQData()
+LSQ::injectFaultLSQFunc()
 {
-	if (requests.empty())
-	{
-		//DPRINTF(ShsTemp, "LSQ: requests are empty!\n");		
-	}
-	else
-	{
-		LSQRequestPtr target=requests.front();
-		
-		if(target->isLoad)
-			DPRINTF(ShsTemp, "LSQ:requests:isLoad: TRUE\n");
-		else
-			DPRINTF(ShsTemp, "LSQ:requests:isLoad: FALSE\n");
-		
-		if(target->data==NULL)
-			DPRINTF(ShsTemp, "LSQ:requests:data: NULL\n");
-		else
-			DPRINTF(ShsTemp, "LSQ:requests:data: %d\n", sizeof(*(target->data)));
-		
-		DPRINTF(ShsTemp, "LSQ:requests:inst %x\n", target->inst);
-		
-		if(target->request.hasVaddr())
-			DPRINTF(ShsTemp, "LSQ:requests:request.getVaddr() %x\n", target->request.getVaddr());
-		else
-			DPRINTF(ShsTemp, "LSQ:requests:request.getVaddr() No vaddr\n");
-		
-		
-		if(target->request.hasPaddr())
-			DPRINTF(ShsTemp, "LSQ:requests:request.getPaddr() %x\n", target->request.getPaddr());
-		else
-			DPRINTF(ShsTemp, "LSQ:requests:request.getPaddr() No paddr\n");
-		
-		if(target->request.hasPC())
-			DPRINTF(ShsTemp, "LSQ:requests:request.getPC() %x\n", target->request.getPC());
-		else
-			DPRINTF(ShsTemp, "LSQ:requests:request.getPC() No PC\n");
-		
-		if(target->request.hasInstSeqNum())
-			DPRINTF(ShsTemp, "LSQ:requests:request.getReqInstSeqNum() %d\n", target->request.getReqInstSeqNum());
-		else
-			DPRINTF(ShsTemp, "LSQ:requests:request.getReqInstSeqNum()No InstSeqNum\n");
-		
-		if(target->request.hasSize())
-			DPRINTF(ShsTemp, "LSQ:requests:request.getSize() %d\n", target->request.getSize());
-		else
-			DPRINTF(ShsTemp, "LSQ:requests:request.getSize() No Size\n");
-		
-		
-		//DPRINTF(ShsTemp, "LSQ:packet->addr:%x\n", target->packet->getAddr()); //Error. finding way to check
+    if ((cpu.checkFaultLSQ==1 || cpu.injectFaultLSQ==1)
+        &&curTick()>=cpu.injectTime) {
+        if (cpu.injectFaultLSQ == 1) {
+            DPRINTF(FI, "LSQ FI : curTick() = %d\n", curTick());
 
-	}
-	
-	
-	
-	if (transfers.empty())
-	{
-		//DPRINTF(ShsTemp, "LSQ: requests are empty!\n");		
-	}
-	else
-	{
-		LSQRequestPtr target=transfers.front();
-		
-		if(target->isLoad)
-			DPRINTF(ShsTemp, "LSQ:transfers.isLoad: TRUE\n");
-		else
-			DPRINTF(ShsTemp, "LSQ:transfers.isLoad: FALSE\n");
-		
-		if(target->data==NULL)
-			DPRINTF(ShsTemp, "LSQ:transfers.data: NULL\n");
-		else
-			DPRINTF(ShsTemp, "LSQ:transfers.data: %d\n", sizeof(*(target->data)));
-		
-		DPRINTF(ShsTemp, "LSQ:transfers.inst %x\n", target->inst);
-		
-		if(target->request.hasVaddr())
-			DPRINTF(ShsTemp, "LSQ:transfers.request.getVaddr() %x\n", target->request.getVaddr());
-		else
-			DPRINTF(ShsTemp, "LSQ:transfers.request.getVaddr() No vaddr\n");
-		
-		if(target->request.hasPaddr())
-			DPRINTF(ShsTemp, "LSQ:transfers.request.getPaddr() %x\n", target->request.getPaddr());
-		else
-			DPRINTF(ShsTemp, "LSQ:transfers.request.getPaddr() No paddr\n");
-		
-		if(target->request.hasPC())
-			DPRINTF(ShsTemp, "LSQ:transfers.request.getPC() %x\n", target->request.getPC());
-		else
-			DPRINTF(ShsTemp, "LSQ:transfers.request.getPC() No PC\n");
-		
-		if(target->request.hasInstSeqNum())
-			DPRINTF(ShsTemp, "LSQ:transfers.request.getReqInstSeqNum() %d\n", target->request.getReqInstSeqNum()); //error!
-		else
-			DPRINTF(ShsTemp, "LSQ:transfers.request.getReqInstSeqNum()No InstSeqNum\n");
-		
-		if(target->request.hasSize())
-			DPRINTF(ShsTemp, "LSQ:transfers:request.getSize() %d\n", target->request.getSize());
-		else
-			DPRINTF(ShsTemp, "LSQ:transfers:request.getSize() No Size\n");
-		
-		//DPRINTF(ShsTemp, "LSQ:packet->addr:%x\n", target->packet->getAddr()); //Error. finding way to check
+            LSQRequest* target=NULL;
 
-	}
-	
-	
-	
-	
-	
-	
+                        int injectFaultLSQQueue;
+            unsigned int index=cpu.injectLoc/cpu.LSQEntrySize;
+                        if (index<requests.totalSpace())
+                        {
+                                injectFaultLSQQueue=1;
+                        }
+                        else if (index<(requests.totalSpace()
+                                       +transfers.totalSpace()))
+                        {
+                                injectFaultLSQQueue=2;
+                                index-=(requests.totalSpace());
+                        }
+                        else if (index<(requests.totalSpace()
+                                       +transfers.totalSpace()
+                                       +storeBuffer.numSlots))
+                        {
+                                injectFaultLSQQueue=3;
+                                index-=(requests.totalSpace()
+                                       +transfers.totalSpace());
+                        }
+                        else
+                        {
+                                DPRINTF(FI, "LSQ FI : unvalid location\n");
+                                cpu.injectFaultLSQ=0;
+                                return;
+                        }
+
+            //0,1=data, 2=paddr, 3=not implemented
+            unsigned int targetElement = ((cpu.injectLoc%cpu.LSQEntrySize)/32);
+            int injectByte=(cpu.injectLoc%32)/8;
+            int injectBit=cpu.injectLoc%8;
+
+            //select target queue and index
+            if (injectFaultLSQQueue==1)//requests
+            {
+                if (index>=requests.size())
+                    DPRINTF(FI, "LSQ FI : to requests : "
+                                "index %d does not exist\n"
+                    , index);
+                else
+                {
+                    target=requests.getElement(index);
+                    DPRINTF(FI, "LSQ FI :to requests : "
+                                "target index : %d, size:%d\n"
+                    , index, requests.size());
+                }
+            }
+
+            else if (injectFaultLSQQueue==2)//transfers
+            {
+                if (index>=transfers.size())
+                    DPRINTF(FI, "LSQ FI :to transfers : "
+                                "index %d does not exist\n", index);
+                else
+                {
+                    target=transfers.getElement(index);
+                    DPRINTF(FI, "LSQ FI :to transfer : "
+                            "target index : %d,  size:%d\n"
+                            , index,transfers.size());
+                }
+            }
+
+            else if (injectFaultLSQQueue==3)//storeBuffer
+            {
+                if (index>=storeBuffer.slots.size())
+                    DPRINTF(FI, "LSQ FI :to storebuffer : "
+                                "index %d does not exist\n"
+                                , index);
+                else
+                {
+                    target=storeBuffer.slots[index];
+                    DPRINTF(FI, "LSQ FI :to storebuffer : "
+                                "target index : %d, size:%d\n"
+                                , index, storeBuffer.slots.size());
+                }
+            }
+
+            if (target==NULL)
+                DPRINTF(FI, "LSQ FI : No target\n");
+            else
+            {
+                //select target field
+                if (targetElement==0 || targetElement==1)
+                {
+                    if (targetElement==1)
+                        injectByte+=4;
+                    if (target->packet==NULL)
+                    {
+                        DPRINTF(FI,
+                        "LSQ FI : target does not have packet\n");
+                    }
+                    else if (!target->packet->hasData())
+                    {
+                        DPRINTF(FI,
+                        "LSQ FI : index %d packet does not have data\n"
+                        , index);
+                        if (target->hasDataInFragments(injectByte))
+                        {
+                            DPRINTF(FI, "LSQ FI : Special case "
+                            "(No data in packet, but in fragments)"
+                            "\n");
+                            DPRINTF(FI
+                            , "LSQ FI : inject fault to %d index "
+                            "(fragments)\n" , index);
+                            target->faultInjectionToFragments(targetElement
+                            , injectByte*8+injectBit);
+                        }
+                    }
+                    else
+                    {
+                        DPRINTF(FI, "LSQ FI : inject fault to %d index \n"
+                        , index);
+                        target->packet->flipData(injectByte, injectBit);
+                        target->faultInjectionToFragments(targetElement
+                        , injectByte*8+injectBit);
+                    }
+                }
+
+                else if (targetElement==2)//paddr
+                {
+                    if (cpu.injectLoc%32>=30)
+                    {
+                        int newLoc=random()%30;
+                        injectByte=newLoc/8;
+                        injectBit=newLoc%8;
+                        DPRINTF(FI
+                        , "LSQ FI : change injection location"
+                        "to paddr(>=30)\n");
+                    }
+                    if (target->request.hasPaddr())
+                    {
+                        DPRINTF(FI, "LSQ FI : before injection to paddr(%x)\n"
+                        ,target->request.getPaddr());
+                        target->request.flipPaddr(injectByte*8+injectBit);
+                        DPRINTF(FI, "LSQ FI : temporal injection "
+                        "to paddr done\n");
+                        DPRINTF(FI,
+                        "LSQ FI : after temporal injection to paddr(%x)\n"
+                        ,target->request.getPaddr());
+
+                        if (target->packet!=NULL)
+                        {
+                            //how to consider split case?
+                            target->packet->flipAddr(injectByte*8+injectBit);
+                        }
+                        target->faultInjectionToFragments(targetElement
+                        , injectByte*8+injectBit);
+                    }
+                    else
+                            DPRINTF(FI, "LSQ FI : has no paddr!\n");
+                }
+
+                else if (targetElement==3)//not implemented
+                {
+
+                }
+
+            }
+
+            cpu.injectLSQ=true;
+        }
+        else
+        {
+            cpu.checkLSQ=true;
+        }
+
+        if (cpu.injectLSQ)
+        {
+            cpu.injectFaultLSQ = 0;
+
+
+
+        }
+
+        else {
+
+
+        }
+    }
+
 }
+
+void
+LSQ::SplitDataRequest::
+faultInjectionToFragments(uint32_t element, uint32_t loc)
+{
+    DPRINTFS(FI, (&port),
+    "LSQ FI : Split Data Request. "
+    "fragments injection will be done\n");
+    if (element==0 || element==1)
+    {
+        if (numFragments>0)
+        {
+            //fragmentPackets[0]->flipData(loc/8, loc%8);
+            int injectByte=loc/8;
+            int injectBit=loc%8;
+            int currentByte=0;
+            for (int i=0; i<numFragments; i++)
+            {
+                currentByte+=fragmentPackets[i]->getSize();
+                if (currentByte <= injectByte)
+                   continue;
+                int targetByte=injectByte-
+                (currentByte-fragmentPackets[i]->getSize());
+                fragmentPackets[i]->flipData(targetByte, injectBit);
+                DPRINTFS(FI, (&port), "LSQ FI : loc : %d, fragment : "
+                "%d data injection was done\n", loc, i);
+                break;
+            }
+        }
+        else
+            DPRINTFS(FI, (&port), "LSQ FI : No fragments in split\n");
+
+    }
+    else if (element==2)
+    {
+        int addrIndex=0;
+        for (int i=0; i<numFragments; i++)
+        {
+            DPRINTFS(FI, (&port),
+            "LSQ FI : paddr injection to fragment %d\n", i);
+            if (fragmentRequests[i]->hasPaddr())
+            {
+                fragmentRequests[i]->flipSetPaddr(request.getPaddr()
+                +addrIndex);
+                fragmentPackets[i]->flipSetAddr(request.getPaddr()+addrIndex);
+                addrIndex+=fragmentRequests[i]->getSize();
+            }
+            else
+            {
+                DPRINTFS(FI, (&port), "LSQ FI : no paddr in fragment %d\n", i);
+            }
+        }
+    }
+}
+
+
+
+void
+LSQ::SpecialDataRequest::
+faultInjectionToFragments(uint32_t element, uint32_t loc)
+{
+    DPRINTFS(FI, (&port), "LSQ FI : Special Data Request, no fragments\n");
+
+}
+
+
+void
+LSQ::SingleDataRequest::
+faultInjectionToFragments(uint32_t element, uint32_t loc)
+{
+    DPRINTFS(FI, (&port), "LSQ FI : Single Data Request, no fragments\n");
+
+}
+
+void
+LSQ::FIProfiling()
+{
+    for (int i=0; i<requests.size(); i++)
+    {
+        LSQRequestPtr target=requests.getElement(i);
+
+        if (target->packet==NULL)
+        {
+
+                continue;
+        }
+
+        DPRINTF(FIProfiling, "\t%lld\trequests\t%d\t%s\t%d"
+        "\t%d\t%d\t%d\t%d\t%d\n"
+        ,curTick(),i,target->state, target->isLoad,
+        target->packet->hasData(), target->hasDataInFragments(0),
+        target->hasDataInFragments(target->request.getSize()/2),
+        target->request.hasPaddr(), target->request.getSize());
+    }
+
+
+    for (int i=0; i<transfers.size(); i++)
+    {
+        LSQRequestPtr target=transfers.getElement(i);
+
+        if (target->packet==NULL)
+        {
+                continue;
+        }
+
+        DPRINTF(FIProfiling, "\t%lld\ttransfers\t%d\t%s\t%d"
+        "\t%d\t%d\t%d\t%d\t%d\n"
+        ,curTick(),i,target->state, target->isLoad,
+        target->packet->hasData(), target->hasDataInFragments(0),
+        target->hasDataInFragments(target->request.getSize()/2),
+        target->request.hasPaddr(), target->request.getSize());
+    }
+
+    for (int i=0; i<storeBuffer.slots.size(); i++)
+    {
+        LSQRequestPtr target=storeBuffer.slots[i];
+
+        if (target->packet==NULL)
+        {
+                continue;
+        }
+
+        DPRINTF(FIProfiling, "\t%lld\tstoreBuffer\t%d\t%s\t%d"
+        "\t%d\t%d\t%d\t%d\t%d\n"
+        ,curTick(),i,target->state, target->isLoad,
+        target->packet->hasData(), target->hasDataInFragments(0),
+        target->hasDataInFragments(target->request.getSize()/2),
+        target->request.hasPaddr(), target->request.getSize());
+    }
+}
+
+
+bool LSQ::SingleDataRequest::hasDataInFragments(int injectByte)
+{
+        return false;
+
+}
+
+bool LSQ::SpecialDataRequest::hasDataInFragments(int injectByte)
+{
+        return false;
+
+}
+
+bool LSQ::SplitDataRequest::hasDataInFragments(int injectByte)
+{
+        int currentByte=0;
+        for (int i=0; i<numFragments; i++)
+        {
+        currentByte+=fragmentPackets[i]->getSize();
+        if (currentByte < injectByte)
+                   continue;
+        if (fragmentPackets[i]->hasData())
+                return true;
+        else
+                return false;
+        }
+        return false;
+}
+
+
 
 }
 

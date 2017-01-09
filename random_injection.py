@@ -43,15 +43,18 @@ for i in range(int(start), int(end)):
 		injectLoc = random.randrange(0,480) #32: Data (15 user integer registers)
 	elif (injectArch == "FU"):
 		injectLoc = random.randrange(1,15)
-	
-	injectTime = random.randrange(0,runtime)
-	#injectTime = 85381464
-	#injectLoc = 361
-	f = open(str(bench) + "/val_" + str(injectArch)+"_"+str(start)+"_"+str(end)+".txt", 'a') 
-	s = open(str(bench) + "/sec_" + str(injectArch)+"_"+str(start)+"_"+str(end)+".txt", 'a') 
-	
-	f.write(str(injectTime) + "\t" + str(injectLoc) + "\t")
-	
+        elif (injectArch == "LSQ"):
+                injectIndex = random.randrange(0,8)
+                injectLoc = random.randrange(0,96)+injectIndex*128
+
+        injectTime = random.randrange(0,runtime)
+        #injectTime = 85381464
+        #injectLoc = 361
+        f = open(str(bench) + "/val_" + str(injectArch)+"_"+str(start)+"_"+str(end)+".txt", 'a')
+        s = open(str(bench) + "/sec_" + str(injectArch)+"_"+str(start)+"_"+str(end)+".txt", 'a')
+
+        f.write(str(injectTime) + "\t" + str(injectLoc) + "\t")
+
 	if (injectArch == "Reg"):
 		if(bench == 'susan') or (bench == 'jpeg'):
 			os.system("./inject_output.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + str(i).zfill(5)  + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
@@ -274,5 +277,33 @@ for i in range(int(start), int(end)):
 				
 		if(failure):
 			f.write("failure\n")		
-	f.close()
-	s.close()
+
+        if (injectArch == "LSQ"):
+                if(bench == 'susan') or (bench == 'jpeg'):
+                        os.system("./inject_output.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + str(i).zfill(5)  + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
+                else:
+                        os.system("./inject.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
+
+                fi_read = file(bench+"/FI_" + str(injectArch)+ "_" + str(i))
+                for line in fi_read:
+                        if "NF" in line:
+                                f.write("NF\t")
+                        else:
+                                f.write("F\t")
+
+                failure = True
+                stat_read = file(bench+"/"+injectArch+"/stats_" + str(i))
+                for line in stat_read:
+                        pattern = re.compile(r'\s+')
+                        line = re.sub(pattern, '', line)
+                        line2 = line.strip().split(' ')
+                        if "sim_ticks" in line:
+                                sim_ticks = int(re.findall('\d+', line)[0])
+                                f.write(str(float(sim_ticks)/runtime*100) + "\n")
+                                failure = False
+
+                if(failure):
+                        f.write("failure\n")
+
+        f.close()
+        s.close()

@@ -63,7 +63,12 @@ MinorCPU::MinorCPU(MinorCPUParams *params) :
     isFaultInjectedToFu(false),
     //YOHAN
     correctTime(params->correctTime),
-    correctRf(params->correctRf)
+    correctRf(params->correctRf),
+        injectFaultLSQ(params->injectFaultLSQ),
+    checkFaultLSQ(params->checkFaultLSQ),
+        LSQEntrySize(128),
+    injectLSQ(false),
+    checkLSQ(false)
 {
     //YOHAN
     Callback *cb = new MakeCallback<MinorCPU, &MinorCPU::exitCallback>(this);
