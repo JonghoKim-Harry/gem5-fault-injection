@@ -116,7 +116,7 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
 
     // JONGHO
     if(params.injectComp == "f1ToF2") {
-        fetch2.registerInj(params.injectTime, params.injectLoc, SoftError::F1TOF2);
+        fetch2.registerInj(params.injectTime, params.injectLoc);
     }
     else if(params.injectComp == "f2ToD") {
         SoftError::registerInj(params.injectTime, params.injectLoc%32, SoftError::F2TOD, params.injectLoc/32);

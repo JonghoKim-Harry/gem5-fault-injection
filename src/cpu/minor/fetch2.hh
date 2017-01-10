@@ -97,22 +97,18 @@ class Fetch2 : public Named
     /* Public so that Pipeline can pass it to Fetch1 */
     std::vector<InputBuffer<ForwardLineData>> inputBuffer;
 
-    // JONGHO
-    bool injReady() { return injRegistered && (!injDone) && curTick() >= injTime; }
-    void registerInj(unsigned int time, unsigned int loc, SoftError::InjComp comp)
-    {
-        injRegistered = true;
-        injTime = time;
-        injLoc = loc % 512;
-        injComp = comp;
-        DPRINTF(FI, "Injection Registered\n");
-    }
-
+    /**
+     *  JONGHO - Fault Injection into Pipeline Register "f1ToF2"
+     *
+     *    These methods are needed for fault injection into pipeline register
+     *    "f1ToF2", which stores data from Fetch1 stage to Fetch2 stage.
+     */
+    bool injReady() const;
+    void registerInj(unsigned int time, unsigned int loc);
     bool injRegistered = false;
     bool injDone = false;
     unsigned int injTime;
     unsigned int injLoc;
-    SoftError::InjComp injComp;
 
   protected:
     /** Data members after this line are cycle-to-cycle state */

@@ -234,7 +234,7 @@ Fetch2::evaluate()
     /* Push input onto appropriate input buffer */
     if (!inp.outputWire->isBubble()) {
         // JONGHO
-        if(injReady() && injComp == SoftError::F1TOF2) {
+        if(injReady()) {
             injDone = true;
             ForwardLineData& line = *inp.outputWire;
             line.injectFault(injLoc);
@@ -617,4 +617,19 @@ Fetch2::minorTrace() const
     inputBuffer[0].minorTrace();
 }
 
+bool
+Fetch2::injReady() const
+{
+    return injRegistered && (!injDone) && curTick() >= injTime;
 }
+
+void
+Fetch2::registerInj(unsigned int time, unsigned int loc)
+{
+    injRegistered = true;
+    injTime = time;
+    injLoc = loc % 512;
+    DPRINTF(FI, "Injection Registered in Fetch2 - TIME=%u, BIT=%u\n", injTime, injLoc);
+}
+
+} // namespace Minor
