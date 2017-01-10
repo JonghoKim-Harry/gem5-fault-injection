@@ -48,6 +48,8 @@
 #include "debug/Fetch.hh"
 #include "debug/MinorTrace.hh"
 
+// JONGHO
+#include "debug/ForwardLineData.hh"
 namespace Minor
 {
 
@@ -239,6 +241,8 @@ Fetch2::evaluate()
         }
 
         inputBuffer[inp.outputWire->id.threadId].setTail(*inp.outputWire);
+        /** Print out information about *class ForwardLineData* */
+        DPRINTF(ForwardLineData, "ForwardLineData.lineWidth = %u\n", inp.outputWire->lineWidth);
     }
 
     ForwardInstData &insts_out = *out.inputWire;

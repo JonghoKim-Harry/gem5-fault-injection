@@ -217,7 +217,7 @@ class ExpManager:
                         actual_inject = False
                     if 'mnemonic' in line:
                         mnemonic = line.split('mnemonic:')[1].split()[0]
-                    if 'Injection' in line:
+                    if ('Injection') in line and ('@' in line):
                         inject_at = '@' + line.split('@')[1].split()[0]
                     if 'Flip' in line:
                         etc = line.split(':')[-2].split()[-1] + line.split(':')[-1].strip()

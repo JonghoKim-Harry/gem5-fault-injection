@@ -41,6 +41,9 @@
 #include "cpu/minor/pipeline.hh"
 #include "debug/Decode.hh"
 
+// JONGHO
+#include "debug/ForwardInstData.hh"
+
 namespace Minor
 {
 
@@ -149,6 +152,11 @@ Decode::evaluate()
         {
             MinorDynInstPtr inst = insts_in->insts[decode_info.inputIndex];
 
+            /**
+             *  JONGHO
+             *    Print out information about *class ForwardInstData*
+             */
+            DPRINTF(ForwardInstData, "ForwardInstData.numInst = %u\n", insts_in->numInsts);
             if (inst->isBubble()) {
                 /* Skip */
                 decode_info.inputIndex++;
