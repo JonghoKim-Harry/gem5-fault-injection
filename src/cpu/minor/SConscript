@@ -71,11 +71,6 @@ if 'MinorCPU' in env['CPU_MODELS']:
     DebugFlag('ShsTemp', 'Temporal Debug Flag')
     DebugFlag('FI', 'Fault injection')
     DebugFlag('FIProfiling', 'Profiling for LSQ')
-    DebugFlag('Completion', 'Completed Instruction')            # JONGHO
-    DebugFlag('InstInfo', 'Instruct Information such as *OpClass*') # JONGHO
-    DebugFlag('PrintAllFU', 'Print all FU at the initialization stage') # JONGHO
-    DebugFlag('ForwardLineData', 'Check information about *class ForwardLineData* declared in cpu/minor/pipe_data.hh') # JONGHO
-    DebugFlag('ForwardInstData', 'Check information about *class ForwardInstData* declared in cpu/minor/pipe_data.hh') # JONGHO
 
     CompoundFlag('Minor', [
         'MinorCPU', 'MinorExecute', 'MinorInterrupt', 'MinorMem',

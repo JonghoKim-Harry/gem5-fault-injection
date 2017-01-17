@@ -71,10 +71,6 @@ Source('loader/symtab.cc')
 
 Source('stats/text.cc')
 
-# JONGHO
-Source('softerror.cc')
-Source('instinfo.cc')
-
 DebugFlag('Annotate', "State machine annotation debugging")
 DebugFlag('AnnotateQ', "State machine annotation queue debugging")
 DebugFlag('AnnotateVerbose', "Dump all state machine annotation details")
@@ -95,3 +91,15 @@ CompoundFlag('GDBAll',
 CompoundFlag('AnnotateAll', ['Annotate', 'AnnotateQ', 'AnnotateVerbose'],
     desc="All Annotation flags")
 
+# JONGHO: Soft Error
+Source('softerror.cc')
+DebugFlag('FIReport', 'Information about fault injection: time, loc, etc.')
+DebugFlag('FICallTrace', 'Trace function call used for fault injection')
+
+# JONGHO: Tracking Information
+Source('instinfo.cc') 
+DebugFlag('Completion', 'Completed Instruction')
+DebugFlag('InstInfo', 'Instruct Information such as *OpClass*')
+DebugFlag('PrintAllFU', 'Print all FU at the initialization stage')
+DebugFlag('ForwardLineData', 'Check information about *class ForwardLineData* declared in cpu/minor/pipe_data.hh')
+DebugFlag('ForwardInstData', 'Check information about *class ForwardInstData* declared in cpu/minor/pipe_data.hh')
