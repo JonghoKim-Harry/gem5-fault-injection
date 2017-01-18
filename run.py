@@ -242,6 +242,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('bench_name', metavar='<bench name>', help='Benchmark\'s name')
     parser.add_argument('-g', '--golden', action='store_true', help='No fault injection to get golden output')
+    parser.add_argument('--sim', action='store', nargs=1, help='Simulation Binary')
     parser.add_argument('-i', '--index', action='store', nargs=2, help='Experiment Number')
     parser.add_argument('-f', '--flag', action='store', nargs='*', help='All gem5 debug flags')
     parser.add_argument('--inject', action='store', nargs=2, help='Injection <time> <location>')
@@ -250,6 +251,9 @@ if __name__ == '__main__':
     ##
     #  End parsing & Run gem5
     args = parser.parse_args()
+
+    if args.sim:
+        ExpManager.GEM5_BINARY = os.path.abspath(WHERE_AM_I + '/build/ARM/' + str(args.sim[0]))
 
     if args.golden:
         # Golden Run
