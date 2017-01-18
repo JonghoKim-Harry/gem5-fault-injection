@@ -39,6 +39,10 @@
 
 #include "cpu/minor/pipe_data.hh"
 
+// JONGHO
+#include "debug/FICallTrace.hh"
+#include "debug/FIReport.hh"
+
 namespace Minor
 {
 
@@ -223,6 +227,30 @@ ForwardLineData::reportData(std::ostream &os) const
         os << id;
 }
 
+// JONGHO
+void
+ForwardLineData::injectFault(unsigned int loc)
+{
+    DPRINTF(FICallTrace, "injectFault() @ForwardLineData\n");
+
+    const unsigned int BYTE_PER_INST = sizeof(uint32_t);
+    const unsigned int BIT_PER_INST = sizeof(uint32_t) * BIT_PER_BYTE;
+
+    // Same with (loc - (loc % BIT_PER_INST)) / (BIT_PER_BYTE)
+    unsigned int offset_to_inst = BYTE_PER_INST * (loc / BIT_PER_INST);
+    Addr inst_addr = lineBaseAddr + offset_to_inst;
+    DPRINTF(FIReport, "--- Fault Injection ---\n");
+    DPRINTF(FIReport, "     * loc:  %u\n", loc);
+    DPRINTF(FIReport, "     * base address: %#x\n", lineBaseAddr);
+    DPRINTF(FIReport, "     * inst address: %#x\n", inst_addr);
+
+    /** Bit Flip */
+    const uint32_t golden_bin = *(uint32_t *)&line[offset_to_inst];
+    line[loc/BIT_PER_BYTE] = BITFLIP(line[loc/BIT_PER_BYTE], loc%BIT_PER_BYTE);
+    const uint32_t faulty_bin = *(uint32_t *)&line[offset_to_inst];
+    DPRINTF(FIReport, "     * inst: %#x -> %#x\n", golden_bin, faulty_bin);
+}
+
 ForwardInstData::ForwardInstData(unsigned int width, ThreadID tid) :
     numInsts(width), threadId(tid)
 {
@@ -284,6 +312,13 @@ ForwardInstData::reportData(std::ostream &os) const
         }
         os << ')';
     }
+}
+
+void
+ForwardInstData::injectFault(unsigned int loc)
+{
+    DPRINTF(FICallTrace, "injectFault() @ForwardInstData\n");
+    // TODO
 }
 
 }

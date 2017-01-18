@@ -52,7 +52,9 @@
 
 // JONGHO
 #include "base/softerror.hh"
+#include "base/vulnerable.hh"
 #include "debug/PrintAllFU.hh"
+#include "debug/ForwardInstData.hh"
 
 namespace Minor
 {
@@ -115,8 +117,11 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
     }
 
     // JONGHO
+    DPRINTF(ForwardInstData, "Instruction Width: %u\n", params.decodeInputWidth);
+
+    // JONGHO: Register fault injection
     if(params.injectComp == "f1ToF2") {
-        fetch2.registerInj(params.injectTime, params.injectLoc);
+        f1ToF2.registerFi(params.injectTime, params.injectLoc);
     }
     else if(params.injectComp == "f2ToD") {
         SoftError::registerInj(params.injectTime, params.injectLoc%32, SoftError::F2TOD, params.injectLoc/32);
@@ -152,6 +157,9 @@ Pipeline::minorTrace() const
 void
 Pipeline::evaluate()
 {
+    // JONGHO
+    Vulnerable::evaluate();
+
     cpu.injectFaultRegFunc();
 
         //HwiSoo

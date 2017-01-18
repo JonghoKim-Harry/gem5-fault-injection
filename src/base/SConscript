@@ -93,6 +93,7 @@ CompoundFlag('AnnotateAll', ['Annotate', 'AnnotateQ', 'AnnotateVerbose'],
 
 # JONGHO: Soft Error
 Source('softerror.cc')
+Source('vulnerable.cc')
 DebugFlag('FIReport', 'Information about fault injection: time, loc, etc.')
 DebugFlag('FICallTrace', 'Trace function call used for fault injection')
 

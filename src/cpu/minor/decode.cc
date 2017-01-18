@@ -151,12 +151,6 @@ Decode::evaluate()
            output_index < outputWidth /* Still more output to fill */)
         {
             MinorDynInstPtr inst = insts_in->insts[decode_info.inputIndex];
-
-            /**
-             *  JONGHO
-             *    Print out information about *class ForwardInstData*
-             */
-            DPRINTF(ForwardInstData, "ForwardInstData.numInst = %u\n", insts_in->numInsts);
             if (inst->isBubble()) {
                 /* Skip */
                 decode_info.inputIndex++;

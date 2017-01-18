@@ -49,6 +49,7 @@
 #include "debug/MinorTrace.hh"
 
 // JONGHO
+#include "base/trace.hh"
 #include "debug/ForwardLineData.hh"
 namespace Minor
 {

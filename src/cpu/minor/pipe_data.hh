@@ -59,6 +59,7 @@
 // JONGHO
 #include "base/softerror.hh"
 #include "debug/FI.hh"
+#include "base/vulnerable.hh"
 
 namespace Minor
 {
@@ -201,7 +202,7 @@ std::ostream &operator <<(std::ostream &os, const BranchData &branch);
  *  (or fragment of a line), its address, a sequence number assigned when
  *  that line was fetched and a bubbleFlag that can allow ForwardLineData to
  *  be used to represent the absence of line data in a pipeline. */
-class ForwardLineData /* : public ReportIF, public BubbleIF */
+class ForwardLineData : public VulnerableData /* : public ReportIF, public BubbleIF */
 {
   private:
     /** This line is a bubble.  No other data member is required to be valid
@@ -249,18 +250,6 @@ class ForwardLineData /* : public ReportIF, public BubbleIF */
     ~ForwardLineData() { line = NULL; }
 
   public:
-    // JONGHO
-    void injectFault(unsigned int loc)
-    {
-        unsigned int offset = 4 * (loc / 32);
-        const uint32_t golden_bin = *(uint32_t *)&line[offset];
-        Addr addr = lineBaseAddr + offset;
-
-        line[loc/8] = BITFLIP(line[loc/8], loc%8);
-        const uint32_t faulty_bin = *(uint32_t *)&line[offset];
-        DPRINTF(FI, "Fault Injection - %#x:\t%#x -> %#x\n", addr, golden_bin, faulty_bin);
-    }
-
     /** This is a fault, not a line */
     bool isFault() const { return fault != NoFault; }
 
@@ -287,6 +276,9 @@ class ForwardLineData /* : public ReportIF, public BubbleIF */
 
     /** ReportIF interface */
     void reportData(std::ostream &os) const;
+
+    // JONGHO
+    void injectFault(unsigned int loc) override;
 };
 
 /** Maximum number of instructions that can be carried by the pipeline. */
@@ -295,7 +287,7 @@ const unsigned int MAX_FORWARD_INSTS = 16;
 /** Forward flowing data between Fetch2,Decode,Execute carrying a packet of
  *  instructions of a width appropriate to the configured stage widths.
  *  Also carries exception information where instructions are not valid */
-class ForwardInstData /* : public ReportIF, public BubbleIF */
+class ForwardInstData : public VulnerableData /* : public ReportIF, public BubbleIF */
 {
   public:
     /** Array of carried insts, ref counted */
@@ -331,6 +323,9 @@ class ForwardInstData /* : public ReportIF, public BubbleIF */
 
     /** ReportIF interface */
     void reportData(std::ostream &os) const;
+
+    // JONGHO
+    void injectFault(unsigned int loc) override;
 };
 
 }

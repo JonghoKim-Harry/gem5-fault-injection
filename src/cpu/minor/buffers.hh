@@ -54,6 +54,10 @@
 #include "cpu/activity.hh"
 #include "cpu/timebuf.hh"
 
+// JONGHO
+#include "base/vulnerable.hh"
+#include "debug/FICallTrace.hh"
+
 namespace Minor
 {
 
@@ -209,7 +213,9 @@ class MinorBuffer : public Named, public TimeBuffer<ElemType>
 /** Wraps a MinorBuffer with Input/Output interfaces to ensure that units
  *  within the model can only see the right end of buffers between them. */
 template <typename Data>
-class Latch
+// JONGHO
+/** Note that type Data must implement VulnerableData interface */
+class Latch : public Vulnerable
 {
   public:
     typedef MinorBuffer<Data> Buffer;
@@ -272,6 +278,15 @@ class Latch
     void minorTrace() const { buffer.minorTrace(); }
 
     void evaluate() { buffer.advance(); }
+ 
+    // JONGHO
+    /** Data must implement VulnerableData interface */
+    void injectFault(unsigned int loc) override
+    {
+        DPRINTF(FICallTrace, "injectFault() @Latch\n");
+        Data& vul_data = *output().outputWire;
+        vul_data.injectFault(loc);
+    }
 };
 
 /** A pipeline simulating class that will stall (not advance when advance()
