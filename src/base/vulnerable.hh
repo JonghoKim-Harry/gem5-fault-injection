@@ -50,11 +50,16 @@ class Vulnerable
  
     class FiInfo {
       public:
+        friend class Vulnerable;
         FiInfo(unsigned int _t, unsigned int _l, Vulnerable *_v);
         unsigned int injTime;
         unsigned int injLoc;
         Vulnerable *target;
+
+      protected:
+        unsigned int id;
     }; // class Vulnerable::FiInfo
+
 }; // class Vulnerable
 
 

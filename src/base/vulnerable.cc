@@ -3,11 +3,13 @@
  */
 #include "base/vulnerable.hh"
 #include "sim/core.hh"          // curTick()
+#include "base/trace.hh"        // DPRINTF
 #include "debug/FIReport.hh"
 
 namespace
 {
     std::vector<Vulnerable::FiInfo> remainingFi;
+    unsigned int fi_count = 0;
 } // anonymous namespace
 
 
@@ -15,12 +17,18 @@ namespace
 void
 Vulnerable::registerFi(unsigned int time, unsigned int loc)
 {
-    Vulnerable::FiInfo fi_info = *new Vulnerable::FiInfo(time, loc, this);
+    Vulnerable::FiInfo& fi_info = *new Vulnerable::FiInfo(time, loc, this);
+    DPRINTF(FIReport, "--- Fault-injection Registered ---\n");
+    DPRINTF(FIReport, "     * id:   %u\n", fi_info.id);
+    DPRINTF(FIReport, "     * time: %u\n", time);
+    DPRINTF(FIReport, "     * loc:  %u\n", loc);
     remainingFi.push_back(fi_info);
 }
- 
+
 Vulnerable::FiInfo::FiInfo(unsigned int _t, unsigned int _l, Vulnerable *_v)
 {
+    ++fi_count;
+    id = fi_count;
     injTime = _t;
     injLoc  = _l;
     target = _v;
