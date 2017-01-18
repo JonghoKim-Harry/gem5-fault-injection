@@ -151,7 +151,7 @@ class ExpManager:
         digest = open(bench_name + '/' + 'digest_' + exp_info + '.txt', 'w')
 
         #  Write headline of digest
-        digest.write('\t'.join(['exp#', 'time', 'bit', 'F/NF', 'comp2', 'runtime', 'benchmark', 'exec?', 'actual?', 'etc']) + '\n')
+        digest.write('\t'.join(['exp#', 'time', 'bit', 'F/NF', 'comp2', 'runtime', 'benchmark', 'exec?', 'actual?', 'bubble?', 'etc']) + '\n')
         digest.write('-' * 80 + '\n')
 
         #  Iterating several experiments
@@ -209,6 +209,7 @@ class ExpManager:
             etc = ''
             mnemonic = ''
             inject_at = ''
+            bubble = ''
             with open(outdir + '/' + 'debug_' + str(idx), 'r') as debug_read:
                 for line in debug_read:
                     if 'Executed' in line:
@@ -219,11 +220,16 @@ class ExpManager:
                         mnemonic = line.split('mnemonic:')[1].split()[0]
                     if ('Injection') in line and ('@' in line):
                         inject_at = '@' + line.split('@')[1].split()[0]
+                    if 'BUBBLE' in line:
+                        bubble = 'BUBBLE'
+                    if 'FAULT' in line:
+                        bubble = 'FAULT'
                     if 'Flip' in line:
                         etc = line.split(':')[-2].split()[-1] + line.split(':')[-1].strip()
+
                         
             # <F/NF> <stage> <inst> <target> <runtime> <bench name>
-            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, executed, str(actual_inject), mnemonic, inject_at, etc])
+            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, executed, str(actual_inject), mnemonic, inject_at, bubble, etc])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]) + '\n')
