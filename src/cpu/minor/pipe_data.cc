@@ -238,22 +238,9 @@ ForwardLineData::injectFault(const unsigned int loc)
     const unsigned int BYTE_PER_INST = sizeof(uint32_t);
     const unsigned int BIT_PER_INST = sizeof(uint32_t) * BIT_PER_BYTE;
 
-    /** Do NOT use loc. Use valid_loc instead */
-    const unsigned int valid_loc = loc % lineWidth;
-
-    /** To log instruction change */
-    ArmISA::Decoder *decoder = new ArmISA::Decoder(nullptr);
-
-    /** Same with (valid_loc - (valid_loc % BIT_PER_INST)) / (BIT_PER_BYTE) */
-    unsigned int offset_to_inst = BYTE_PER_INST * (valid_loc / BIT_PER_INST);
-
-    /** fault-injected instruction's address */
-    Addr inst_addr = lineBaseAddr + offset_to_inst;
-
     /** Print out fault injection informations */
     DPRINTF(FIReport, "--- Fault Injection ---\n");
-    DPRINTF(FIReport, "     * loc:  %u\n", valid_loc);
-    DPRINTF(FIReport, "     * addr: %#x\n", inst_addr);
+    DPRINTF(FIReport, "     @ForwardLineData\n");
 
     /**
      *  Bit Flip Procss: Do fault injection if and only if
@@ -264,6 +251,25 @@ ForwardLineData::injectFault(const unsigned int loc)
     else if(isFault())
         DPRINTF(FIReport, "     * Injected into FAULT\n");
     else {
+        /** 
+         *  Do NOT use loc. Use valid_loc instead.
+         *  Note that if the given instance of ForwardLineData is bubble,
+         *  valid_loc will be undefined, and many following variables will
+         *  remain undefined
+         */
+        const unsigned int valid_loc = loc % lineWidth;
+        DPRINTF(FIReport, "     * loc:  %u\n", valid_loc);
+
+        /** To log instruction change */
+        ArmISA::Decoder *decoder = new ArmISA::Decoder(nullptr);
+
+        /** Same with (valid_loc - (valid_loc % BIT_PER_INST)) / (BIT_PER_BYTE) */
+        unsigned int offset_to_inst = BYTE_PER_INST * (valid_loc / BIT_PER_INST);
+
+        /** fault-injected instruction's address */
+        Addr inst_addr = lineBaseAddr + offset_to_inst;
+        DPRINTF(FIReport, "     * addr: %#x\n", inst_addr);
+
         /** original binary instruction */
         const uint32_t golden_bin = *(uint32_t *)&line[offset_to_inst];
 
@@ -364,6 +370,7 @@ ForwardInstData::injectFault(const unsigned int loc)
 
     /** Print out fault injection information */
     DPRINTF(FIReport, "--- Fault Injection ---\n");
+    DPRINTF(FIReport, "     @ForwardInstData\n");
 
     if(isBubble())
         DPRINTF(FIReport, "     * Injected into BUBBLE\n");
@@ -379,7 +386,7 @@ ForwardInstData::injectFault(const unsigned int loc)
 
         /** Select instruction to inject fault into */
         unsigned int inst_index = valid_loc / BIT_PER_INST;
-        MinorDynInstPtr target_wrapper = insts[inst_index];
+        MinorDynInstPtr& target_wrapper = *(&insts[inst_index]);
 
         if(target_wrapper->isBubble())
             DPRINTF(FIReport, "     * Injected into BUBBLE\n");
