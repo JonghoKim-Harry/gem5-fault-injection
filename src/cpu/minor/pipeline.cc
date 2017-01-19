@@ -124,7 +124,7 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
         f1ToF2.registerFi(params.injectTime, params.injectLoc);
     }
     else if(params.injectComp == "f2ToD") {
-        SoftError::registerInj(params.injectTime, params.injectLoc%32, SoftError::F2TOD, params.injectLoc/32);
+        f2ToD.registerFi(params.injectTime, params.injectLoc);
     }
     else if(params.injectComp == "dToE") {
         const unsigned GCM = 8*3*5*8;   // 960
