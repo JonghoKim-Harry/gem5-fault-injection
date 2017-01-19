@@ -49,8 +49,8 @@
 #include "debug/MinorTrace.hh"
 
 // JONGHO
-#include "base/trace.hh"
-#include "debug/ForwardLineData.hh"
+//#include "base/trace.hh"
+
 namespace Minor
 {
 
@@ -233,18 +233,8 @@ void
 Fetch2::evaluate()
 {
     /* Push input onto appropriate input buffer */
-    if (!inp.outputWire->isBubble()) {
-        // JONGHO
-        if(injReady()) {
-            injDone = true;
-            ForwardLineData& line = *inp.outputWire;
-            line.injectFault(injLoc);
-        }
-
+    if (!inp.outputWire->isBubble())
         inputBuffer[inp.outputWire->id.threadId].setTail(*inp.outputWire);
-        /** Print out information about *class ForwardLineData* */
-        DPRINTF(ForwardLineData, "ForwardLineData.lineWidth = %u\n", inp.outputWire->lineWidth);
-    }
 
     ForwardInstData &insts_out = *out.inputWire;
     BranchData prediction;
@@ -616,21 +606,6 @@ Fetch2::minorTrace() const
     MINORTRACE("inputIndex=%d havePC=%d predictionSeqNum=%d insts=%s\n",
         fetchInfo[0].inputIndex, fetchInfo[0].havePC, fetchInfo[0].predictionSeqNum, data.str());
     inputBuffer[0].minorTrace();
-}
-
-bool
-Fetch2::injReady() const
-{
-    return injRegistered && (!injDone) && curTick() >= injTime;
-}
-
-void
-Fetch2::registerInj(unsigned int time, unsigned int loc)
-{
-    injRegistered = true;
-    injTime = time;
-    injLoc = loc % 512;
-    DPRINTF(FI, "Injection Registered in Fetch2 - TIME=%u, BIT=%u\n", injTime, injLoc);
 }
 
 } // namespace Minor
