@@ -358,7 +358,68 @@ void
 ForwardInstData::injectFault(const unsigned int loc)
 {
     DPRINTF(FICallTrace, "injectFault() @ForwardInstData\n");
-    // TODO
+
+    /** 32-bit ISA */
+    const unsigned int BIT_PER_INST = sizeof(uint32_t) * BIT_PER_BYTE;
+
+    /** Print out fault injection information */
+    DPRINTF(FIReport, "--- Fault Injection ---\n");
+
+    if(isBubble())
+        DPRINTF(FIReport, "     * Injected into BUBBLE\n");
+    else {
+        /** 
+         *  Do NOT use loc. Use valid_loc instead.
+         *  Note that if the given instance of ForwardInstData is bubble,
+         *  valid_loc will be undefined, and many following variables will
+         *  remain undefined
+         */
+        const unsigned int valid_loc = loc % (numInsts * BIT_PER_INST);
+        DPRINTF(FIReport, "     * loc:  %u\n", valid_loc);
+
+        /** Select instruction to inject fault into */
+        unsigned int inst_index = valid_loc / BIT_PER_INST;
+        MinorDynInstPtr target_wrapper = insts[inst_index];
+
+        if(target_wrapper->isBubble())
+            DPRINTF(FIReport, "     * Injected into BUBBLE\n");
+        else if(target_wrapper->isFault())
+            DPRINTF(FIReport, "     * Injected into FAULT\n");
+        else {
+            /**
+             *  We can get address only if the instruction is
+             *  neither bubble nor fault
+             */
+            const Addr addr = target_wrapper->pc.instAddr();
+            DPRINTF(FIReport, "     * addr: %#x\n", addr);
+
+            /** original binary instruction & instruction mnemonic */
+            const uint32_t golden_bin = target_wrapper->staticInst->machInst;
+            const std::string golden_inst = target_wrapper->staticInst->generateDisassembly(addr, debugSymbolTable);
+
+            /** fault-injected binary instruction */
+            const uint32_t faulty_bin = BITFLIP(golden_bin, valid_loc % BIT_PER_INST);
+
+            /**
+             *  Replace original instruction with fault-injected instruction
+             *   - target_wrapper will remain unchanged except its staticInst
+             *   - We have to generate StaticInstPtr
+             */
+            ArmISA::Decoder *decoder = new ArmISA::Decoder(nullptr);
+            target_wrapper->staticInst = decoder->decodeInst(faulty_bin);
+
+            /**
+             *  We can NOT use cached faulty instruction,
+             *  so set address parameter to 0 to prevent use of decode cache
+             */
+            std::string faulty_inst = target_wrapper->staticInst->generateDisassembly(0, debugSymbolTable);
+
+            /**  Print out changes of binary instruction by soft error */
+            DPRINTF(FIReport, "     * bin:  %#x -> %#x\n", golden_bin, faulty_bin);
+            /**  Print out changes of instruction mnenomic by soft error */
+            DPRINTF(FIReport, "     * inst: %s -> %s\n", golden_inst, faulty_inst);
+        }
+    }
 }
 
 }
