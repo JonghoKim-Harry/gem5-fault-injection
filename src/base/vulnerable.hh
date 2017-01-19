@@ -46,7 +46,7 @@ class Vulnerable
      *  This method is called just after registerFi() is called.
      *  You can easily override them!
      */
-    virtual void injectFault(unsigned int loc) = 0;
+    virtual void injectFault(const unsigned int loc) = 0;
  
     class FiInfo {
       public:
@@ -66,7 +66,7 @@ class Vulnerable
 class VulnerableData
 {
   public:
-    virtual void injectFault(unsigned int loc) = 0;
+    virtual void injectFault(const unsigned int loc) = 0;
 }; // class VulnerableData
 
 #endif // __BASE_VULNERABLE_HH__

@@ -230,7 +230,7 @@ ForwardLineData::reportData(std::ostream &os) const
 
 // JONGHO
 void
-ForwardLineData::injectFault(unsigned int loc)
+ForwardLineData::injectFault(const unsigned int loc)
 {
     DPRINTF(FICallTrace, "injectFault() @ForwardLineData\n");
 
@@ -238,18 +238,21 @@ ForwardLineData::injectFault(unsigned int loc)
     const unsigned int BYTE_PER_INST = sizeof(uint32_t);
     const unsigned int BIT_PER_INST = sizeof(uint32_t) * BIT_PER_BYTE;
 
+    /** Do NOT use loc. Use valid_loc instead */
+    const unsigned int valid_loc = loc % lineWidth;
+
     /** To log instruction change */
     ArmISA::Decoder *decoder = new ArmISA::Decoder(nullptr);
 
-    /** Same with (loc - (loc % BIT_PER_INST)) / (BIT_PER_BYTE) */
-    unsigned int offset_to_inst = BYTE_PER_INST * (loc / BIT_PER_INST);
+    /** Same with (valid_loc - (valid_loc % BIT_PER_INST)) / (BIT_PER_BYTE) */
+    unsigned int offset_to_inst = BYTE_PER_INST * (valid_loc / BIT_PER_INST);
 
     /** fault-injected instruction's address */
     Addr inst_addr = lineBaseAddr + offset_to_inst;
 
     /** Print out fault injection informations */
     DPRINTF(FIReport, "--- Fault Injection ---\n");
-    DPRINTF(FIReport, "     * loc:  %u\n", loc);
+    DPRINTF(FIReport, "     * loc:  %u\n", valid_loc);
     DPRINTF(FIReport, "     * addr: %#x\n", inst_addr);
 
     /**
@@ -268,7 +271,7 @@ ForwardLineData::injectFault(unsigned int loc)
         const std::string golden_inst = decoder->decodeInst(golden_bin)->generateDisassembly(inst_addr, debugSymbolTable);
 
         /** actual bit flip */
-        line[loc/BIT_PER_BYTE] = BITFLIP(line[loc/BIT_PER_BYTE], loc%BIT_PER_BYTE);
+        line[valid_loc/BIT_PER_BYTE] = BITFLIP(line[valid_loc/BIT_PER_BYTE], valid_loc%BIT_PER_BYTE);
 
         /** fault-injected binary instruction */
         const uint32_t faulty_bin = *(uint32_t *)&line[offset_to_inst];
@@ -352,7 +355,7 @@ ForwardInstData::reportData(std::ostream &os) const
 }
 
 void
-ForwardInstData::injectFault(unsigned int loc)
+ForwardInstData::injectFault(const unsigned int loc)
 {
     DPRINTF(FICallTrace, "injectFault() @ForwardInstData\n");
     // TODO

@@ -281,7 +281,7 @@ class Latch : public Vulnerable
  
     // JONGHO
     /** Data must implement VulnerableData interface */
-    void injectFault(unsigned int loc) override
+    void injectFault(const unsigned int loc) override
     {
         DPRINTF(FICallTrace, "injectFault() @Latch\n");
         Data& vul_data = *output().outputWire;

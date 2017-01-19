@@ -278,7 +278,7 @@ class ForwardLineData : public VulnerableData /* : public ReportIF, public Bubbl
     void reportData(std::ostream &os) const;
 
     // JONGHO
-    void injectFault(unsigned int loc) override;
+    void injectFault(const unsigned int loc) override;
 };
 
 /** Maximum number of instructions that can be carried by the pipeline. */
@@ -325,7 +325,7 @@ class ForwardInstData : public VulnerableData /* : public ReportIF, public Bubbl
     void reportData(std::ostream &os) const;
 
     // JONGHO
-    void injectFault(unsigned int loc) override;
+    void injectFault(const unsigned int loc) override;
 };
 
 }
