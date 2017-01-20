@@ -386,40 +386,64 @@ ForwardInstData::injectFault(const unsigned int loc)
 
         /** Select instruction to inject fault into */
         unsigned int inst_index = valid_loc / BIT_PER_INST;
-        MinorDynInstPtr& target_wrapper = *(&insts[inst_index]);
+        MinorDynInstPtr target_dynamic_wrapper = insts[inst_index];
 
-        if(target_wrapper->isBubble())
+        if(target_dynamic_wrapper->isBubble())
             DPRINTF(FIReport, "     * Injected into BUBBLE\n");
-        else if(target_wrapper->isFault())
+        else if(target_dynamic_wrapper->isFault())
             DPRINTF(FIReport, "     * Injected into FAULT\n");
         else {
             /**
              *  We can get address only if the instruction is
              *  neither bubble nor fault
              */
-            const Addr addr = target_wrapper->pc.instAddr();
+            const Addr addr = target_dynamic_wrapper->pc.instAddr();
             DPRINTF(FIReport, "     * addr: %#x\n", addr);
 
+            /**
+             *  Wrapper for original instruction
+             *  Note that changes in golden_static_wrapper has no effect on
+             *  fault-injected instruction
+             */
+            const StaticInstPtr golden_static_wrapper = target_dynamic_wrapper->staticInst;
+
             /** original binary instruction & instruction mnemonic */
-            const uint32_t golden_bin = target_wrapper->staticInst->machInst;
-            const std::string golden_inst = target_wrapper->staticInst->generateDisassembly(addr, debugSymbolTable);
+            const uint32_t golden_bin = golden_static_wrapper->machInst;
+            const std::string golden_inst = golden_static_wrapper->generateDisassembly(addr, debugSymbolTable);
+
+            /** 
+             *  Check if the original instruction is macro operation.
+             *  If an instruction is macro operation, it will be decomposed
+             *  into several micro operations. Otherwise, an instruction
+             *  must be a single instruction.
+             *
+             *  Note that either isMacro() or isMicro() is valid in same time:
+             *    isMacro() is valid until the instruction is decoded, while
+             *    isMicro() is valid right after the instruction is decoded
+             */
+            const bool golden_is_macroop = golden_static_wrapper->isMacroop();
+            DPRINTF(FIReport, "     * type: %s\n", golden_is_macroop ? "Macro Operation":"Single Instruction");
 
             /** fault-injected binary instruction */
             const uint32_t faulty_bin = BITFLIP(golden_bin, valid_loc % BIT_PER_INST);
 
             /**
              *  Replace original instruction with fault-injected instruction
-             *   - target_wrapper will remain unchanged except its staticInst
-             *   - We have to generate StaticInstPtr
+             *
+             *   - Changes in golden_static_wrapper have NO EFFECT on fault-
+             *     injected instruction. We have to generate new StaticInstPtr
+             *
+             *   - Change target_dynamic_wrapper->staticInst to the generated
+             *     StaticInstPtr
              */
             ArmISA::Decoder *decoder = new ArmISA::Decoder(nullptr);
-            target_wrapper->staticInst = decoder->decodeInst(faulty_bin);
+            target_dynamic_wrapper->staticInst = decoder->decodeInst(faulty_bin);
 
             /**
              *  We can NOT use cached faulty instruction,
              *  so set address parameter to 0 to prevent use of decode cache
              */
-            std::string faulty_inst = target_wrapper->staticInst->generateDisassembly(0, debugSymbolTable);
+            std::string faulty_inst = target_dynamic_wrapper->staticInst->generateDisassembly(0, debugSymbolTable);
 
             /**  Print out changes of binary instruction by soft error */
             DPRINTF(FIReport, "     * bin:  %#x -> %#x\n", golden_bin, faulty_bin);
