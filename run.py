@@ -225,8 +225,8 @@ class ExpManager:
                         bubble = 'BUBBLE'
                     if 'FAULT' in line:
                         bubble = 'FAULT'
-                    if 'inst' in line:
-                        inst = line.split('inst:')[1].strip()
+                    if '* inst:' in line:
+                        inst = line.split('* inst:')[1].strip()
                     if 'Flip' in line:
                         etc = line.split(':')[-2].split()[-1] + line.split(':')[-1].strip()
 
