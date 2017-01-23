@@ -37,14 +37,25 @@ class Vulnerable
     static void evaluate();
 
     /**
+     *  Registration of fault injection
+     *
+     *  @time: Tick when to inject fault into hardware component
+     *  @loc: Index of the bit flipped by fault injection
+     *
      *  You should NOT modify or override this method.
      *  We've already prevented it by using the keyword "final"
      */
     virtual void registerFi(unsigned int time, unsigned int loc) final;
  
     /**
-     *  This method is called just after registerFi() is called.
-     *  You can easily override them!
+     *  Your own implementation of fault injection into a hardware component
+     *
+     *  @loc: Index of the bit flipped by fault injection
+     *
+     *  You should override this method, and make this method to trigger
+     *  fault injection into an instance of VulnerableData.
+     *  Note that this method is called at the end of registerFi(),
+     *  so you just register fault injections with registerFi() and it's done
      */
     virtual void injectFault(const unsigned int loc) = 0;
  
@@ -66,6 +77,13 @@ class Vulnerable
 class VulnerableData
 {
   public:
+    /**
+     *  Your own implementation of fault injection into data
+     *
+     *  @loc: Index of the bit flipped by fault injection
+     *
+     *  You should override this method.
+     */
     virtual void injectFault(const unsigned int loc) = 0;
 }; // class VulnerableData
 

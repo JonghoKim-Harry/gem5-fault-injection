@@ -202,6 +202,7 @@ std::ostream &operator <<(std::ostream &os, const BranchData &branch);
  *  (or fragment of a line), its address, a sequence number assigned when
  *  that line was fetched and a bubbleFlag that can allow ForwardLineData to
  *  be used to represent the absence of line data in a pipeline. */
+// JONGHO: See base/vulnerable.hh
 class ForwardLineData : public VulnerableData /* : public ReportIF, public BubbleIF */
 {
   private:
@@ -278,6 +279,11 @@ class ForwardLineData : public VulnerableData /* : public ReportIF, public Bubbl
     void reportData(std::ostream &os) const;
 
     // JONGHO
+    /*
+     * Fault Injection into Data in f1ToF2
+     *
+     * @loc: Index of a bit flipped by fault injection
+     */
     void injectFault(const unsigned int loc) override;
 };
 
@@ -287,6 +293,7 @@ const unsigned int MAX_FORWARD_INSTS = 16;
 /** Forward flowing data between Fetch2,Decode,Execute carrying a packet of
  *  instructions of a width appropriate to the configured stage widths.
  *  Also carries exception information where instructions are not valid */
+// JONGHO: See base/vulnerable.hh
 class ForwardInstData : public VulnerableData /* : public ReportIF, public BubbleIF */
 {
   public:
@@ -325,6 +332,19 @@ class ForwardInstData : public VulnerableData /* : public ReportIF, public Bubbl
     void reportData(std::ostream &os) const;
 
     // JONGHO
+    /*
+     * Fault Injection into Data in f2ToD
+     *   (TODO: Implementation of fault injection into dToE)
+     *
+     * @loc: Index of a bit flipped by fault injection
+     *
+     * There are two types of ForwardInstData
+     *  - A single ARM instruction before decoded (f2ToD)
+     *  - A single ARM instruction or a micro-operation after decoded (dToE)
+     *
+     * This method inject fault into a single ARM instruction before decoded,
+     * which is in f2ToD.
+     */
     void injectFault(const unsigned int loc) override;
 };
 

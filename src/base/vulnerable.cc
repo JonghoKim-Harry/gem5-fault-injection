@@ -26,19 +26,29 @@ Vulnerable::registerFi(unsigned int time, unsigned int loc)
     remainingFi.push_back(fi_info);
 }
 
-Vulnerable::FiInfo::FiInfo(unsigned int _t, unsigned int _l, Vulnerable *_v)
+/*
+ * Constructor of class Vulnerable::FiInfo
+ *
+ * @_time:   Tich when to inject fault
+ * @_loc:    Index of a bit flipped by fault injection
+ * @_vul:    A hardware component where fault injection happens
+ *
+ * All information about a fault injection is stored in this constructor
+ */
+Vulnerable::FiInfo::FiInfo(unsigned int _time, unsigned int _loc, Vulnerable *_vul)
 {
     ++fi_count;
     id = fi_count;
-    injTime = _t;
-    injLoc  = _l;
-    target = _v;
+    injTime = _time;
+    injLoc  = _loc;
+    target = _vul;
 }
 
 /**
- *  Iterate registered fault injections. If current tick is larger than
- *  registered injection-time, inject fault. If done, registered injections
- *  will be from the list 'remainingFi'
+ *  Iterate registered fault injections.
+ *
+ *  If current tick is larger than registered injection-time, inject fault.
+ *  If done, registered injections will be removed from the list 'remainingFi'
  */
 void
 Vulnerable::evaluate()

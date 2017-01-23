@@ -158,12 +158,18 @@ void
 Pipeline::evaluate()
 {
     // JONGHO
+    /*
+     * Fault Injection into Pipeline Registers
+     *
+     *   Inject fault into data in pipeline registers before each pipeline
+     *   stages do evaluate(). This enables fault injection timing be correct
+     */
     Vulnerable::evaluate();
 
     cpu.injectFaultRegFunc();
 
-        //HwiSoo
-        execute.getLSQ().injectFaultLSQFunc();
+    //HwiSoo
+    execute.getLSQ().injectFaultLSQFunc();
     execute.getLSQ().FIProfiling();
 
     //ybkim: Fault injection on FU
