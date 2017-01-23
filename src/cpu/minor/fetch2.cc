@@ -48,9 +48,6 @@
 #include "debug/Fetch.hh"
 #include "debug/MinorTrace.hh"
 
-// JONGHO
-//#include "base/trace.hh"
-
 namespace Minor
 {
 
@@ -476,12 +473,6 @@ Fetch2::evaluate()
                     dyn_inst->staticInst->isMacroop())
                 {
                     dyn_inst->minorTraceInst(*this);
-                }
-
-                // JONGHO
-                if (SoftError::injDone && (!SoftError::faulty_inst_id_tracked)) {
-                    SoftError::faulty_inst_id_tracked = true;
-                    SoftError::faulty_inst_id = dyn_inst->id;
                 }
             }
 

@@ -53,9 +53,6 @@
 #include "cpu/pred/bpred_unit.hh"
 #include "params/MinorCPU.hh"
 
-//JONGHO
-#include "base/softerror.hh"
-
 namespace Minor
 {
 
