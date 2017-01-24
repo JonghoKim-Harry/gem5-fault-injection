@@ -53,6 +53,7 @@
 // JONGHO
 #include "base/softerror.hh"
 #include "base/vulnerable.hh"
+#include "debug/Bubble.hh"
 #include "debug/PrintAllFU.hh"
 #include "debug/ForwardInstData.hh"
 
@@ -194,6 +195,33 @@ Pipeline::evaluate()
     f2ToD.evaluate();
     dToE.evaluate();
     eToF1.evaluate();
+
+    // JONGHO
+    /*
+     * Print out whether each data transfered is bubble or not.
+     * The information will be presented by ascii art, easy to understand
+     */
+    if(DTRACE(Bubble)) {
+        std::ostream& debug_file = Trace::output();
+        debug_file << "---------- Current Tick: " << curTick() << "----------" << std::endl;
+
+        const std::string f1ToF2_input = f1ToF2.input().inputWire->isBubble()?" BB ":"data";
+        const std::string f1ToF2_output = f1ToF2.output().outputWire->isBubble()?" BB ":"data";
+        const std::string f2ToD_input = f2ToD.input().inputWire->isBubble()?" BB ":"data";
+        const std::string f2ToD_output = f2ToD.output().outputWire->isBubble()?" BB ":"data";
+        const std::string dToE_input = dToE.input().inputWire->isBubble()?" BB ":"data";
+        const std::string dToE_output = dToE.output().outputWire->isBubble()?" BB ":"data";
+        debug_file  << "(F1) ---> f1ToF2 ---> (F2) ---> f2ToD ---> (D) ---> dToE ---> (E)" << std::endl
+                    << "     " << f1ToF2_input
+                    << "        " << f1ToF2_output
+                    << "      " << f2ToD_input
+                    << "       " << f2ToD_output
+                    << "     " << dToE_input
+                    << "      " << dToE_output
+                    << std::endl << std::endl;
+    }
+
+
 
     /* The activity recorder must be be called after all the stages and
      *  before the idler (which acts on the advice of the activity recorder */

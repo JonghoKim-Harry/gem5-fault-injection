@@ -75,3 +75,6 @@ if 'MinorCPU' in env['CPU_MODELS']:
     CompoundFlag('Minor', [
         'MinorCPU', 'MinorExecute', 'MinorInterrupt', 'MinorMem',
         'MinorScoreboard', 'ShsTemp'])
+
+    # JONGHO: To checkout *bubbles*
+    DebugFlag('Bubble', 'To checkout bubble')
