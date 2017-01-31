@@ -1513,7 +1513,7 @@ Execute::evaluate()
             // JONGHO
             ForwardInstData *insts_in = getInput(issue_tid);
             for(int i = 0; i < insts_in->numInsts; ++i)
-                InstInfo::push_execute_addr(insts_in->insts[i]->pc.instAddr());
+                InstInfo::push_execute_addr(insts_in->insts[i]->pc.pc());
 
             num_issued = issue(issue_tid);
         }

@@ -413,7 +413,7 @@ Fetch2::evaluate()
 
                     // JONGHO
                     if(Debug::InstInfo || Debug::Bubble)
-                        InstInfo::push_fetch2_addr(fetch_info.pc.instAddr());
+                        InstInfo::push_fetch2_addr(fetch_info.pc.pc());
 
                     DPRINTF(Fetch, "Instruction extracted from line %s"
                         " lineWidth: %d output_index: %d inputIndex: %d"

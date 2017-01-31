@@ -323,7 +323,7 @@ Pipeline::evaluate()
                 //if(decode_op_list[j]->staticInst->isMicroop())
                 //    debug_file << decode_op_list[j]->pc.instAddr() + "." + decode_op_list[j]->pc.microPC();
                 //else
-                    debug_file << decode_op_list[j]->pc.instAddr();
+                    debug_file << decode_op_list[j]->pc.pc();
             }
             else
                 debug_file << " ";
