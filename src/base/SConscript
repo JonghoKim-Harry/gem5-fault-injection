@@ -95,6 +95,7 @@ CompoundFlag('AnnotateAll', ['Annotate', 'AnnotateQ', 'AnnotateVerbose'],
 Source('softerror.cc')
 Source('vulnerable.cc')
 DebugFlag('FIReport', 'Information about fault injection: time, loc, etc.')
+DebugFlag('FIFaultTrace', 'Trace fault injected into hardware component along pipeline')
 DebugFlag('FICallTrace', 'Trace function call used for fault injection')
 
 # JONGHO: Tracking Information

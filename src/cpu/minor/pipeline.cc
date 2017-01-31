@@ -51,6 +51,7 @@
 #include "debug/ShsTemp.hh"
 
 // JONGHO
+#include "base/instinfo.hh"
 #include "base/softerror.hh"
 #include "base/vulnerable.hh"
 #include "debug/Bubble.hh"
@@ -160,6 +161,54 @@ Pipeline::evaluate()
 {
     // JONGHO
     /*
+     *                       WHAT THIS METHOD DO?
+     *
+     *
+     *              prev stage           pipeline register          next stage
+     *               +------+             +------+------+            +------+
+     *   T(n)        |      |             |      | data1|            |      |
+     *               +------+             +------+------+            +------+
+     *
+     *
+     * pipeline stage evalute():
+     *
+     *  - Read input, which is output of previous stage,
+     *    from pipeline register.
+     *
+     *              prev stage          pipeline register          next stage
+     *               +------+            +------+------+   data1    +------+
+     *               |      |            |      | data1|  ------>   |      |
+     *               +------+            +------+------+            +------+
+     *
+     *  - Process input to generate output.
+     *
+     *              prev stage          pipeline register          next stage
+     *               +------+            +------+------+            +------+
+     *               |//////|            |      | data1|            |//////|
+     *               +------+            +------+------+            +------+
+     *
+     *  - Write output  into pipeline register.
+     *
+     *              prev stage           pipeline register          next stage
+     *               +------+    data2   +------+------+            +------+
+     *               |      |   ------>  |      | data1|            |      |
+     *               +------+            +------+------+            +------+
+     *
+     *              prev stage          pipeline register          next stage
+     *               +------+            +------+------+            +------+
+     *               |      |            |data2 | data1|            |      |
+     *               +------+            +------+------+            +------+
+     *
+     * pipeline register evaluate():
+     *
+     *              prev stage          pipeline register          next stage
+     *               +------+            +------+------+            +------+
+     *   T(n+1)      |      |            |      | data2|            |      |
+     *               +------+            +------+------+            +------+
+     */
+
+    // JONGHO
+    /*
      * Fault Injection into Pipeline Registers
      *
      *   Inject fault into data in pipeline registers before each pipeline
@@ -177,6 +226,12 @@ Pipeline::evaluate()
     //TODO: move these flags to the pipeline
     if (!cpu.isFaultInjectedToFu && cpu.injectFaultToFu)
         cpu.isFaultInjectedToFu = execute.injectFaultToFu();
+
+    // JONGHO
+    /* Output of pipeline registers */
+    const std::string f1ToF2_output = f1ToF2.output().outputWire->isBubble()?" BB ":"data";
+    const std::string f2ToD_output = f2ToD.output().outputWire->isBubble()?" BB ":"data";
+    const std::string dToE_output = dToE.output().outputWire->isBubble()?" BB ":"data";
 
     /* Note that it's important to evaluate the stages in order to allow
      *  'immediate', 0-time-offset TimeBuffer activity to be visible from
@@ -201,27 +256,92 @@ Pipeline::evaluate()
      * Print out whether each data transfered is bubble or not.
      * The information will be presented by ascii art, easy to understand
      */
+
     if(DTRACE(Bubble)) {
         std::ostream& debug_file = Trace::output();
-        debug_file << "---------- Current Tick: " << curTick() << "----------" << std::endl;
+        debug_file << "          ---------- Current Tick: " << curTick() << " ----------" << std::endl;
+        const std::string f1ToF2_input = f1ToF2.output().outputWire->isBubble() ? " BB " : "data";
+        const std::string f2ToD_input = f2ToD.output().outputWire->isBubble() ? " BB " : "data";
+        const std::string dToE_input = dToE.output().outputWire->isBubble() ? " BB " : "data";
 
-        const std::string f1ToF2_input = f1ToF2.input().inputWire->isBubble()?" BB ":"data";
-        const std::string f1ToF2_output = f1ToF2.output().outputWire->isBubble()?" BB ":"data";
-        const std::string f2ToD_input = f2ToD.input().inputWire->isBubble()?" BB ":"data";
-        const std::string f2ToD_output = f2ToD.output().outputWire->isBubble()?" BB ":"data";
-        const std::string dToE_input = dToE.input().inputWire->isBubble()?" BB ":"data";
-        const std::string dToE_output = dToE.output().outputWire->isBubble()?" BB ":"data";
-        debug_file  << "(F1) ---> f1ToF2 ---> (F2) ---> f2ToD ---> (D) ---> dToE ---> (E)" << std::endl
-                    << "     " << f1ToF2_input
-                    << "        " << f1ToF2_output
-                    << "      " << f2ToD_input
-                    << "       " << f2ToD_output
-                    << "     " << dToE_input
-                    << "      " << dToE_output
-                    << std::endl << std::endl;
+/*
+ *                  HOW IT LOOKS LIKE
+
+
+         11111111112222222222333333333344444444445555555555666666666677777777778
+12345678901234567890123456789012345678901234567890123456789012345678901234567890
+(F1) ---> f1ToF2 ---> (F2) ---> f2ToD ---> (D) ---> dToE ---> (E)
+     _BB_        _BB_      data       data     data      data
+                                           0x8d0c             0x8d94
+                                           0x8d9c             0x8d98
+
+
+*/
+        debug_file  << "(F1) ---> f1ToF2 ---> (F2) ---> f2ToD ---> (D) ---> dToE ---> (E)" << std::endl;
+        debug_file.width(5);
+        debug_file << " ";
+        debug_file << f1ToF2_input;
+        debug_file.width(8);
+        debug_file << " ";
+        debug_file << f1ToF2_output;
+        debug_file.width(6);
+        debug_file << " ";
+        debug_file << f2ToD_input;
+        debug_file.width(7);
+        debug_file << " ";
+        debug_file << f2ToD_output;
+        debug_file.width(5);
+        debug_file << " ";
+        debug_file << dToE_input;
+        debug_file.width(6);
+        debug_file << " ";
+        debug_file << dToE_output << std::endl;
+
+        std::vector<Addr> fetch1_addr_list = InstInfo::fetch1_addr();
+        std::vector<Addr> fetch2_addr_list = InstInfo::fetch2_addr();
+        std::vector<Minor::MinorDynInstPtr> decode_op_list = InstInfo::decode_op();
+        //std::vector<Addr> microop_addr_list = InstInfo::microop_addr();
+        std::vector<Addr> execute_addr_list = InstInfo::execute_addr();
+        unsigned int max_size = std::max(std::max(std::max(fetch1_addr_list.size(), fetch2_addr_list.size()), decode_op_list.size()), execute_addr_list.size());
+        debug_file << std::showbase << std::hex << std::left;
+
+        for(int j=0; j<max_size; ++j) {
+            debug_file.width(20);
+            if(j < fetch1_addr_list.size())
+                debug_file << fetch1_addr_list[j];
+            else
+                debug_file << " ";
+
+            debug_file.width(21);
+            if(j < fetch2_addr_list.size())
+                debug_file << fetch2_addr_list[j];
+            else
+                debug_file << " ";
+
+            debug_file.width(18);
+            if(j < decode_op_list.size()) {
+                //if(decode_op_list[j]->staticInst->isMicroop())
+                //    debug_file << decode_op_list[j]->pc.instAddr() + "." + decode_op_list[j]->pc.microPC();
+                //else
+                    debug_file << decode_op_list[j]->pc.instAddr();
+            }
+            else
+                debug_file << " ";
+
+            if(j < execute_addr_list.size())
+                debug_file << execute_addr_list[j];
+
+            debug_file << std::endl;
+        }
+
+        debug_file << std::noshowbase << std::dec << std::right;
+        debug_file << std::endl;
+
+        InstInfo::clear_fetch1_addr();
+        InstInfo::clear_fetch2_addr();
+        InstInfo::clear_decode_op();
+        InstInfo::clear_execute_addr();
     }
-
-
 
     /* The activity recorder must be be called after all the stages and
      *  before the idler (which acts on the advice of the activity recorder */

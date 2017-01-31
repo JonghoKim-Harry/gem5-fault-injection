@@ -373,7 +373,7 @@ ForwardInstData::injectFault(const unsigned int loc)
     DPRINTF(FIReport, "     @ForwardInstData\n");
 
     if(isBubble())
-        DPRINTF(FIReport, "     * Injected into BUBBLE\n");
+        DPRINTF(FIReport, "     * Injected into BUBBLE@ForwardInstData\n");
     else {
         /** 
          *  Do NOT use loc. Use valid_loc instead.
@@ -389,7 +389,7 @@ ForwardInstData::injectFault(const unsigned int loc)
         MinorDynInstPtr target_dynamic_wrapper = insts[inst_index];
 
         if(target_dynamic_wrapper->isBubble())
-            DPRINTF(FIReport, "     * Injected into BUBBLE\n");
+            DPRINTF(FIReport, "     * Injected into BUBBLE@MinorDynInst\n");
         else if(target_dynamic_wrapper->isFault())
             DPRINTF(FIReport, "     * Injected into FAULT\n");
         else {

@@ -151,7 +151,7 @@ class ExpManager:
         digest = open(bench_name + '/' + 'digest_' + exp_info + '.txt', 'w')
 
         #  Write headline of digest
-        digest.write('\t'.join(['exp#', 'time', 'bit', 'F/NF', 'comp2', 'runtime', 'benchmark', 'exec?', 'actual?', 'bubble?', 'inst', 'etc']) + '\n')
+        digest.write('\t'.join(['exp#', 'time', 'bit', 'F/NF', 'comp2', 'runtime', 'benchmark', 'inst', 'etc']) + '\n')
         digest.write('-' * 80 + '\n')
 
         #  Iterating several experiments
@@ -203,8 +203,7 @@ class ExpManager:
             ##
             #  Read debug file
             #
-            #executed = '[Executed | Not-executed]'
-            executed = '-'
+            executed = ''
             actual_inject = True
             etc = ''
             mnemonic = ''
@@ -213,26 +212,25 @@ class ExpManager:
             bubble = ''
             with open(outdir + '/' + 'debug_' + str(idx), 'r') as debug_read:
                 for line in debug_read:
-                    if 'Executed' in line:
-                        executed = 'Executed'
+                    if '* inst:' in line:
+                        #inst = line.split('* inst:')[1].strip()
+                        executed = line.split('* inst:')[1].strip()
+                    if 'BUBBLE' in line:
+                        executed = 'BUBBLE' + line.split('BUBBLE')[1].strip()
+                    if 'FAULT' in line:
+                        executed = 'FAULT'
                     if 'Empty' in line:
                         actual_inject = False
                     if 'mnemonic' in line:
                         mnemonic = line.split('mnemonic:')[1].split()[0]
                     if ('Injection') in line and ('@' in line):
                         inject_at = '@' + line.split('@')[1].split()[0]
-                    if 'BUBBLE' in line:
-                        bubble = 'BUBBLE'
-                    if 'FAULT' in line:
-                        bubble = 'FAULT'
-                    if '* inst:' in line:
-                        inst = line.split('* inst:')[1].strip()
                     if 'Flip' in line:
                         etc = line.split(':')[-2].split()[-1] + line.split(':')[-1].strip()
 
                         
             # <F/NF> <stage> <inst> <target> <runtime> <bench name>
-            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, executed, str(actual_inject), mnemonic, inject_at, inst, bubble, etc])
+            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, executed, mnemonic, inject_at, etc])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]) + '\n')

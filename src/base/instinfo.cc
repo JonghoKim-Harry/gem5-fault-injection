@@ -145,5 +145,75 @@ namespace InstInfo
             debug_file << std::endl;
         }
     }
-} // namespace InstInfo
 
+    namespace
+    {
+        std::vector<Addr> __fetch1_addr;
+        std::vector<Addr> __fetch2_addr;
+        std::vector<Minor::MinorDynInstPtr> __decode_op;
+        std::vector<Addr> __microop_addr;
+        std::vector<Addr> __execute_addr;
+    }
+
+    std::vector<Addr> fetch1_addr() {
+        return *(new std::vector<Addr>(__fetch1_addr.begin(), __fetch1_addr.end()));
+    }
+
+    void push_fetch1_addr(Addr addr) {
+        __fetch1_addr.push_back(addr);
+    }
+
+    void clear_fetch1_addr() {
+        __fetch1_addr.clear();
+    }
+
+    std::vector<Addr> fetch2_addr() {
+        return *(new std::vector<Addr>(__fetch2_addr.begin(), __fetch2_addr.end()));
+    }
+
+    void push_fetch2_addr(Addr addr) {
+        __fetch2_addr.push_back(addr);
+    }
+
+    void clear_fetch2_addr() {
+        __fetch2_addr.clear();
+    }
+
+    std::vector<Minor::MinorDynInstPtr> decode_op() {
+        return *(new std::vector<Minor::MinorDynInstPtr>(__decode_op.begin(), __decode_op.end()));
+    }
+
+    void push_decode_op(Minor::MinorDynInstPtr op) {
+        __decode_op.push_back(op);
+    }
+
+    void clear_decode_op() {
+        __decode_op.clear();
+    }
+
+    /*
+    std::vector<Addr> microop_addr() {
+        return *(new std::vector<Addr>(__microop_addr.begin(), __microop_addr.end()));
+    }
+
+    void push_microop_addr(Addr addr) {
+        __microop_addr.push_back(addr);
+    }
+
+    void clear_microop_addr() {
+        __microop_addr.clear();
+    }
+    */
+
+    std::vector<Addr> execute_addr() {
+        return *(new std::vector<Addr>(__execute_addr.begin(), __execute_addr.end()));
+    }
+
+    void push_execute_addr(Addr addr) {
+        __execute_addr.push_back(addr);
+    }
+
+    void clear_execute_addr() {
+        __execute_addr.clear();
+    }
+} // namespace InstInfo

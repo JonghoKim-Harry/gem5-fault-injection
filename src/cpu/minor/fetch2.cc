@@ -48,6 +48,11 @@
 #include "debug/Fetch.hh"
 #include "debug/MinorTrace.hh"
 
+// JONGHO
+#include "base/instinfo.hh"
+#include "debug/InstInfo.hh"
+#include "debug/Bubble.hh"
+
 namespace Minor
 {
 
@@ -406,6 +411,9 @@ Fetch2::evaluate()
                     dyn_inst->pc = fetch_info.pc;
                     DPRINTF(Fetch, "decoder inst %s\n", *dyn_inst);
 
+                    // JONGHO
+                    if(Debug::InstInfo || Debug::Bubble)
+                        InstInfo::push_fetch2_addr(fetch_info.pc.instAddr());
 
                     DPRINTF(Fetch, "Instruction extracted from line %s"
                         " lineWidth: %d output_index: %d inputIndex: %d"

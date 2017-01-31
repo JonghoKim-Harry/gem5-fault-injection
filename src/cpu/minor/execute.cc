@@ -58,11 +58,10 @@
 #include "debug/FI.hh" //YOHAN
 
 // JONGHO
+#include "base/instinfo.hh"
 #include "debug/Completion.hh"
 #include "debug/InstInfo.hh"
 #include "base/softerror.hh"
-#include "base/instinfo.hh"
-//#include "enums/OpClass.hh"
 
 namespace Minor
 {
@@ -1510,6 +1509,12 @@ Execute::evaluate()
         if (issue_tid != InvalidThreadID) {
             DPRINTF(MinorExecute, "Attempting to issue [tid:%d]\n",
                     issue_tid);
+
+            // JONGHO
+            ForwardInstData *insts_in = getInput(issue_tid);
+            for(int i = 0; i < insts_in->numInsts; ++i)
+                InstInfo::push_execute_addr(insts_in->insts[i]->pc.instAddr());
+
             num_issued = issue(issue_tid);
         }
 
