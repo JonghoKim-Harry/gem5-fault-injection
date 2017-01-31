@@ -191,20 +191,6 @@ namespace InstInfo
         __decode_op.clear();
     }
 
-    /*
-    std::vector<Addr> microop_addr() {
-        return *(new std::vector<Addr>(__microop_addr.begin(), __microop_addr.end()));
-    }
-
-    void push_microop_addr(Addr addr) {
-        __microop_addr.push_back(addr);
-    }
-
-    void clear_microop_addr() {
-        __microop_addr.clear();
-    }
-    */
-
     std::vector<Addr> execute_addr() {
         return *(new std::vector<Addr>(__execute_addr.begin(), __execute_addr.end()));
     }

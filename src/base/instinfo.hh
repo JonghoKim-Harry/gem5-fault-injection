@@ -32,12 +32,6 @@ namespace InstInfo
     std::vector<Minor::MinorDynInstPtr> decode_op();
     void clear_decode_op();
 
-    /*
-    void push_microop_addr(Addr addr);
-    std::vector<MicroPC> microop_addr();
-    void clear_microop_addr();
-    */
-
     void push_execute_addr(Addr addr);
     std::vector<Addr> execute_addr();
     void clear_execute_addr();

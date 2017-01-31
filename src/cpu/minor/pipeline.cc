@@ -320,9 +320,13 @@ Pipeline::evaluate()
 
             debug_file.width(18);
             if(j < decode_op_list.size()) {
-                //if(decode_op_list[j]->staticInst->isMicroop())
-                //    debug_file << decode_op_list[j]->pc.instAddr() + "." + decode_op_list[j]->pc.microPC();
-                //else
+                if(decode_op_list[j]->staticInst->isMicroop()) {
+                    std::stringstream ss1, ss2;
+                    ss1 << std::hex << decode_op_list[j]->pc.pc();
+                    ss2 << decode_op_list[j]->pc.microPC();
+                    debug_file << "0x" + ss1.str() + "." + ss2.str();
+                }
+                else
                     debug_file << decode_op_list[j]->pc.pc();
             }
             else
