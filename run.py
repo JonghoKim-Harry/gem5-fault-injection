@@ -68,10 +68,10 @@ class ExpManager:
         #  gem5 option
         redirection = '-re'
         outdir = '--outdir=' + bench_name + '/golden'
-        stdout_file = '--stdout-file=simout_golden'
-        stderr_file = '--stderr-file=simerr_golden'
-        stats_file = '--stats-file=stats_golden'
-        debug_file = '--debug-file=debug_golden'
+        stdout_file = '--stdout-file=simout_golden.txt'
+        stderr_file = '--stderr-file=simerr_golden.txt'
+        stats_file = '--stats-file=stats_golden.txt'
+        debug_file = '--debug-file=debug_golden.txt'
         debug_flags = ''
         if flag and len(flag) > 0:
             all_flag = ','.join(flag)
@@ -107,10 +107,10 @@ class ExpManager:
         #  gem5 option
         redirection = '-re'
         outdir = '--outdir=' + bench_name + '/' + comp_info
-        stdout_file = '--stdout-file=' + 'simout_' + str(idx)
-        stderr_file = '--stderr-file=' + 'simerr_' + str(idx)
-        stats_file = '--stats-file=' + 'stats_' + str(idx)
-        debug_file = '--debug-file=' + 'debug_' + str(idx)
+        stdout_file = '--stdout-file=' + 'simout_' + str(idx) + '.txt'
+        stderr_file = '--stderr-file=' + 'simerr_' + str(idx) + '.txt'
+        stats_file = '--stats-file=' + 'stats_' + str(idx) + '.txt'
+        debug_file = '--debug-file=' + 'debug_' + str(idx) + '.txt'
         if flag:
             debug_flags = '--debug-flags=' + ','.join(flag)
         else:
@@ -151,7 +151,7 @@ class ExpManager:
         digest = open(bench_name + '/' + 'digest_' + exp_info + '.txt', 'w')
 
         #  Write headline of digest
-        digest.write('\t'.join(['exp#', 'time', 'bit', 'F/NF', 'comp2', 'runtime', 'benchmark', 'inst', 'etc']) + '\n')
+        digest.write('\t'.join(['exp#', 'time', 'bit', 'F/NF', 'comp2', 'runtime', 'benchmark', 'inst']) + '\n')
         digest.write('-' * 80 + '\n')
 
         #  Iterating several experiments
@@ -174,7 +174,7 @@ class ExpManager:
             failure = True
             outdir = bench_name + '/' + comp_info
             runtime_100 = 'failure'
-            with open(outdir + '/' + 'stats_' + str(idx), 'r') as stat_read:
+            with open(outdir + '/' + 'stats_' + str(idx) + '.txt', 'r') as stat_read:
                 for line in stat_read:
                     pattern = re.compile(r'\s+')
                     line2 = re.sub(pattern, '', line)
@@ -203,21 +203,20 @@ class ExpManager:
             ##
             #  Read debug file
             #
-            inst_change = ''
+            change_by_flip = ''
             actual_inject = True
-            etc = ''
             mnemonic = ''
             inject_at = ''
             inst = ''
             bubble = ''
-            with open(outdir + '/' + 'debug_' + str(idx), 'r') as debug_read:
+            with open(outdir + '/' + 'debug_' + str(idx) + '.txt', 'r') as debug_read:
                 for line in debug_read:
                     if '* inst:' in line:
-                        inst_change = line.split('* inst:')[1].strip()
+                        change_by_flip = line.split('* inst:')[1].strip()
                     if 'BUBBLE' in line:
-                        inst_change = 'BUBBLE' + line.split('BUBBLE')[1].strip()
+                        change_by_flip = 'BUBBLE' + line.split('BUBBLE')[1].strip()
                     if 'FAULT' in line:
-                        inst_change = 'FAULT'
+                        change_by_flip = 'FAULT'
                     if 'Empty' in line:
                         actual_inject = False
                     if 'mnemonic' in line:
@@ -225,11 +224,11 @@ class ExpManager:
                     if ('Injection') in line and ('@' in line):
                         inject_at = '@' + line.split('@')[1].split()[0]
                     if 'Flip' in line:
-                        etc = line.split(':')[-2].split()[-1] + line.split(':')[-1].strip()
-
+                        # (ex)   43809000: global:      * Flip target address: 0x1da88 -> 0x1da98
+                        change_by_flip = ' '.join(':'.join(line.split(':')[3:]).split()).strip()
                         
             # <F/NF> <stage> <inst> <target> <runtime> <bench name>
-            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, inst_change, mnemonic, inject_at, etc])
+            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, change_by_flip, mnemonic, inject_at])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]).strip() + '\n')
