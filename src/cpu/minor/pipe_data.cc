@@ -184,13 +184,40 @@ BranchData::injectFault(const unsigned int loc)
         }
         else {
         /* Fault Injection HERE */
+
+        std::string why_branch;
+        switch (reason) {
+            case NoBranch:
+            case CorrectlyPredictedBranch:
+            case SuspendThread:
+            case Interrupt:
+            case HaltFetch:
+                break;
+
+            /* Change of stream (Fetch1 should act on) */
+            case UnpredictedBranch:
+                why_branch = "UnpredictedBranch";
+                break;
+            case BranchPrediction:
+                why_branch = "BranchPrediction";
+                break;
+            case BadlyPredictedBranchTarget:
+                why_branch = "BadlyPredictedBranchTarget";
+                break;
+            case BadlyPredictedBranch:
+                why_branch = "BadlyPredictedBranch";
+                break;
+        }
+            
+        DPRINTF(FIReport, "     * fetching caused by: %s\n", why_branch);
+
         /** These values are all unavailable when it is not branch */
         // Address of instruction which cause branch
         if(inst) {
             const Addr cause_inst_addr = inst->pc.pc();
             const ExtMachInst cause_bin_inst = inst->staticInst->machInst;
             const std::string cause_inst = inst->staticInst->generateDisassembly(cause_inst_addr, debugSymbolTable);
-            DPRINTF(FIReport, "     * branch caused by: %#x: %#x %s\n", cause_inst_addr, cause_bin_inst, cause_inst);
+            DPRINTF(FIReport, "     * inst which cause fetching: %#x: %#x %s\n", cause_inst_addr, cause_bin_inst, cause_inst);
         }
 
         // Golden Target Address
@@ -202,7 +229,7 @@ BranchData::injectFault(const unsigned int loc)
         // Faulty Target Address
         const Addr faulty_target_addr = target.pc();
 
-        DPRINTF(FIReport, "     * Flip target address: %#x -> %#x\n", golden_target_addr, faulty_target_addr);
+        DPRINTF(FIReport, "     * Flip target address: %#x -> %#x (%s)\n", golden_target_addr, faulty_target_addr, why_branch);
         }
     }
 }
