@@ -232,7 +232,7 @@ class ExpManager:
             para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, inst_change, mnemonic, inject_at, etc])
             
             # Write one line to digest file
-            digest.write('\t'.join([para1, para2]) + '\n')
+            digest.write('\t'.join([para1, para2]).strip() + '\n')
 
         digest.close()
 
