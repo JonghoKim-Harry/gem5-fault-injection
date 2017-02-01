@@ -203,7 +203,7 @@ class ExpManager:
             ##
             #  Read debug file
             #
-            executed = ''
+            inst_change = ''
             actual_inject = True
             etc = ''
             mnemonic = ''
@@ -213,12 +213,11 @@ class ExpManager:
             with open(outdir + '/' + 'debug_' + str(idx), 'r') as debug_read:
                 for line in debug_read:
                     if '* inst:' in line:
-                        #inst = line.split('* inst:')[1].strip()
-                        executed = line.split('* inst:')[1].strip()
+                        inst_change = line.split('* inst:')[1].strip()
                     if 'BUBBLE' in line:
-                        executed = 'BUBBLE' + line.split('BUBBLE')[1].strip()
+                        inst_change = 'BUBBLE' + line.split('BUBBLE')[1].strip()
                     if 'FAULT' in line:
-                        executed = 'FAULT'
+                        inst_change = 'FAULT'
                     if 'Empty' in line:
                         actual_inject = False
                     if 'mnemonic' in line:
@@ -230,7 +229,7 @@ class ExpManager:
 
                         
             # <F/NF> <stage> <inst> <target> <runtime> <bench name>
-            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, executed, mnemonic, inject_at, etc])
+            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, inst_change, mnemonic, inject_at, etc])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]) + '\n')
