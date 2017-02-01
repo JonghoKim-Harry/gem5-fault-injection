@@ -66,36 +66,10 @@ namespace Minor
 
 /** Forward data betwen Execute and Fetch1 carrying change-of-address/stream
  *  information. */
-class BranchData /* : public ReportIF, public BubbleIF */
+// JONGHO
+class BranchData: public VulnerableData /* : public ReportIF, public BubbleIF */
 {
   public:
-    // JONGHO
-    bool injectFault(unsigned int loc)
-    {
-        if(!isBranch()) {
-            DPRINTF(FI, "Empty Injection: Instruction is not branch\n");
-            return false;
-        }
-    
-        /** These values are all unavailable when it is not branch */
-        // Address of instruction which cause branch
-        const Addr addr = inst->pc.pc();
-        // Binary of instruction which cause branch
-        const ExtMachInst bin = inst->staticInst->machInst;
-
-        // Golden Target Address
-        const Addr golden_addr = target.pc();
-
-        // Bit Flip
-        target.set(BITFLIP(golden_addr, loc%32));
-
-        // Faulty Target Address
-        const Addr faulty_addr = target.pc();
-        DPRINTF(FI, "Fault Injection - Flip bit[%u] of target address - %#x:\t%#x (target: %#x -> %#x)\n", loc%32, addr, bin, golden_addr, faulty_addr);
-
-        return true;
-    }
-
     enum Reason
     {
         /* *** No change of stream (information to branch prediction) */
@@ -189,6 +163,14 @@ class BranchData /* : public ReportIF, public BubbleIF */
 
     /** ReportIF interface */
     void reportData(std::ostream &os) const;
+
+    // JONGHO
+    /*
+     * Fault Injection into branch or branch prediction address
+     *
+     * @loc: Index of a bit flipped by fault injection
+     */
+    void injectFault(const unsigned int loc) override;
 };
 
 /** Print a branch reason enum */

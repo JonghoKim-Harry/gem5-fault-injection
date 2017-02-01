@@ -166,6 +166,47 @@ operator <<(std::ostream &os, const BranchData &branch)
     return os;
 }
 
+// JONGHO
+void
+BranchData::injectFault(const unsigned int loc)
+{
+    DPRINTF(FICallTrace, "injectFault() @BranchData\n");
+
+    DPRINTF(FIReport, "--- Fault Injection ---\n");
+    DPRINTF(FIReport, "     @BranchData\n");
+
+    if(isBubble()) {
+        DPRINTF(FIReport, "     * Injected into BUBBLE\n");
+    }
+    else {
+        if(!isBranch()) {
+            DPRINTF(FIReport, "     * Injected into BUBBLE (No Branch)\n");
+        }
+        else {
+        /* Fault Injection HERE */
+        /** These values are all unavailable when it is not branch */
+        // Address of instruction which cause branch
+        if(inst) {
+            const Addr cause_inst_addr = inst->pc.pc();
+            const ExtMachInst cause_bin_inst = inst->staticInst->machInst;
+            const std::string cause_inst = inst->staticInst->generateDisassembly(cause_inst_addr, debugSymbolTable);
+            DPRINTF(FIReport, "     * branch caused by: %#x: %#x %s\n", cause_inst_addr, cause_bin_inst, cause_inst);
+        }
+
+        // Golden Target Address
+        const Addr golden_target_addr = target.pc();
+
+        // Bit Flip
+        target.set(BITFLIP(golden_target_addr, loc%32));
+
+        // Faulty Target Address
+        const Addr faulty_target_addr = target.pc();
+
+        DPRINTF(FIReport, "     * Flip target address: %#x -> %#x\n", golden_target_addr, faulty_target_addr);
+        }
+    }
+}
+
 void
 ForwardLineData::setFault(Fault fault_)
 {
@@ -288,12 +329,8 @@ ForwardLineData::injectFault(const unsigned int loc)
          */
         const std::string faulty_inst = decoder->decodeInst(faulty_bin)->generateDisassembly(0, debugSymbolTable);
 
-        /**
-         *  Print out changes of binary instruction and instruction mnemonic
-         *  by injected soft error
-         */
-        DPRINTF(FIReport, "     * bin:  %#x -> %#x\n", golden_bin, faulty_bin);
-        DPRINTF(FIReport, "     * inst: %s -> %s\n", golden_inst, faulty_inst);
+        /* Print out change of instruction by injected soft error */
+        DPRINTF(FIReport, "     * Flip inst: %#x %s -> %#x %s\n", golden_bin, golden_inst, faulty_bin, faulty_inst);
     }
 }
 
@@ -445,10 +482,8 @@ ForwardInstData::injectFault(const unsigned int loc)
              */
             std::string faulty_inst = target_dynamic_wrapper->staticInst->generateDisassembly(0, debugSymbolTable);
 
-            /**  Print out changes of binary instruction by soft error */
-            DPRINTF(FIReport, "     * bin:  %#x -> %#x\n", golden_bin, faulty_bin);
-            /**  Print out changes of instruction mnenomic by soft error */
-            DPRINTF(FIReport, "     * inst: %s -> %s\n", golden_inst, faulty_inst);
+            /**  Print out changes of instruction by soft error */
+            DPRINTF(FIReport, "     * Flip inst: %#x %s -> %#x %s\n", golden_bin, golden_inst, faulty_bin, faulty_inst);
         }
     }
 }

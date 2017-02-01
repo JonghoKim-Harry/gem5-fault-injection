@@ -582,15 +582,6 @@ Fetch1::evaluate()
     BranchData &fetch2_branch = *prediction.outputWire;
     ForwardLineData &line_out = *out.inputWire;
 
-    // JONGHO
-    if(injReady()) {
-        injDone = true;
-        if(injComp == SoftError::ETOF1)
-            injReallyDone = execute_branch.injectFault(injLoc);
-        else if(injComp == SoftError::F2TOF1)
-            injReallyDone = fetch2_branch.injectFault(injLoc);
-    }
-
     assert(line_out.isBubble());
 
     for (ThreadID tid = 0; tid < cpu.numThreads; tid++)
