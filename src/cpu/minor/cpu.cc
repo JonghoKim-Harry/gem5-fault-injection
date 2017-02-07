@@ -151,6 +151,7 @@ MinorCPU::regStats()
     BaseCPU::regStats();
     stats.regStats(name(), *this);
     pipeline->regStats();
+    pipeline_stats.regStats();
 }
 
 void
