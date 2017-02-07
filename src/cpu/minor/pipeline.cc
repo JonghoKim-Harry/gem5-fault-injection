@@ -274,14 +274,6 @@ Pipeline::evaluate()
     fetch2.evaluate();
     fetch1.evaluate();
 
-    // JONGHO: Time to get input of pipeline registers
-    /* Input of pipeline registers */
-    ForwardLineData f1ToF2_input(*f1ToF2.output().outputWire);
-    ForwardInstData f2ToD_input(*f2ToD.output().outputWire);
-    ForwardInstData dToE_input(*dToE.output().outputWire);
-    BranchData eToF1_input(*eToF1.output().outputWire);
-    BranchData f2ToF1_input(*f2ToF1.output().outputWire);
-
     if (DTRACE(MinorTrace))
         minorTrace();
 
@@ -291,6 +283,14 @@ Pipeline::evaluate()
     f2ToD.evaluate();
     dToE.evaluate();
     eToF1.evaluate();
+
+    // JONGHO: Time to get input of pipeline registers
+    /* Input of pipeline registers */
+    ForwardLineData f1ToF2_input(*f1ToF2.output().outputWire);
+    ForwardInstData f2ToD_input(*f2ToD.output().outputWire);
+    ForwardInstData dToE_input(*dToE.output().outputWire);
+    BranchData eToF1_input(*eToF1.output().outputWire);
+    BranchData f2ToF1_input(*f2ToF1.output().outputWire);
 
     // JONGHO
     /*
