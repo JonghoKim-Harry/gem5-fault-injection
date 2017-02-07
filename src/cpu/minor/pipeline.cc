@@ -163,10 +163,15 @@ Pipeline::evaluate()
      *
      *
      *              prev stage           pipeline register          next stage
-     *               +------+             +------+------+            +------+
-     *   T(n)        |      |             |      | data1|            |      |
+     *   n-th        +------+             +------+------+            +------+
+     * SNAPSHOT      |      |             |//////| data1|            |      |
      *               +------+             +------+------+            +------+
      *
+     *
+     * Vulnerable::evaluate():
+     *
+     *  - If there is fault injection, corrupt data1.
+     *    Else, do nothing.
      *
      * pipeline stage evalute():
      *
@@ -175,33 +180,42 @@ Pipeline::evaluate()
      *
      *              prev stage          pipeline register          next stage
      *               +------+            +------+------+   data1    +------+
-     *               |      |            |      | data1|  ------>   |      |
+     *               |      |            |//////| data1|  ------>   |      |
      *               +------+            +------+------+            +------+
      *
      *  - Process input to generate output.
      *
      *              prev stage          pipeline register          next stage
      *               +------+            +------+------+            +------+
-     *               |//////|            |      | data1|            |//////|
+     *               |@@@@@@|            |//////| data1|            |@@@@@@|
      *               +------+            +------+------+            +------+
+     *             (running...)                                   (running...)
      *
      *  - Write output  into pipeline register.
      *
      *              prev stage           pipeline register          next stage
      *               +------+    data2   +------+------+            +------+
-     *               |      |   ------>  |      | data1|            |      |
+     *               |      |   ------>  |//////| data1|            |      |
      *               +------+            +------+------+            +------+
      *
      *              prev stage          pipeline register          next stage
      *               +------+            +------+------+            +------+
      *               |      |            |data2 | data1|            |      |
      *               +------+            +------+------+            +------+
+     *                                  (A pipeline register
+     *                                   can store only one
+     *                                   data at once:
+     *                                   This is not a valid
+     *                                   state of hardware,
+     *                                   so it needs to delete
+     *                                   'data1')
+     *
      *
      * pipeline register evaluate():
      *
      *              prev stage          pipeline register          next stage
-     *               +------+            +------+------+            +------+
-     *   T(n+1)      |      |            |      | data2|            |      |
+     * (n+1)-th      +------+            +------+------+            +------+
+     * SNAPSHOT      |      |            |//////| data2|            |      |
      *               +------+            +------+------+            +------+
      */
 
