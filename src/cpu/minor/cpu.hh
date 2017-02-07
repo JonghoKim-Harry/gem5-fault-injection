@@ -53,8 +53,6 @@
 #include "enums/ThreadPolicy.hh"
 #include "params/MinorCPU.hh"
 #include "base/callback.hh"                                     //YOHAN: exit callback
-// JONGHO
-#include "cpu/minor/pipeline_stats.hh"
 
 namespace Minor
 {
@@ -81,10 +79,6 @@ typedef SimpleThread MinorThread;
  */
 class MinorCPU : public BaseCPU
 {
-    // JONGHO
-  public:
-      Minor::PipelineStats pipeline_stats;
-
   protected:
     /** pipeline is a container for the clockable pipeline stage objects.
      *  Elements of pipeline call TheISA to implement the model. */

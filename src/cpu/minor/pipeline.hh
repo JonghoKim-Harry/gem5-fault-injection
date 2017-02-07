@@ -70,6 +70,14 @@ namespace Minor
  *  between the CPU and its grubby implementation details clean. */
 class Pipeline : public Ticked
 {
+  // JONGHO
+  public:
+    /* Override method regStats() of class Ticked */
+    void regStats() override;
+
+    /* Statistics */
+    Stats::Scalar snapshot_count;
+
   protected:
     MinorCPU &cpu;
 

@@ -139,6 +139,18 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
     }
 }
 
+// JONGHO
+void
+Pipeline::regStats()
+{
+    Ticked::regStats();
+
+    /* Register custom statistics for Minor CPU pipeline */
+    snapshot_count.name("num_snapshot")
+                    .desc("JONGHO: Number of snapshots")
+                    ;
+}
+
 void
 Pipeline::minorTrace() const
 {

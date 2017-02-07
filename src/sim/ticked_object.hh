@@ -122,7 +122,9 @@ class Ticked : public Serializable
 
     /** Register {num,ticks}Cycles if necessary.  If numCycles is
      *  imported, be sure to register it *before* calling this regStats */
-    void regStats();
+    //void regStats();
+    // JONGHO: Make it virtual
+    virtual void regStats();
 
     /** Start ticking */
     void
