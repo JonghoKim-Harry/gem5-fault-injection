@@ -403,6 +403,9 @@ Pipeline::evaluate()
             stop();
         }
     }
+
+    // JONGHO
+    ++snapshot_count;
 }
 
 MinorCPU::MinorCPUPort &
