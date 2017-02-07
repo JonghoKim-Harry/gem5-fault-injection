@@ -170,6 +170,14 @@ void
 Pipeline::evaluate()
 {
     // JONGHO
+    /* Output of pipeline registers */
+    const ForwardLineData& f1ToF2_output = *f1ToF2.output().outputWire;
+    const ForwardInstData& f2ToD_output = *f2ToD.output().outputWire;
+    const ForwardInstData& dToE_output = *dToE.output().outputWire;
+    //const BranchData& eToF1_output = *eToF1.output().outputWire;
+    //const BranchData& f2ToF1_output = *f2ToF1.output().outputWire;
+
+    // JONGHO
     /*
      *                       WHAT THIS METHOD DO?
      *
@@ -252,10 +260,9 @@ Pipeline::evaluate()
         cpu.isFaultInjectedToFu = execute.injectFaultToFu();
 
     // JONGHO
-    /* Output of pipeline registers */
-    const std::string f1ToF2_output = f1ToF2.output().outputWire->isBubble()?" BB ":"data";
-    const std::string f2ToD_output = f2ToD.output().outputWire->isBubble()?" BB ":"data";
-    const std::string dToE_output = dToE.output().outputWire->isBubble()?" BB ":"data";
+    const std::string f1ToF2_output_bb = f1ToF2_output.isBubble()?" BB ":"data";
+    const std::string f2ToD_output_bb = f2ToD_output.isBubble()?" BB ":"data";
+    const std::string dToE_output_bb = dToE_output.isBubble()?" BB ":"data";
 
     /* Note that it's important to evaluate the stages in order to allow
      *  'immediate', 0-time-offset TimeBuffer activity to be visible from
@@ -264,6 +271,14 @@ Pipeline::evaluate()
     decode.evaluate();
     fetch2.evaluate();
     fetch1.evaluate();
+
+    // JONGHO: Time to get input of pipeline registers
+    /* Input of pipeline registers */
+    const ForwardLineData& f1ToF2_input = *f1ToF2.output().outputWire;
+    const ForwardInstData& f2ToD_input = *f2ToD.output().outputWire;
+    const ForwardInstData& dToE_input = *dToE.output().outputWire;
+    const BranchData& eToF1_input = *eToF1.output().outputWire;
+    const BranchData& f2ToF1_input = *f2ToF1.output().outputWire;
 
     if (DTRACE(MinorTrace))
         minorTrace();
@@ -283,10 +298,13 @@ Pipeline::evaluate()
 
     if(DTRACE(Bubble)) {
         std::ostream& debug_file = Trace::output();
-        debug_file << "          ---------- Current Tick: " << curTick() << " ----------" << std::endl;
-        const std::string f1ToF2_input = f1ToF2.output().outputWire->isBubble() ? " BB " : "data";
-        const std::string f2ToD_input = f2ToD.output().outputWire->isBubble() ? " BB " : "data";
-        const std::string dToE_input = dToE.output().outputWire->isBubble() ? " BB " : "data";
+        debug_file << "_________________________________________________________________" << std::endl;
+        debug_file << "[SNAPSHOT] Tick: " << curTick() << std::endl;
+        const std::string f1ToF2_input_bb = f1ToF2_input.isBubble() ? " BB " : "data";
+        const std::string f2ToD_input_bb = f2ToD_input.isBubble() ? " BB " : "data";
+        const std::string dToE_input_bb = dToE_input.isBubble() ? " BB " : "data";
+        const std::string eToF1_input_bb = eToF1_input.isBubble() ? " BB " : "data";
+        const std::string f2ToF1_input_bb = f2ToF1_input.isBubble() ? " BB " : "data";
 
 /*
  *                  HOW IT LOOKS LIKE
@@ -294,6 +312,9 @@ Pipeline::evaluate()
 
          11111111112222222222333333333344444444445555555555666666666677777777778
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
+                 _BB_                                    data
+          f2ToF1 <-----+                           eToF1 <-----+
+                       |                                       |
 (F1) ---> f1ToF2 ---> (F2) ---> f2ToD ---> (D) ---> dToE ---> (E)
      _BB_        _BB_      data       data     data      data
                                            0x8d0c             0x8d94
@@ -301,25 +322,42 @@ Pipeline::evaluate()
 
 
 */
+        debug_file.width(17);
+        debug_file  << " ";
+        debug_file  << f2ToF1_input_bb;
+        debug_file.width(36);
+        debug_file  << " ";
+        debug_file  << eToF1_input_bb << std::endl;
+
+        debug_file  << "          f2ToF1 <-----+                           eToF1 <------+" << std::endl;
+
+        debug_file.width(23);
+        debug_file  << " ";
+        debug_file  << "|";
+        debug_file.width(40);
+        debug_file  << " ";
+        debug_file  << "|" << std::endl;
+
         debug_file  << "(F1) ---> f1ToF2 ---> (F2) ---> f2ToD ---> (D) ---> dToE ---> (E)" << std::endl;
+
         debug_file.width(5);
         debug_file << " ";
-        debug_file << f1ToF2_input;
+        debug_file << f1ToF2_input_bb;
         debug_file.width(8);
         debug_file << " ";
-        debug_file << f1ToF2_output;
+        debug_file << f1ToF2_output_bb;
         debug_file.width(6);
         debug_file << " ";
-        debug_file << f2ToD_input;
+        debug_file << f2ToD_input_bb;
         debug_file.width(7);
         debug_file << " ";
-        debug_file << f2ToD_output;
+        debug_file << f2ToD_output_bb;
         debug_file.width(5);
         debug_file << " ";
-        debug_file << dToE_input;
+        debug_file << dToE_input_bb;
         debug_file.width(6);
         debug_file << " ";
-        debug_file << dToE_output << std::endl;
+        debug_file << dToE_output_bb << std::endl;
 
         std::vector<Addr> fetch1_addr_list = InstInfo::fetch1_addr();
         std::vector<Addr> fetch2_addr_list = InstInfo::fetch2_addr();
