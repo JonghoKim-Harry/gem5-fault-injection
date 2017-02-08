@@ -140,15 +140,55 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
 }
 
 // JONGHO
+/*
+ *  Note that this method will be called at initialization stage,
+ *  so you have to use only predefined-stats
+ */
 void
 Pipeline::regStats()
 {
     Ticked::regStats();
 
-    /* Register custom statistics for Minor CPU pipeline */
+    /*
+     *  Rule for stat naming
+     *
+     *   1) Stat's name consists of one or more tokens,
+     *      which is seperated by '.' (dot)
+     *       (ex) Hello.Jongho.Kim
+     *
+     *   2) Empty token is not allowed
+     *       (ex) Hello.Jongho.
+     *
+     *   3) Each character in token can be
+     *      alphabet, number, or '_' (underscore)
+     *
+     *   4) First characters of each token can't be number
+     */
+
+    /*
+     * Register custom statistics for Minor CPU pipeline.
+     */
     snapshot_count.name("num_snapshot")
                     .desc("JONGHO: Number of snapshots")
                     ;
+
+    eToF1_bubble_ticks.name("Pipereg.Execute2Cache.bubble_ticks")
+                        .desc("JONGHO: [E->$] How long is it bubble?")
+                        ;
+
+    eToF1_bubble_ticks_percentage.name("Pipereg.Execute2Cache.bubble_ticks_percentage")
+                                .desc("JONGHO: [E->$] BB\% among total time")
+                                ;
+    eToF1_bubble_ticks_percentage = 100 * eToF1_bubble_ticks / simTicks;
+
+    f2ToF1_bubble_ticks.name("Pipereg.Fetch2Cache.bubble_ticks")
+                        .desc("JONGHO: [F->$] How long is it bubble?")
+                        ;
+
+    f2ToF1_bubble_ticks_percentage.name("Pipereg.Fetch2Cache.bubble_ticks_percentage")
+                                .desc("JONGHO: [F->$] BB\% among total time")
+                                ;
+    f2ToF1_bubble_ticks_percentage = 100 * f2ToF1_bubble_ticks / simTicks;
 }
 
 void
@@ -316,7 +356,7 @@ Pipeline::evaluate()
          11111111112222222222333333333344444444445555555555666666666677777777778
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
      data        _BB_                          _BB_      data
-     <--- f2ToF1 <-----+                       <--- eToF1 <-----+
+     <--- f2ToF1 <-----+                       <--- eToF1 <----+
                        |                                       |
 (F1) ---> f1ToF2 ---> (F2) ---> f2ToD ---> (D) ---> dToE ---> (E)
      _BB_        _BB_      data       data     data      data
@@ -457,7 +497,13 @@ Pipeline::evaluate()
     }
 
     // JONGHO
+    if(eToF1_output.isBubble() || (!eToF1_output.isBranch()))
+        eToF1_bubble_ticks += (curTick() - last_snapshot_time);
+    if(f2ToF1_output.isBubble() || (!f2ToF1_output.isBranch()))
+        f2ToF1_bubble_ticks += (curTick() - last_snapshot_time);
+
     ++snapshot_count;
+    last_snapshot_time = curTick();
 }
 
 MinorCPU::MinorCPUPort &

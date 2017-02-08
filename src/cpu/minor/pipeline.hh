@@ -71,12 +71,21 @@ namespace Minor
 class Pipeline : public Ticked
 {
   // JONGHO
+  protected:
+    unsigned long last_snapshot_time = 0;
+
   public:
     /* Override method regStats() of class Ticked */
     void regStats() override;
 
     /* Statistics */
     Stats::Scalar snapshot_count;
+
+    /* Note that there is case that non-bubble is not vulnerable */
+    Stats::Scalar eToF1_bubble_ticks;
+    Stats::Formula eToF1_bubble_ticks_percentage;
+    Stats::Scalar f2ToF1_bubble_ticks;
+    Stats::Formula f2ToF1_bubble_ticks_percentage;
 
   protected:
     MinorCPU &cpu;
