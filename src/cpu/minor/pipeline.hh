@@ -82,6 +82,12 @@ class Pipeline : public Ticked
     Stats::Scalar snapshot_count;
 
     /* Note that there is case that non-bubble is not vulnerable */
+    Stats::Scalar f1ToF2_bubble_ticks;
+    Stats::Formula f1ToF2_bubble_ticks_percentage;
+    Stats::Scalar f2ToD_bubble_ticks;
+    Stats::Formula f2ToD_bubble_ticks_percentage;
+    Stats::Scalar dToE_bubble_ticks;
+    Stats::Formula dToE_bubble_ticks_percentage;
     Stats::Scalar eToF1_bubble_ticks;
     Stats::Formula eToF1_bubble_ticks_percentage;
     Stats::Scalar f2ToF1_bubble_ticks;

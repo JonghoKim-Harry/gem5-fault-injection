@@ -172,19 +172,46 @@ Pipeline::regStats()
                     .desc("JONGHO: Number of snapshots")
                     ;
 
+    /* [$->F] */
+    f1ToF2_bubble_ticks.name("Pipereg.Cache2Fetch.bubble_ticks")
+                        .desc("JONGHO: [$->F] How long is it bubble?")
+                        ;
+    f1ToF2_bubble_ticks_percentage.name("Pipereg.Cache2Fetch.bubble_ticks_percentage")
+                                .desc("JONGHO: [$->F] BB\% among total time")
+                                ;
+    f1ToF2_bubble_ticks_percentage = 100 * f1ToF2_bubble_ticks / simTicks;
+
+    /* [F->D] */
+    f2ToD_bubble_ticks.name("Pipereg.Fetch2Decode.bubble_ticks")
+                        .desc("JONGHO: [F->D] How long is it bubble?")
+                        ;
+    f2ToD_bubble_ticks_percentage.name("Pipereg.Fetch2Decode.bubble_ticks_percentage")
+                                .desc("JONGHO: [F->D] BB\% among total time")
+                                ;
+    f2ToD_bubble_ticks_percentage = 100 * f2ToD_bubble_ticks / simTicks;
+
+    /* [D->E] */
+    dToE_bubble_ticks.name("Pipereg.Decode2Execute.bubble_ticks")
+                        .desc("JONGHO: [D->E] How long is it bubble?")
+                        ;
+    dToE_bubble_ticks_percentage.name("Pipereg.Decode2Execute.bubble_ticks_percentage")
+                                .desc("JONGHO: [D->E] BB\% among total time")
+                                ;
+    dToE_bubble_ticks_percentage = 100 * dToE_bubble_ticks / simTicks;
+
+    /* [E->$] */
     eToF1_bubble_ticks.name("Pipereg.Execute2Cache.bubble_ticks")
                         .desc("JONGHO: [E->$] How long is it bubble?")
                         ;
-
     eToF1_bubble_ticks_percentage.name("Pipereg.Execute2Cache.bubble_ticks_percentage")
                                 .desc("JONGHO: [E->$] BB\% among total time")
                                 ;
     eToF1_bubble_ticks_percentage = 100 * eToF1_bubble_ticks / simTicks;
 
+    /* [F->$] */
     f2ToF1_bubble_ticks.name("Pipereg.Fetch2Cache.bubble_ticks")
                         .desc("JONGHO: [F->$] How long is it bubble?")
                         ;
-
     f2ToF1_bubble_ticks_percentage.name("Pipereg.Fetch2Cache.bubble_ticks_percentage")
                                 .desc("JONGHO: [F->$] BB\% among total time")
                                 ;
@@ -497,6 +524,12 @@ Pipeline::evaluate()
     }
 
     // JONGHO
+    if(f1ToF2_output.isBubble())
+        f1ToF2_bubble_ticks += (curTick() - last_snapshot_time);
+    if(f2ToD_output.isBubble())
+        f2ToD_bubble_ticks += (curTick() - last_snapshot_time);
+    if(dToE_output.isBubble())
+        dToE_bubble_ticks += (curTick() - last_snapshot_time);
     if(eToF1_output.isBubble() || (!eToF1_output.isBranch()))
         eToF1_bubble_ticks += (curTick() - last_snapshot_time);
     if(f2ToF1_output.isBubble() || (!f2ToF1_output.isBranch()))
