@@ -6,7 +6,7 @@ import subprocess
 from collections import namedtuple
 
 #  Absolute Path to *THIS* Script
-WHERE_AM_I = os.path.dirname(os.path.realpath(__file__))
+WHERE_AM_I = os.path.dirname(os.path.realpath(__file__)) + '/'
 
 GOLDEN_RUNTIME = {
     'hello':            25129000,               # on HP-Z640
@@ -64,12 +64,12 @@ class ExpManager:
     }
 
     # Summary of single fault-injection experiment result
-    SINGLE_FI_RESULT = namedtuple('SingleFIResult', 'failure failure_reason')
+    SINGLE_FI_RESULT = namedtuple('SingleFIResult', 'failure failure_reason runtime_percent')
 
     @staticmethod
     def run_golden(bench_name, flag):
         # Directory name
-        outdir = bench_name + '/golden'
+        outdir = bench_name + '/golden/'
 
         # File names
         stdout_file = 'simout_golden'
@@ -126,7 +126,7 @@ class ExpManager:
         comp_info = '_'.join([inj_comp1, inj_comp2])
 
         # Directory name
-        outdir = bench_name + '/' + comp_info
+        outdir = bench_name + '/' + comp_info + '/'
 
         # File names
         stdout_file = 'simout_' + str(idx)
@@ -172,6 +172,7 @@ class ExpManager:
         gem5script_injectComp = '--injectComp=' + inj_comp2
         gem5script_runtime_limit = ' '.join(['-m', str(runtime_limit)])
 
+
         # Combine gem5 sciprt options into one string
         gem5script_option = ' '.join([gem5script_env, gem5script_bench_binary, gem5script_bench_option, gem5script_output, gem5script_injectTime, gem5script_injectLoc, gem5script_injectArch, gem5script_injectComp, gem5script_runtime_limit])
 
@@ -182,40 +183,49 @@ class ExpManager:
         subprocess.call(gem5_command, shell=True)
 
         # Summarize experiment info, then remove result file to save storage
-        this_failure = False
+        this_failure = 'NF'
         this_failure_reason = ''
+        this_runtime_percent = str(0)
 
         ## (1) Check if it is 'System Halt'
-        if not os.path.isfile(stats_file):
-            this_failure = True
+        ##     Note that every time stats file will be made,
+        ##     although its contents can be empty
+        stats_file_location = os.path.abspath(WHERE_AM_I + outdir + stats_file)
+        if (not os.path.isfile(stats_file_location)) or os.path.getsize(stats_file_location) == 0:
+            this_failure = 'F'
             this_failure_reason = 'SYSHALT'
+            this_runtime_percent = 'failure'
         else:
             ## (2) Check if it is 'Timing Failure'
             runtime = 0
-            with open(stats_file, 'r') as stats_file_stream:
+            with open(stats_file_location, 'r') as stats_file_stream:
                 for line in stats_file_stream:
                     if "sim_ticks" in line:
                         runtime = int(re.findall('\d+', line)[0])
+                        # Fault injection runtime compared to golden runtime (%)
+                        this_runtime_percent = str(round(100 * float(runtime) / float(GOLDEN_RUNTIME[bench_name]), 2)) + '%'
                         break
 
             ### It is 'Timing Failure' if its runtime is over the limit
-            if runtime > int(runtime_limit):
-                this_failure = True
+            if runtime >= int(runtime_limit):
+                this_failure = 'F'
                 this_failure_reason = 'TIME-FAILURE'
+                this_runtime_percent = '>200%'
 
             ## (3) Check if it is 'SDC' (Silent Data Corruption)
-            if (this_failure == False) and os.path.isfile(output_file):
-                golden_output_file = os.path.abspath(WHERE_AM_I + '/golden' + '/golden_output_' + bench_name)
-                if subprocess.call(' '.join(['diff', '-s', output_file, golden_output_file, '>/dev/null', '| echo $?']), shell=True) != '0':
-                    this_failure = True
+            output_file_location = os.path.abspath(WHERE_AM_I + outdir + output_file)
+            if (this_failure == False) and os.path.isfile(output_file_location):
+                golden_output_file_location = os.path.abspath(WHERE_AM_I + '/golden' + '/golden_output_' + bench_name)
+                ### Compare benchmark output file with golden output file
+                if subprocess.call(' '.join(['diff', '-s', output_file_location, golden_output_file_location, '>/dev/null', '| echo $?']), shell=True) != '0':
+                    this_failure = 'F'
                     this_failure_reason = 'SDC'
-
-        # Remove result file
-        if remove_result_file and os.path.isfile(output_file):
-            subprocess.call('rm ' + output_file, shell=True)
+                ### Remove benchmark file
+                if remove_result_file:
+                    subprocess.call('rm ' + output_file_location, shell=True)
 
         # Return a named tuple, which summarizes a single experiment result
-        return ExpManager.SINGLE_FI_RESULT(failure=this_failure, failure_reason=this_failure_reason)
+        return ExpManager.SINGLE_FI_RESULT(failure=this_failure, failure_reason=this_failure_reason, runtime_percent=this_runtime_percent)
 
     @staticmethod
     def inject_random(inj_comp1, inj_comp2, start_idx=1, end_idx=1000, bench_name='stringsearch', flag=['FI']):
@@ -238,47 +248,10 @@ class ExpManager:
             rand_bit = str(random.randrange(0, ExpManager.BIT_LENGTH[inj_comp2]))
 
             #  Do single experiment
-            ExpManager.inject_single(rand_time, rand_bit, inj_comp1, inj_comp2, idx, bench_name, flag)
+            single_exp_result = ExpManager.inject_single(rand_time, rand_bit, inj_comp1, inj_comp2, idx, bench_name, flag)
             
             # <index> <inj time> <inj loc>
             para1 = '\t'.join([str(idx), rand_time, rand_bit])
-
-            """
-
-            ##
-            #  Read stat file. If "sim_tick" stat not exists,
-            #  we consider it as "failure"
-            #  We edit runtime column of digest file, whose values will be:
-            #     [ n% / Timing Failure / Sys-halt ]
-            failure = True
-            outdir = bench_name + '/' + comp_info
-            runtime_100 = 'failure'
-            with open(outdir + '/' + 'stats_' + str(idx) + '.txt', 'r') as stat_read:
-                for line in stat_read:
-                    pattern = re.compile(r'\s+')
-                    line2 = re.sub(pattern, '', line)
-                    if "sim_ticks" in line2:
-                        failure = False
-                        sim_ticks = int(re.findall('\d+', line2)[0])
-                        runtime_100 = str((float(sim_ticks)/runtime) * 100)
-                
-                ##
-                #  Read result file. If the result is different from golden output,
-                #  we define it as SDC (Silent Data Corruption), which is failure
-                #
-                result = outdir + '/' + 'result_' + str(idx)
-                if os.path.isfile(result):
-                    golden = os.path.abspath(WHERE_AM_I + '/golden' + '/golden_output_' + bench_name)
-                    if subprocess.call(' '.join(['diff', '-s', result, golden, '>/dev/null', '| echo $?']), shell=True) == '0':
-                        failure = False
-
-            if failure:
-                # Log failure as "F"
-                isFailure = 'F'
-            else:
-                # Log non-failure as "NF"
-                isFailure = 'NF'
-            """
 
             ##
             #  Read debug file
@@ -309,8 +282,8 @@ class ExpManager:
                         change_by_flip = ' '.join(':'.join(line.split(':')[3:]).split()).strip()
                         
             # <F/NF> <stage> <inst> <target> <runtime> <bench name>
-            para2 = ''
-            #para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, change_by_flip, mnemonic, inject_at])
+            #para2 = ''
+            para2 = '\t'.join([single_exp_result.failure, inj_comp2, '', single_exp_result.runtime_percent, bench_name, change_by_flip, mnemonic, inject_at, single_exp_result.failure_reason])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]).strip() + '\n')
