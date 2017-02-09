@@ -382,7 +382,7 @@ MinorCPU::injectFaultRegFunc()
             traceReg = true;
         }
         else {
-            checkReg=true;
+            checkReg = true;
             traceReg = true;
         }
 
@@ -390,8 +390,7 @@ MinorCPU::injectFaultRegFunc()
         {
             injectFaultReg = 0;
             //add register information to faultyRegs
-            faultyRegs[injectLoc/32]=originalRegData;
-
+            RCDBP[injectLoc/32] = originalRegData;
         }
         else {
             if(injectLoc >= threads[0]->totalNumPhysRegs()*32)
@@ -405,6 +404,16 @@ MinorCPU::injectFaultRegFunc()
 void
 MinorCPU::exitCallback()
 {
+    std::map<int, uint64_t>::iterator itMap;
+    
     if(traceReg && injectReg)
         DPRINTF(FI, "Corrupted reg %d is unused\n", injectLoc/32);
+
+    for(itMap = RCDBP.begin(); itMap != RCDBP.end(); itMap++) {
+        DPRINTF(FI, "Reg %d is faulty\n", itMap->first);
+    }
+    
+    for(itMap = RCDAP.begin(); itMap != RCDAP.end(); itMap++) {
+        DPRINTF(FI, "Reg %d is faulty\n", itMap->first);
+    }
 }

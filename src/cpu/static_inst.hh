@@ -201,6 +201,10 @@ class StaticInst : public RefCounted, public StaticInstFlags
     /// Return logical index (architectural reg num) of i'th source reg.
     /// Only the entries from 0 through numSrcRegs()-1 are valid.
     RegIndex srcRegIdx(int i)  const { return _srcRegIdx[i]; }
+	
+	//YOHAN
+	uint64_t origDestReg[MaxInstDestRegs];
+	uint64_t corruptedSrcReg[MaxInstSrcRegs];
 
     /// Pointer to a statically allocated "null" instruction object.
     /// Used to give eaCompInst() and memAccInst() something to return

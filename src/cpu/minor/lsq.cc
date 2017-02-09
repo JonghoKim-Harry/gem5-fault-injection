@@ -1511,7 +1511,19 @@ LSQ::pushRequest(MinorDynInstPtr inst, bool isLoad, uint8_t *data,
 
     if (inst->traceData)
         inst->traceData->setMem(addr, size, flags);
-
+    
+    //YOHAN: Store memory address
+    if(cpu.traceMask) {
+        inst->memAddr = addr;
+        if(!isLoad) {
+            uint64_t temp = 0;
+            for(int i=0; i<size; i++) {
+                temp += request_data[i] * pow(256, i);
+            }
+            inst->memData = temp;
+        }
+    }
+    
     int cid = cpu.threads[inst->id.threadId]->getTC()->contextId();
     request->request.setContext(cid);
     request->request.setVirt(0 /* asid */,
@@ -1678,32 +1690,33 @@ LSQ::injectFaultLSQFunc()
 
             LSQRequest* target=NULL;
 
-                        int injectFaultLSQQueue;
+            int injectFaultLSQQueue;
             unsigned int index=cpu.injectLoc/cpu.LSQEntrySize;
-                        if (index<requests.totalSpace())
-                        {
-                                injectFaultLSQQueue=1;
-                        }
-                        else if (index<(requests.totalSpace()
-                                       +transfers.totalSpace()))
-                        {
-                                injectFaultLSQQueue=2;
-                                index-=(requests.totalSpace());
-                        }
-                        else if (index<(requests.totalSpace()
-                                       +transfers.totalSpace()
-                                       +storeBuffer.numSlots))
-                        {
-                                injectFaultLSQQueue=3;
-                                index-=(requests.totalSpace()
-                                       +transfers.totalSpace());
-                        }
-                        else
-                        {
-                                DPRINTF(FI, "LSQ FI : unvalid location\n");
-                                cpu.injectFaultLSQ=0;
-                                return;
-                        }
+            
+            if (index<requests.totalSpace())
+            {
+                    injectFaultLSQQueue=1;
+            }
+            else if (index<(requests.totalSpace()
+                           +transfers.totalSpace()))
+            {
+                    injectFaultLSQQueue=2;
+                    index-=(requests.totalSpace());
+            }
+            else if (index<(requests.totalSpace()
+                           +transfers.totalSpace()
+                           +storeBuffer.numSlots))
+            {
+                    injectFaultLSQQueue=3;
+                    index-=(requests.totalSpace()
+                           +transfers.totalSpace());
+            }
+            else
+            {
+                    DPRINTF(FI, "LSQ FI : unvalid location\n");
+                    cpu.injectFaultLSQ=0;
+                    return;
+            }
 
             //0,1=data, 2=paddr, 3=not implemented
             unsigned int targetElement = ((cpu.injectLoc%cpu.LSQEntrySize)/32);

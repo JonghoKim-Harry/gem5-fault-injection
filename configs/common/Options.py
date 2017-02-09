@@ -164,7 +164,14 @@ def addCommonOptions(parser):
     # JONGHO
     parser.add_option('--injectComp', type='string', default='NO_INJECTION',
                       help='The component you want to inject fault into')
-    # HwiSoo
+    # YOHAN
+    parser.add_option('--traceMask', type='choice', default='NO',
+                      choices = ["YES", "NO"],
+                      help='Trace masking effects? - Deafault: No trace')
+    parser.add_option("--correctStore", action="store_true", default=False,
+                      help="Correct store instructions")
+    parser.add_option("--correctLoad", action="store_true", default=False,
+                      help="Correct load instructions")
 
     # dist-gem5 options
     parser.add_option("--dist", action="store_true",

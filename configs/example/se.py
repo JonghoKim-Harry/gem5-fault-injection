@@ -267,6 +267,12 @@ for i in xrange(np):
     if options.correctRf == "YES":
         system.cpu[i].correctRf = True
     system.cpu[i].correctTime = options.correctTime
+    if options.traceMask == "YES":
+        system.cpu[i].traceMask = True
+    if options.correctStore:
+        system.cpu[i].correctStore = True
+    if options.correctLoad:
+        system.cpu[i].correctLoad = True
 
             #hwisoo
     if options.injectArch == "LSQ":

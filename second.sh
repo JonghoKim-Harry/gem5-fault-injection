@@ -63,9 +63,9 @@ config_path=./configs/example/se.py		# Path to config file
 
 #$gemv_exec_path -d $2/$6 -re --stdout-file=simout_$5 --stderr-file=simerr_$5 --debug-file=FI_$5 --stats-file=stats_$5 --debug-flags=FI,Exec,Minor,IntRegs,SyscallAll $config_path --cpu-type=$cpu_type --caches -n $num_procs -c "$bench_home/$bench" -o "$options" --output=$2/$6/result_$5 --injectArch=$6 --injectTime=$3 --injectLoc=$4 -m $7
 
-$gemv_exec_path -d $2/$6 -re --stdout-file=simout_$5_$8 --stderr-file=simerr_$5_$8 --debug-file=FI_$5_$8 --stats-file=stats_$5_$8 --debug-flags=FI $config_path --cpu-type=$cpu_type --caches -n $num_procs -c "$bench_home/$bench" -o "$options" --output=$2/$6/result_$5_$8 --injectArch=$6 --injectTime=$3 --injectLoc=$4 -m $7 --correctRf=YES --correctTime=$9
+$gemv_exec_path -d $2/$6 -re --stdout-file=simout_$5_$8 --stderr-file=simerr_$5_$8 --debug-file=FI_$5_$8 --stats-file=stats_$5_$8 --debug-flags=FI $config_path --cpu-type=$cpu_type --caches -n $num_procs -c "$bench_home/$bench" -o "$options" --output=$2/$6/result_$5_$8 --injectArch=$6 --injectTime=$3 --injectLoc=$4 -m $7 --correctRf=YES --correctTime=$9 --traceMask=YES
 
-if cmp -s ./$2/$6/result_$5_$8 golden_output_$2
+if cmp -s ./$2/$6/result_$5_$8 golden/golden_output_$2
 then
 	if cmp -s ./$2/$6/stats_$5_$8 bin.txt
 	then

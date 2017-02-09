@@ -368,6 +368,17 @@ class Execute : public Named
     unsigned int injLoc;
     void registerInj(unsigned int time, unsigned int loc);
     bool injReady() const;
+    
+    //YOHAN
+    void preExecute(MinorDynInstPtr inst);
+    void validateExecute(MinorDynInstPtr inst);
+    void correctInst(MinorDynInstPtr inst);
+    uint64_t readIntReg(MinorDynInstPtr inst, int reg_idx);
+    void setIntReg(MinorDynInstPtr inst, int reg_idx, uint64_t reg_data);
+    bool isFlag(int reg_idx);
+    bool isCompare(MinorDynInstPtr inst);
+    void clearCD();
+    bool * update;
 };
 
 }

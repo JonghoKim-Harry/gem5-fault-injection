@@ -208,6 +208,11 @@ class BaseCPU(MemObject):
         "between CPU models)")
 
     tracer = Param.InstTracer(default_tracer, "Instruction tracer")
+    
+    #YOHAN
+    traceMask = Param.Bool(False, "Trace masking effect")
+    correctStore = Param.Bool(False, "Correct store instructions")
+    correctLoad = Param.Bool(False, "Correct load instructions")
 
     icache_port = MasterPort("Instruction Port")
     dcache_port = MasterPort("Data Port")

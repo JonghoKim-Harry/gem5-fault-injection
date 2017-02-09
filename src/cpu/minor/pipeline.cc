@@ -152,10 +152,11 @@ Pipeline::minorTrace() const
 void
 Pipeline::evaluate()
 {
+	//YOHAN: Inject fault into register file
     cpu.injectFaultRegFunc();
 
-        //HwiSoo
-        execute.getLSQ().injectFaultLSQFunc();
+    //HwiSoo
+    execute.getLSQ().injectFaultLSQFunc();
     execute.getLSQ().FIProfiling();
 
     //ybkim: Fault injection on FU

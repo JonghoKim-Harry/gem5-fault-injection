@@ -40,6 +40,7 @@
 #include "cpu/minor/decode.hh"
 #include "cpu/minor/pipeline.hh"
 #include "debug/Decode.hh"
+#include "debug/FI.hh" //YOHAN
 
 namespace Minor
 {
@@ -242,6 +243,12 @@ Decode::evaluate()
 #if TRACING_ON
                 dynInstAddTracing(output_inst, parent_static_inst, cpu);
 #endif
+
+                //YOHAN
+                if(cpu.injectReg && cpu.injectEarlySN == -1) {
+                    cpu.injectEarlySN = decode_info.execSeqNum;
+                    DPRINTF(FI, "cpu.injectEarlySN is %d\n", cpu.injectEarlySN);
+                }
 
                 /* Step to next sequence number */
                 decode_info.execSeqNum++;
