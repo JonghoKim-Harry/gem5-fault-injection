@@ -340,21 +340,21 @@ Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
         //YOHAN
         DPRINTF(Symptom, "%#x\t%s\tNotTaken\tTaken\tIncorrect\t%d\n", inst->pc.instAddr(), my_inst, inst->id.execSeqNum); //YOHAN
         
-		if(cpu.injectReadSN != -1 && !cpu.readSymptom) {
-			if(inst->id.execSeqNum >= cpu.injectReadSN)
-				DPRINTF(SymptomFI, "Read length: %d\n", inst->id.execSeqNum - cpu.injectReadSN); //YOHAN
-			else
-				DPRINTF(SymptomFI, "Read length: -1\n"); //YOHAN
-			cpu.readSymptom = true;
-		}
-		
-		if(cpu.injectEarlySN != -1 && !cpu.earlySymptom) {
-			if(inst->id.execSeqNum >= cpu.injectEarlySN)
-				DPRINTF(SymptomFI, "Early length: %d\n", inst->id.execSeqNum - cpu.injectEarlySN); //YOHAN
-			else
-				DPRINTF(SymptomFI, "Early length: -1\n"); //YOHAN
-			cpu.earlySymptom = true;
-		}
+        if(cpu.injectReadSN != -1 && !cpu.readSymptom) {
+            if(inst->id.execSeqNum >= cpu.injectReadSN)
+                DPRINTF(SymptomFI, "Read length: %d\n", inst->id.execSeqNum - cpu.injectReadSN); //YOHAN
+            else
+                DPRINTF(SymptomFI, "Read length: -1\n"); //YOHAN
+            cpu.readSymptom = true;
+        }
+        
+        if(cpu.injectEarlySN != -1 && !cpu.earlySymptom) {
+            if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                DPRINTF(SymptomFI, "Early length: %d\n", inst->id.execSeqNum - cpu.injectEarlySN); //YOHAN
+            else
+                DPRINTF(SymptomFI, "Early length: -1\n"); //YOHAN
+            cpu.earlySymptom = true;
+        }
 
         reason = BranchData::UnpredictedBranch;
     } else {
@@ -976,6 +976,10 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
     
     //YOHAN
     inst->needReExecute = false;
+    if(cpu.injectReg && cpu.injectEarlySN == -1) {
+        cpu.injectEarlySN = inst->id.execSeqNum;
+        DPRINTF(FI, "cpu.injectEarlySN is %d\n", cpu.injectEarlySN);
+    }
 
     /* Is the thread for this instruction suspended?  In that case, just
      *  stall as long as there are no pending interrupts */
@@ -1539,7 +1543,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     inst->traceData->setWhen(curTick());
                 inst->traceData->dump();
             }
-			
+            
             // JONGHO
             InstInfo::print_instinfo(inst);
             
