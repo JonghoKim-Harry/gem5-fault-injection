@@ -3,6 +3,7 @@ import random
 import re
 import argparse
 import subprocess
+from collections import namedtuple
 
 #  Absolute Path to *THIS* Script
 WHERE_AM_I = os.path.dirname(os.path.realpath(__file__))
@@ -53,8 +54,7 @@ class ExpManager:
     GEM5_BINARY = os.path.abspath(WHERE_AM_I + '/build/ARM/gem5.opt')
     GEM5_SCRIPT = os.path.abspath(WHERE_AM_I + '/configs/example/se.py')
 
-    ##
-    #  gem5 MinorCPU bits
+    # gem5 MinorCPU bits
     BIT_LENGTH = {
         'f1ToF2': 512,       # 64 Byte = 512 bit
         'f2ToD': 64,
@@ -63,82 +63,159 @@ class ExpManager:
         'f2ToF1': 32
     }
 
+    # Summary of single fault-injection experiment result
+    SINGLE_FI_RESULT = namedtuple('SingleFIResult', 'failure failure_reason')
+
     @staticmethod
     def run_golden(bench_name, flag):
-        #  gem5 option
-        redirection = '-re'
-        outdir = '--outdir=' + bench_name + '/golden'
-        stdout_file = '--stdout-file=simout_golden.txt'
-        stderr_file = '--stderr-file=simerr_golden.txt'
-        stats_file = '--stats-file=stats_golden.txt'
-        debug_file = '--debug-file=debug_golden.txt'
-        debug_flags = ''
+        # Directory name
+        outdir = bench_name + '/golden'
+
+        # File names
+        stdout_file = 'simout_golden'
+        stderr_file = 'simerr_golden'
+        stats_file = 'stats_golden.txt'
+        output_file = 'result_golden'
+        debug_file = 'debug_golden.txt'
+
+        # gem5 options
+        gem5_redirection = '-re'
+        gem5_outdir = '--outdir=' + outdir
+        gem5_stdout_file = '--stdout-file=' + stdout_file
+        gem5_stderr_file = '--stderr-file=' + stderr_file
+        gem5_stats_file = '--stats-file=' + stats_file
+        gem5_debug_file = '--debug-file=debug_golden.txt'
+
+        # Process given debug flags
+        gem5_debug_flags = ''
         if flag and len(flag) > 0:
-            all_flag = ','.join(flag)
-            debug_flags = '--debug-flags=' + all_flag
-        gem5_option = ' '.join([redirection, outdir, stdout_file, stderr_file, stats_file, debug_file, debug_flags])
+            gem5_debug_flags = '--debug-flags=' + ','.join(flag)
 
-        #  gem5 script option
-        env = '--cpu-type=MinorCPU --caches -n 1'
-        bench_binary = '-c ' + BENCH_BINARY[bench_name]
-        bench_option = BENCH_OPTION[bench_name]
-        if bench_option:
-            bench_option = '-o ' + '\"' + str(bench_option) + '\"'
-            bench_option = bench_option.replace('$BENCH_NAME', bench_name)
-            bench_option = bench_option.replace('$IDX', 'golden')
-            bench_option = bench_option.replace('$COMP_INFO', 'golden')
+        # Combine gem5 options into one string
+        gem5_option = ' '.join([gem5_redirection, gem5_outdir, gem5_stdout_file, gem5_stderr_file, gem5_stats_file, gem5_debug_file, gem5_debug_flags])
 
-        output = '--output=' + bench_name + '/golden/result_golden'
-        gem5_script_option = ' '.join([env, bench_binary, bench_option, output])
+        # gem5 script options
+        gem5script_env = '--cpu-type=MinorCPU --caches -n 1'
+        gem5script_bench_binary = '-c ' + BENCH_BINARY[bench_name]
+        gem5script_bench_option = BENCH_OPTION[bench_name]
+        if gem5script_bench_option:
+            gem5script_bench_option = '-o ' + '\"' + str(bench_option) + '\"'
+            gem5script_bench_option = gem5script_bench_option.replace('$BENCH_NAME', bench_name)
+            gem5script_bench_option = gem5script_bench_option.replace('$IDX', 'golden')
+            gem5script_bench_option = gem5script_bench_option.replace('$COMP_INFO', 'golden')
 
-        #  gem5 command
-        gem5_command = ' '.join([ExpManager.GEM5_BINARY, gem5_option, ExpManager.GEM5_SCRIPT, gem5_script_option])
+        # Output file option needs directory name in which it is located
+        gem5script_output = '--output=' + outdir + output_file
+
+        # Combile gem5 script options into one string
+        gem5script_option = ' '.join([gem5script_env, gem5script_bench_binary, gem5script_bench_option, gem5script_output])
+
+        # Generate whole gem5 command
+        gem5_command = ' '.join([ExpManager.GEM5_BINARY, gem5_option, ExpManager.GEM5_SCRIPT, gem5script_option])
+
+        # Run simulation
         subprocess.call(gem5_command, shell=True)
 
     @staticmethod
-    def inject_single(inj_time, inj_bit, inj_comp1, inj_comp2, idx=0, bench_name='stringsearch', flag=['FI']):
+    def inject_single(inj_time, inj_bit, inj_comp1, inj_comp2, idx=0, bench_name='stringsearch', flag=['FI'], remove_result_file=True):
         ##
-        #  One fault injected per each experiment
+        #  Assume only one fault is injected in each experiment
         #
         
         # Component Info
         comp_info = '_'.join([inj_comp1, inj_comp2])
 
-        #  gem5 option
-        redirection = '-re'
-        outdir = '--outdir=' + bench_name + '/' + comp_info
-        stdout_file = '--stdout-file=' + 'simout_' + str(idx) + '.txt'
-        stderr_file = '--stderr-file=' + 'simerr_' + str(idx) + '.txt'
-        stats_file = '--stats-file=' + 'stats_' + str(idx) + '.txt'
-        debug_file = '--debug-file=' + 'debug_' + str(idx) + '.txt'
-        if flag:
-            debug_flags = '--debug-flags=' + ','.join(flag)
-        else:
-            debug_flags = ''
-        gem5_option = ' '.join([redirection, outdir, stdout_file, stderr_file, stats_file, debug_file, debug_flags])
+        # Directory name
+        outdir = bench_name + '/' + comp_info
 
-        #  gem5 script option
-        env = '--cpu-type=MinorCPU --caches -n 1'
-        bench_binary = '-c ' + BENCH_BINARY[bench_name]
-        bench_option = BENCH_OPTION[bench_name]
-        if bench_option:
-            bench_option = '-o ' + '\"' + str(bench_option) + '\"'
-            bench_option = bench_option.replace('$BENCH_NAME', bench_name)
-            bench_option = bench_option.replace('$IDX', str(idx).zfill(6))
-            bench_option = bench_option.replace('$COMP_INFO', comp_info)
+        # File names
+        stdout_file = 'simout_' + str(idx)
+        stderr_file = 'simerr_' + str(idx)
+        stats_file = 'stats_' + str(idx) + '.txt'
+        output_file = 'result_' + str(idx).zfill(6)
+        debug_file = 'debug_' + str(idx) + '.txt'
 
-        output = '--output=' + '/'.join([bench_name, comp_info, 'result_' + str(idx).zfill(6)])
-        injectTime = '--injectTime=' + str(inj_time)
-        injectLoc = '--injectLoc=' + str(inj_bit)
-        injectArch = '--injectArch=' + inj_comp1
-        injectComp = '--injectComp=' + inj_comp2
-        runtime_limit = ' '.join(['-m', str(2 * GOLDEN_RUNTIME[bench_name])])
-        inj_info = ' '.join([injectTime, injectLoc, injectArch, injectComp, runtime_limit])
-        gem5_script_option = ' '.join([env, bench_binary, bench_option, output, inj_info])
+        # gem5 options
+        gem5_redirection = '-re'
+        gem5_outdir = '--outdir=' + outdir
+        gem5_stdout_file = '--stdout-file=' + stdout_file
+        gem5_stderr_file = '--stderr-file=' + stderr_file
+        gem5_stats_file = '--stats-file=' + stats_file
+        gem5_debug_file = '--debug-file=' + debug_file
 
-        #  gem5 command
-        gem5_command = ' '.join([ExpManager.GEM5_BINARY, gem5_option, ExpManager.GEM5_SCRIPT, gem5_script_option])
+        # Process given debug flags
+        gem5_debug_flags = ''
+        if flag and len(flag) > 0:
+            gem5_debug_flags = '--debug-flags=' + ','.join(flag)
+
+        # Combine gem5 options into one string
+        gem5_option = ' '.join([gem5_redirection, gem5_outdir, gem5_stdout_file, gem5_stderr_file, gem5_stats_file, gem5_debug_file, gem5_debug_flags])
+
+        # gem5 script options
+        gem5script_env = '--cpu-type=MinorCPU --caches -n 1'
+        gem5script_bench_binary = '-c ' + BENCH_BINARY[bench_name]
+        gem5script_bench_option = BENCH_OPTION[bench_name]
+        if gem5script_bench_option:
+            gem5script_bench_option = '-o ' + '\"' + str(gem5script_bench_option) + '\"'
+            gem5script_bench_option = gem5script_bench_option.replace('$BENCH_NAME', bench_name)
+            gem5script_bench_option = gem5script_bench_option.replace('$IDX', str(idx).zfill(6))
+            gem5script_bench_option = bench_option.replace('$COMP_INFO', comp_info)
+
+        # Output file option needs directory name in which it is located
+        gem5script_output = '--output=' + outdir + output_file
+
+        # Fault injection info
+        runtime_limit = 2 * int(GOLDEN_RUNTIME[bench_name])
+        gem5script_injectTime = '--injectTime=' + str(inj_time)
+        gem5script_injectLoc = '--injectLoc=' + str(inj_bit)
+        gem5script_injectArch = '--injectArch=' + inj_comp1
+        gem5script_injectComp = '--injectComp=' + inj_comp2
+        gem5script_runtime_limit = ' '.join(['-m', str(runtime_limit)])
+
+        # Combine gem5 sciprt options into one string
+        gem5script_option = ' '.join([gem5script_env, gem5script_bench_binary, gem5script_bench_option, gem5script_output, gem5script_injectTime, gem5script_injectLoc, gem5script_injectArch, gem5script_injectComp, gem5script_runtime_limit])
+
+        # Generate whole gem5 command
+        gem5_command = ' '.join([ExpManager.GEM5_BINARY, gem5_option, ExpManager.GEM5_SCRIPT, gem5script_option])
+
+        # Run simulation
         subprocess.call(gem5_command, shell=True)
+
+        # Summarize experiment info, then remove result file to save storage
+        this_failure = False
+        this_failure_reason = ''
+
+        ## (1) Check if it is 'System Halt'
+        if not os.path.isfile(stats_file):
+            this_failure = True
+            this_failure_reason = 'SYSHALT'
+        else:
+            ## (2) Check if it is 'Timing Failure'
+            runtime = 0
+            with open(stats_file, 'r') as stats_file_stream:
+                for line in stats_file_stream:
+                    if "sim_ticks" in line:
+                        runtime = int(re.findall('\d+', line)[0])
+                        break
+
+            ### It is 'Timing Failure' if its runtime is over the limit
+            if runtime > int(runtime_limit):
+                this_failure = True
+                this_failure_reason = 'TIME-FAILURE'
+
+            ## (3) Check if it is 'SDC' (Silent Data Corruption)
+            if (this_failure == False) and os.path.isfile(output_file):
+                golden_output_file = os.path.abspath(WHERE_AM_I + '/golden' + '/golden_output_' + bench_name)
+                if subprocess.call(' '.join(['diff', '-s', output_file, golden_output_file, '>/dev/null', '| echo $?']), shell=True) != '0':
+                    this_failure = True
+                    this_failure_reason = 'SDC'
+
+        # Remove result file
+        if remove_result_file and os.path.isfile(output_file):
+            subprocess.call('rm ' + output_file, shell=True)
+
+        # Return a named tuple, which summarizes a single experiment result
+        return ExpManager.SINGLE_FI_RESULT(failure=this_failure, failure_reason=this_failure_reason)
 
     @staticmethod
     def inject_random(inj_comp1, inj_comp2, start_idx=1, end_idx=1000, bench_name='stringsearch', flag=['FI']):
@@ -165,6 +242,8 @@ class ExpManager:
             
             # <index> <inj time> <inj loc>
             para1 = '\t'.join([str(idx), rand_time, rand_bit])
+
+            """
 
             ##
             #  Read stat file. If "sim_tick" stat not exists,
@@ -199,6 +278,7 @@ class ExpManager:
             else:
                 # Log non-failure as "NF"
                 isFailure = 'NF'
+            """
 
             ##
             #  Read debug file
@@ -209,6 +289,7 @@ class ExpManager:
             inject_at = ''
             inst = ''
             bubble = ''
+            outdir = bench_name + '/' + comp_info
             with open(outdir + '/' + 'debug_' + str(idx) + '.txt', 'r') as debug_read:
                 for line in debug_read:
                     if '* inst:' in line:
@@ -228,7 +309,8 @@ class ExpManager:
                         change_by_flip = ' '.join(':'.join(line.split(':')[3:]).split()).strip()
                         
             # <F/NF> <stage> <inst> <target> <runtime> <bench name>
-            para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, change_by_flip, mnemonic, inject_at])
+            para2 = ''
+            #para2 = '\t'.join([isFailure, inj_comp2, '', runtime_100, bench_name, change_by_flip, mnemonic, inject_at])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]).strip() + '\n')
