@@ -159,7 +159,7 @@ class ExpManager:
             gem5script_bench_option = '-o ' + '\"' + str(gem5script_bench_option) + '\"'
             gem5script_bench_option = gem5script_bench_option.replace('$BENCH_NAME', bench_name)
             gem5script_bench_option = gem5script_bench_option.replace('$IDX', str(idx).zfill(6))
-            gem5script_bench_option = bench_option.replace('$COMP_INFO', comp_info)
+            gem5script_bench_option = gem5script_bench_option.replace('$COMP_INFO', comp_info)
 
         # Output file option needs directory name in which it is located
         gem5script_output = '--output=' + outdir + output_file
