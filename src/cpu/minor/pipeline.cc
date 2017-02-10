@@ -140,9 +140,42 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
 }
 
 // JONGHO
-/* To draw ascii-arted picture of pipeline status */
+/* Draw pipeline datapath */
 void
-Pipeline::drawStateWithAsciiArt(std::ostream& os) const
+Pipeline::drawDatapath(std::ostream& os)
+{
+/*
+         11111111112222222222333333333344444444445555555555666666666677777777778
+12345678901234567890123456789012345678901234567890123456789012345678901234567890
+    <--- [F->$] <-----+                       <--- [E->$] <-----+
+                      |                                         |
+($) ---> [$->F] ---> (F) ---> [F->D] ---> (D) ---> [D->E] ---> (E)
+*/
+ 
+    /* 1st Line: Pipeline registers in which address is stored */
+    os.width(4);
+    os  << " ";
+    os  << "<--- [F->$] <-----+";
+    os.width(23);
+    os  << " ";
+    os  << "<--- [E->$] <-----+" << std::endl;
+
+    /* 2nd Line */
+    os.width(22);
+    os  << " ";
+    os  << "|";
+    os.width(41);
+    os  << " ";
+    os  << "|" << std::endl;
+
+    /* 3rd Line: Pipeline registers in which line/instruction/uop is stored */
+    os  << "($) ---> [$->F] ---> (F) ---> [F->D] ---> (D) ---> [D->E] ---> (E)" << std::endl;
+}
+
+// JONGHO
+/* Draw ascii-arted picture of pipeline status */
+void
+Pipeline::drawDataflow(std::ostream& os, DataFlow flow) const
 {
     const ForwardLineData& f1ToF2_data = f1ToF2.buffer[-1];
     const ForwardInstData& f2ToD_data = f2ToD.buffer[-1];
@@ -170,6 +203,58 @@ Pipeline::drawStateWithAsciiArt(std::ostream& os) const
 
     /* [F->$] */
     os  << "[F->$] " << f2ToF1_data << std::endl;
+
+/*
+         11111111112222222222333333333344444444445555555555666666666677777777778
+12345678901234567890123456789012345678901234567890123456789012345678901234567890
+    data        _BB_                          _BB_        data
+    <--- [F->$] <-----+                       <--- [E->$] <-----+
+                      |                                         |
+($) ---> [$->F] ---> (F) ---> [F->D] ---> (D) ---> [D->E] ---> (E)
+    _BB_        _BB_     data        data     data        data
+*/
+
+    /*
+     * Draw input/output of pipeline registers
+     * in which address is stored
+     */
+    os << std::endl;
+    if(flow == DataFlow::INPUT)
+        os.width(16);
+    else if(flow == DataFlow::OUTPUT)
+        os.width(4);
+    os << " ";
+    os.width(4);
+    os << ((f2ToF1_data.isBubble() || !f2ToF1_data.isBranch())?" BB ":"data");
+    os.width(38);
+    os << " ";
+    os.width(4);
+    os << ((eToF1_data.isBubble() || !eToF1_data.isBranch())?" BB ":"data");
+    os << std::endl;
+
+    /* Draw pipeline datapath */
+    drawDatapath(os);
+
+    /*
+     * Draw input/output of pipeline registers
+     * in which line/instruction/micro-operation is stored
+     */
+    if(flow == DataFlow::INPUT)
+        os.width(4);
+    else if(flow == DataFlow::OUTPUT)
+        os.width(16);
+    os << " ";
+    os.width(4);
+    os << (f1ToF2_data.isBubble()?" BB ":"data");
+    os.width(17);
+    os << " ";
+    os.width(4);
+    os << (f2ToD_data.isBubble()?" BB ":"data");
+    os.width(17);
+    os << " ";
+    os.width(4);
+    os << (dToE_data.isBubble()?" BB ":"data");
+    os << std::endl << std::endl;
 }
 
 // JONGHO
@@ -361,13 +446,6 @@ Pipeline::evaluate()
     if (!cpu.isFaultInjectedToFu && cpu.injectFaultToFu)
         cpu.isFaultInjectedToFu = execute.injectFaultToFu();
 
-    // JONGHO
-    const std::string f1ToF2_output_bb = f1ToF2_output.isBubble()?" BB ":"data";
-    const std::string f2ToD_output_bb = f2ToD_output.isBubble()?" BB ":"data";
-    const std::string dToE_output_bb = dToE_output.isBubble()?" BB ":"data";
-    const std::string eToF1_output_bb = (eToF1_output.isBubble() || (!eToF1_output.isBranch()))?" BB ":"data";
-    const std::string f2ToF1_output_bb = (f2ToF1_output.isBubble() || (!f2ToF1_output.isBranch()))?" BB ":"data";
-
     /* Note that it's important to evaluate the stages in order to allow
      *  'immediate', 0-time-offset TimeBuffer activity to be visible from
      *  later stages to earlier ones in the same cycle */
@@ -382,7 +460,8 @@ Pipeline::evaluate()
     // JONGHO
     debug_file << "_________________________________________________________________" << std::endl;
     debug_file << "[SNAPSHOT] Tick: " << curTick() << std::endl;
-    drawStateWithAsciiArt(debug_file);
+    if(DTRACE(Bubble))
+        drawDataflow(debug_file, DataFlow::OUTPUT);
 
     /* Update the time buffers after the stages */
     f1ToF2.evaluate();
@@ -391,111 +470,12 @@ Pipeline::evaluate()
     dToE.evaluate();
     eToF1.evaluate();
 
-    // JONGHO: Time to get input of pipeline registers
-    /* Input of pipeline registers */
-    ForwardLineData f1ToF2_input(*f1ToF2.output().outputWire);
-    ForwardInstData f2ToD_input(*f2ToD.output().outputWire);
-    ForwardInstData dToE_input(*dToE.output().outputWire);
-    BranchData eToF1_input(*eToF1.output().outputWire);
-    BranchData f2ToF1_input(*f2ToF1.output().outputWire);
-
     // JONGHO
-    /*
-     * Print out whether each data transfered is bubble or not.
-     * The information will be presented by ascii art, easy to understand
-     */
-
-    if(DTRACE(Bubble)) {
-        const std::string f1ToF2_input_bb = f1ToF2_input.isBubble() ? " BB " : "data";
-        const std::string f2ToD_input_bb = f2ToD_input.isBubble() ? " BB " : "data";
-        const std::string dToE_input_bb = dToE_input.isBubble() ? " BB " : "data";
-        const std::string eToF1_input_bb = (eToF1_input.isBubble() || (!eToF1_input.isBranch()))? " BB " : "data";
-        const std::string f2ToF1_input_bb = (f2ToF1_input.isBubble() || (!f2ToF1_input.isBranch()))? " BB " : "data";
+    if(DTRACE(Bubble))
+        drawDataflow(debug_file, DataFlow::INPUT);
 
 /*
- *                  HOW IT LOOKS LIKE
-
-
-         11111111112222222222333333333344444444445555555555666666666677777777778
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
-     data        _BB_                          _BB_      data
-     <--- f2ToF1 <-----+                       <--- eToF1 <----+
-                       |                                       |
-(F1) ---> f1ToF2 ---> (F2) ---> f2ToD ---> (D) ---> dToE ---> (E)
-     _BB_        _BB_      data       data     data      data
-                                           0x8d0c             0x8d94
-                                           0x8d9c             0x8d98
-
-
-*/
-        /* 1st Line: BranchData.reason */
-        debug_file  << std::left;
-        debug_file.width(5);
-        debug_file  << " ";
-        debug_file.width(42);
-
-        if((f2ToF1_output.reason != BranchData::NoBranch) &&
-            (eToF1_output.reason != BranchData::NoBranch))
-            debug_file << std::endl;
-        if(f2ToF1_output.reason != BranchData::NoBranch)
-            debug_file  << f2ToF1_output.reason;
-        if(eToF1_output.reason != BranchData::NoBranch)
-            debug_file  << eToF1_output.reason;
-        debug_file  << std::endl;
-
-        /* 2nd Line: BranchData.isBranch*/
-        debug_file.width(5);
-        debug_file  << " ";
-        debug_file  << f2ToF1_output_bb;
-        debug_file.width(8);
-        debug_file  << " ";
-        debug_file  << f2ToF1_input_bb;
-        debug_file.width(26);
-        debug_file  << " ";
-        debug_file  << eToF1_output_bb;
-        debug_file.width(6);
-        debug_file  << " ";
-        debug_file  << eToF1_input_bb << std::endl;
-
-        /* 3rd~5th Line: Figure */
-        debug_file.width(5);
-        debug_file  << " ";
-        debug_file  << "<--- f2ToF1 <-----+";
-        debug_file.width(23);
-        debug_file  << " ";
-        debug_file  << "<--- eToF1 <----+" << std::endl;
-
-        /* 4th Line */
-        debug_file.width(23);
-        debug_file  << " ";
-        debug_file  << "|";
-        debug_file.width(39);
-        debug_file  << " ";
-        debug_file  << "|" << std::endl;
-
-        /* 5th Line */
-        debug_file  << "(F1) ---> f1ToF2 ---> (F2) ---> f2ToD ---> (D) ---> dToE ---> (E)" << std::endl;
-
-        /* 6th Line */
-        debug_file.width(5);
-        debug_file << " ";
-        debug_file << f1ToF2_input_bb;
-        debug_file.width(8);
-        debug_file << " ";
-        debug_file << f1ToF2_output_bb;
-        debug_file.width(6);
-        debug_file << " ";
-        debug_file << f2ToD_input_bb;
-        debug_file.width(7);
-        debug_file << " ";
-        debug_file << f2ToD_output_bb;
-        debug_file.width(5);
-        debug_file << " ";
-        debug_file << dToE_input_bb;
-        debug_file.width(6);
-        debug_file << " ";
-        debug_file << dToE_output_bb << std::endl;
-
+    if(DTRACE(Bubble)) {
         std::vector<Addr> fetch1_addr_list = InstInfo::fetch1_addr();
         std::vector<Addr> fetch2_addr_list = InstInfo::fetch2_addr();
         std::vector<Minor::MinorDynInstPtr> decode_op_list = InstInfo::decode_op();
@@ -544,6 +524,8 @@ Pipeline::evaluate()
         InstInfo::clear_decode_op();
         InstInfo::clear_execute_addr();
     }
+
+*/
 
     /* The activity recorder must be be called after all the stages and
      *  before the idler (which acts on the advice of the activity recorder */

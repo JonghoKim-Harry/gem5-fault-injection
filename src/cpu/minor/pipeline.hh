@@ -71,11 +71,25 @@ namespace Minor
 class Pipeline : public Ticked
 {
   // JONGHO
+  public:
+    enum DataFlow
+    {
+        BUFFERED,
+        INPUT,
+        OUTPUT
+    };
+
+  // JONGHO
   protected:
-    /* To draw ascii-arted picture of pipeline status */
-    void drawStateWithAsciiArt(std::ostream& os) const;
+    /* Draw pipeline datapath */
+    static void drawDatapath(std::ostream& os);
+
+    /* Draw ascii-arted picture of pipeline data flow */
+    void drawDataflow(std::ostream& os, DataFlow flow) const;
+
     unsigned long last_snapshot_time = 0;
 
+  // JONGHO
   public:
     /* Override method regStats() of class Ticked */
     void regStats() override;
