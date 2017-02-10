@@ -392,6 +392,16 @@ Pipeline::evaluate()
 
 
 */
+        debug_file  << std::left;
+        debug_file.width(5);
+        debug_file  << " ";
+        debug_file.width(42);
+        if(f2ToF1_output.reason != BranchData::NoBranch)
+            debug_file  << f2ToF1_output.reason;
+        if(eToF1_output.reason != BranchData::NoBranch)
+            debug_file  << eToF1_output.reason;
+        debug_file  << std::endl;
+
         debug_file.width(5);
         debug_file  << " ";
         debug_file  << f2ToF1_output_bb;
@@ -405,12 +415,12 @@ Pipeline::evaluate()
         debug_file  << " ";
         debug_file  << eToF1_input_bb << std::endl;
 
-        debug_file.width(4);
+        debug_file.width(5);
         debug_file  << " ";
         debug_file  << "<--- f2ToF1 <-----+";
         debug_file.width(23);
         debug_file  << " ";
-        debug_file  << "<--- eToF1 <-----+" << std::endl;
+        debug_file  << "<--- eToF1 <----+" << std::endl;
 
         debug_file.width(23);
         debug_file  << " ";
