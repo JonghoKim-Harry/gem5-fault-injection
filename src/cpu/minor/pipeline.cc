@@ -183,26 +183,10 @@ Pipeline::drawDataflow(std::ostream& os, DataFlow flow) const
     const BranchData& eToF1_data = eToF1.buffer[-1];
     const BranchData& f2ToF1_data = f2ToF1.buffer[-1];
 
-    /* [$->F] */
-    os  << "[$->F] ";
-    f1ToF2_data.reportData(os);
-    os  << std::endl;
-
-    /* [F->D] */
-    os  << "[F->D] ";
-    f2ToD_data.reportData(os);
-    os  << std::endl;
-
-    /* [D->E] */
-    os  << "[D->E] ";
-    dToE_data.reportData(os);
-    os  << std::endl;
-
-    /* [E->$] */
-    os  << "[E->$] " << eToF1_data << std::endl;
-
-    /* [F->$] */
-    os  << "[F->$] " << f2ToF1_data << std::endl;
+    if(flow == DataFlow::INPUT) {
+        os << "_________________________________________________________________" << std::endl;
+        os << "[SNAPSHOT]" << std::endl;
+    }
 
 /*
          11111111112222222222333333333344444444445555555555666666666677777777778
@@ -255,6 +239,31 @@ Pipeline::drawDataflow(std::ostream& os, DataFlow flow) const
     os.width(4);
     os << (dToE_data.isBubble()?" BB ":"data");
     os << std::endl << std::endl;
+
+    if(flow == DataFlow::OUTPUT) {
+        os << "[Tick] about " << curTick() << " (because of delay)" << std::endl;
+
+        /* [$->F] */
+        os  << "[$->F] ";
+        f1ToF2_data.reportData(os);
+        os  << std::endl;
+
+        /* [F->D] */
+        os  << "[F->D] ";
+        f2ToD_data.reportData(os);
+        os  << std::endl;
+
+        /* [D->E] */
+        os  << "[D->E] ";
+        dToE_data.reportData(os);
+        os  << std::endl;
+
+        /* [E->$] */
+        os  << "[E->$] " << eToF1_data << std::endl;
+
+        /* [F->$] */
+        os  << "[F->$] " << f2ToF1_data << std::endl;
+    }
 }
 
 // JONGHO
@@ -458,8 +467,6 @@ Pipeline::evaluate()
         minorTrace();
 
     // JONGHO
-    debug_file << "_________________________________________________________________" << std::endl;
-    debug_file << "[SNAPSHOT] Tick: " << curTick() << std::endl;
     if(DTRACE(Bubble))
         drawDataflow(debug_file, DataFlow::OUTPUT);
 
