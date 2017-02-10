@@ -165,12 +165,27 @@ for i in range(int(start), int(end)):
 			
 		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
 		for line in fi_read:
-			line2 = line.strip().split(' ')
-			if "Early length" in line:
-				f.write(line2[4] + "\t")
-			if "Read length" in line:
-				f.write(line2[4] + "\t")				
+			line2 = line.strip().split('=')
+			if "Misprediction Early length" in line:
+				f.write(line2[1] + "\t")
+			if "Misprediction Read length" in line:
+				f.write(line2[1] + "\t")				
 
+		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
+		for line in fi_read:
+			line2 = line.strip().split('=')
+			if "Exception Early length" in line:
+				f.write(line2[1] + "\t")
+			if "Exception Read length" in line:
+				f.write(line2[1] + "\t")
+
+		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
+		for line in fi_read:
+			line2 = line.strip().split('=')
+			if "Exception Name" in line:
+				f.write(line2[1] + "\t")
+        
+        
 		f.write("\n")
 					
 		#os.system("rm -rf " + bench + "/" + injectArch + "/FI_" + str(i) + "_*")

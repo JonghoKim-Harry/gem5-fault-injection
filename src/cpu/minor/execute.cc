@@ -276,20 +276,20 @@ Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
                 
             DPRINTF(Symptom, "%#x\t%s\tTaken\tNotTaken\tIncorrect\t%d\n", inst->pc.instAddr(), my_inst, inst->id.execSeqNum); //YOHAN
             
-            if(cpu.injectReadSN != -1 && !cpu.readSymptom) {
+            if(cpu.injectReadSN != -1 && !cpu.readSymptom[0]) {
                 if(inst->id.execSeqNum >= cpu.injectReadSN)
-                    DPRINTF(SymptomFI, "Read length: %d\n", inst->id.execSeqNum - cpu.injectReadSN); //YOHAN
+                    DPRINTF(SymptomFI, "Misprediction Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN); //YOHAN
                 else
-                    DPRINTF(SymptomFI, "Read length: -1\n"); //YOHAN
-                cpu.readSymptom = true;
+                    DPRINTF(SymptomFI, "Misprediction Read length=-1\n"); //YOHAN
+                cpu.readSymptom[0] = true;
             }
             
-            if(cpu.injectEarlySN != -1 && !cpu.earlySymptom) {
+            if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[0]) {
                 if(inst->id.execSeqNum >= cpu.injectEarlySN)
-                    DPRINTF(SymptomFI, "Early length: %d\n", inst->id.execSeqNum - cpu.injectEarlySN); //YOHAN
+                    DPRINTF(SymptomFI, "Misprediction Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN); //YOHAN
                 else
-                    DPRINTF(SymptomFI, "Early length: -1\n"); //YOHAN
-                cpu.earlySymptom = true;
+                    DPRINTF(SymptomFI, "Misprediction Early length=-1\n"); //YOHAN
+                cpu.earlySymptom[0] = true;
             }
             
             reason = BranchData::BadlyPredictedBranch;
@@ -314,20 +314,20 @@ Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
                     
             DPRINTF(Symptom, "%#x\t%s\tTaken\tMisTaken\tIncorrect\t%d\n", inst->pc.instAddr(), my_inst, inst->id.execSeqNum); //YOHAN
             
-            if(cpu.injectReadSN != -1 && !cpu.readSymptom) {
+            if(cpu.injectReadSN != -1 && !cpu.readSymptom[0]) {
                 if(inst->id.execSeqNum >= cpu.injectReadSN)
-                    DPRINTF(SymptomFI, "Read length: %d\n", inst->id.execSeqNum - cpu.injectReadSN); //YOHAN
+                    DPRINTF(SymptomFI, "Misprediction Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN); //YOHAN
                 else
-                    DPRINTF(SymptomFI, "Read length: -1\n"); //YOHAN
-                cpu.readSymptom = true;
+                    DPRINTF(SymptomFI, "Misprediction Read length=-1\n"); //YOHAN
+                cpu.readSymptom[0] = true;
             }
             
-            if(cpu.injectEarlySN != -1 && !cpu.earlySymptom) {
+            if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[0]) {
                 if(inst->id.execSeqNum >= cpu.injectEarlySN)
-                    DPRINTF(SymptomFI, "Early length: %d\n", inst->id.execSeqNum - cpu.injectEarlySN); //YOHAN
+                    DPRINTF(SymptomFI, "Misprediction Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN); //YOHAN
                 else
-                    DPRINTF(SymptomFI, "Early length: -1\n"); //YOHAN
-                cpu.earlySymptom = true;
+                    DPRINTF(SymptomFI, "Misprediction Early length=-1\n"); //YOHAN
+                cpu.earlySymptom[0] = true;
             }
 
             reason = BranchData::BadlyPredictedBranchTarget;
@@ -340,20 +340,20 @@ Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
         //YOHAN
         DPRINTF(Symptom, "%#x\t%s\tNotTaken\tTaken\tIncorrect\t%d\n", inst->pc.instAddr(), my_inst, inst->id.execSeqNum); //YOHAN
         
-        if(cpu.injectReadSN != -1 && !cpu.readSymptom) {
+        if(cpu.injectReadSN != -1 && !cpu.readSymptom[0]) {
             if(inst->id.execSeqNum >= cpu.injectReadSN)
-                DPRINTF(SymptomFI, "Read length: %d\n", inst->id.execSeqNum - cpu.injectReadSN); //YOHAN
+                DPRINTF(SymptomFI, "Misprediction Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN); //YOHAN
             else
-                DPRINTF(SymptomFI, "Read length: -1\n"); //YOHAN
-            cpu.readSymptom = true;
+                DPRINTF(SymptomFI, "Misprediction Read length=-1\n"); //YOHAN
+            cpu.readSymptom[0] = true;
         }
         
-        if(cpu.injectEarlySN != -1 && !cpu.earlySymptom) {
+        if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[0]) {
             if(inst->id.execSeqNum >= cpu.injectEarlySN)
-                DPRINTF(SymptomFI, "Early length: %d\n", inst->id.execSeqNum - cpu.injectEarlySN); //YOHAN
+                DPRINTF(SymptomFI, "Misprediction Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN); //YOHAN
             else
-                DPRINTF(SymptomFI, "Early length: -1\n"); //YOHAN
-            cpu.earlySymptom = true;
+                DPRINTF(SymptomFI, "Misprediction Early length=-1\n"); //YOHAN
+            cpu.earlySymptom[0] = true;
         }
 
         reason = BranchData::UnpredictedBranch;
@@ -416,16 +416,45 @@ Execute::handleMemResponse(MinorDynInstPtr inst,
         /* Invoke memory faults. */
         DPRINTF(MinorMem, "Completing fault from DTLB access: %s\n",
             response->fault->name());
-
+            
+        //HwiSoo
+        DPRINTF(Symptom, "Exec:Completing fault from DTLB access:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+            inst->id,inst->pc.instAddr(), inst->id.execSeqNum, response->fault->name());
+            
         if (inst->staticInst->isPrefetch()) {
             DPRINTF(MinorMem, "Not taking fault on prefetch: %s\n",
                 response->fault->name());
+            //HwiSoo
+            DPRINTF(Symptom, "Exec:Not taking fault on prefetch:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, response->fault->name());
 
             /* Don't assign to fault */
         } else {
             /* Take the fault raised during the TLB/memory access */
             fault = response->fault;
 
+            //HwiSoo
+            DPRINTF(Symptom, "Exec:Completing fault from DTLB access(Invoke):id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, response->fault->name());            
+            
+            //HwiSoo
+            if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
+                if(inst->id.execSeqNum >= cpu.injectReadSN)
+                    DPRINTF(SymptomFI, "Exception Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN);
+                else
+                    DPRINTF(SymptomFI, "Exception Read length=-1\n");
+                cpu.readSymptom[1] = true;
+            }
+            
+            if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[1]) {
+                if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                    DPRINTF(SymptomFI, "Exception Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN);
+                else
+                    DPRINTF(SymptomFI, "Exception Early length=-1\n");
+                cpu.earlySymptom[1] = true;
+                DPRINTF(SymptomFI, "Exception Name=%s\n", fault->name());
+            }
+            
             fault->invoke(thread, inst->staticInst);
         }
     } else if (!packet) {
@@ -456,6 +485,29 @@ Execute::handleMemResponse(MinorDynInstPtr inst,
             /* Invoke fault created by instruction completion */
             DPRINTF(MinorMem, "Fault in memory completeAcc: %s\n",
                 fault->name());
+            //HwiSoo
+            DPRINTF(Symptom, "Exec:Fault in memory completeAcc:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name());
+                
+            //HwiSoo
+            if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
+                if(inst->id.execSeqNum >= cpu.injectReadSN)
+                    DPRINTF(SymptomFI, "Exception Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN);
+                else
+                    DPRINTF(SymptomFI, "Exception Read length=-1\n");
+                cpu.readSymptom[1] = true;
+            }
+            
+            if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[1]) {
+                if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                    DPRINTF(SymptomFI, "Exception Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN);
+                else
+                    DPRINTF(SymptomFI, "Exception Early length=-1\n");
+                cpu.earlySymptom[1] = true;
+                DPRINTF(SymptomFI, "Exception Name=%s\n", fault->name());
+            }
+
+            
             fault->invoke(thread, inst->staticInst);
         } else {
             /* Stores need to be pushed into the store buffer to finish
@@ -496,6 +548,10 @@ Execute::takeInterrupt(ThreadID thread_id, BranchData &branch)
     DPRINTF(MinorInterrupt, "Considering interrupt status from PC: %s\n",
         cpu.getContext(thread_id)->pcState());
 
+    //HwiSoo
+    DPRINTF(Symptom, "Interrupt:Considering interrupt status from PC: %s\n",
+        cpu.getContext(thread_id)->pcState());
+        
     Fault interrupt = cpu.getInterruptController(thread_id)->getInterrupt
         (cpu.getContext(thread_id));
 
@@ -503,13 +559,36 @@ Execute::takeInterrupt(ThreadID thread_id, BranchData &branch)
         /* The interrupt *must* set pcState */
         cpu.getInterruptController(thread_id)->updateIntrInfo
             (cpu.getContext(thread_id));
+        
+        //HwiSoo
+        DPRINTF(Symptom, "Interrupt:Invoking interrupt: %s to PC: %s\n",
+            interrupt->name(), cpu.getContext(thread_id)->pcState());
+
+        //HwiSoo, Finding a way to check SeqNum
+        if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
+            //if(inst->id.execSeqNum >= cpu.injectReadSN)
+            //    DPRINTF(SymptomFI, "Exception Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN);
+            //else
+                DPRINTF(SymptomFI, "Exception Read length=-1\n");
+            cpu.readSymptom[1] = true;
+        }
+        
+        if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[1]) {
+            //if(inst->id.execSeqNum >= cpu.injectEarlySN)
+            //    DPRINTF(SymptomFI, "Exception Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN);
+            //else
+                DPRINTF(SymptomFI, "Exception Early length=-1\n");
+            cpu.earlySymptom[1] = true;
+            DPRINTF(SymptomFI, "Exception Name=Interrupt(%s)\n", interrupt->name());        
+        }
+        
         interrupt->invoke(cpu.getContext(thread_id));
 
         assert(!lsq.accessesInFlight());
 
         DPRINTF(MinorInterrupt, "Invoking interrupt: %s to PC: %s\n",
             interrupt->name(), cpu.getContext(thread_id)->pcState());
-
+            
         /* Assume that an interrupt *must* cause a branch.  Assert this? */
 
         updateBranchData(thread_id, BranchData::Interrupt,
@@ -548,6 +627,9 @@ Execute::executeMemRefInst(MinorDynInstPtr inst, BranchData &branch,
         if (init_fault != NoFault) {
             DPRINTF(MinorExecute, "Fault on memory inst: %s"
                 " initiateAcc: %s\n", *inst, init_fault->name());
+            //HwiSoo. note that it does not invoke exception handler
+            DPRINTF(Symptom, "Exec:Fault on memory inst:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, init_fault->name());
             fault = init_fault;
         } else {
             /* Only set this if the instruction passed its
@@ -993,7 +1075,28 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
 
         DPRINTF(MinorExecute, "Fault inst reached Execute: %s\n",
             inst->fault->name());
-
+        //HwiSoo
+        DPRINTF(Symptom, "Exec:Fault inst reached Execute:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+            inst->id,inst->pc.instAddr(), inst->id.execSeqNum, inst->fault->name());
+            
+        //HwiSoo
+        if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
+            if(inst->id.execSeqNum >= cpu.injectReadSN)
+                DPRINTF(SymptomFI, "Exception Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN);
+            else
+                DPRINTF(SymptomFI, "Exception Read length=-1\n");
+            cpu.readSymptom[1] = true;
+        }
+        
+        if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[1]) {
+            if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                DPRINTF(SymptomFI, "Exception Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN);
+            else
+                DPRINTF(SymptomFI, "Exception Early length=-1\n");
+            cpu.earlySymptom[1] = true;
+            DPRINTF(SymptomFI, "Exception Name=%s\n", inst->fault->name());
+        }
+        
         fault = inst->fault;
         inst->fault->invoke(thread, NULL);
 
@@ -1027,6 +1130,10 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
             if (early_memory_issue) {
                 DPRINTF(MinorExecute, "Fault in early executing inst: %s\n",
                     fault->name());
+                    
+                //HwiSoo
+                DPRINTF(Symptom, "Exec:Fault in early executing inst:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                    inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name());
                 /* Don't execute the fault, just stall the instruction
                  *  until it gets to the head of inFlightInsts */
                 inst->canEarlyIssue = false;
@@ -1036,6 +1143,28 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
             } else {
                 DPRINTF(MinorExecute, "Fault in execute: %s\n",
                     fault->name());
+                //HwiSoo
+                DPRINTF(Symptom, "Exec:Fault in execute:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                    inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name());
+                
+                //HwiSoo
+                if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
+                    if(inst->id.execSeqNum >= cpu.injectReadSN)
+                        DPRINTF(SymptomFI, "Exception Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN);
+                    else
+                        DPRINTF(SymptomFI, "Exception Read length=-1\n");
+                    cpu.readSymptom[1] = true;
+                }
+                
+                if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[1]) {
+                    if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                        DPRINTF(SymptomFI, "Exception Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN);
+                    else
+                        DPRINTF(SymptomFI, "Exception Early length=-1\n");
+                    cpu.earlySymptom[1] = true;
+                    DPRINTF(SymptomFI, "Exception Name=%s\n", fault->name());
+                }
+                
                 fault->invoke(thread, NULL);
 
                 tryToBranch(inst, fault, branch);
@@ -1108,6 +1237,29 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
         if (fault != NoFault) {
             DPRINTF(MinorExecute, "Fault in execute of inst: %s fault: %s\n",
                 *inst, fault->name());
+            //HwiSoo
+            DPRINTF(Symptom, "Exec:Fault in execute of inst:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name());
+            
+            //HwiSoo
+            if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
+                if(inst->id.execSeqNum >= cpu.injectReadSN)
+                    DPRINTF(SymptomFI, "Exception Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN);
+                else
+                    DPRINTF(SymptomFI, "Exception Read length=-1\n");
+                cpu.readSymptom[1] = true;
+            }
+            
+            if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[1]) {
+                if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                    DPRINTF(SymptomFI, "Exception Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN);
+                else
+                    DPRINTF(SymptomFI, "Exception Early length=-1\n");
+                cpu.earlySymptom[1] = true;
+                DPRINTF(SymptomFI, "Exception Name=%s\n", fault->name());
+            }
+
+                
             fault->invoke(thread, inst->staticInst);
         }
 

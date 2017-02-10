@@ -140,9 +140,7 @@ BaseCPU::BaseCPU(Params *p, bool is_checker)
       correctStore (p->correctStore), //YOHAN
       correctLoad (p->correctLoad), //YOHAN
       injectReadSN (-1), //YOHAN
-      injectEarlySN (-1), //YOHAN
-      readSymptom (false), //YOHAN
-      earlySymptom (false) //YOHAN
+      injectEarlySN (-1) //YOHAN
 {
     // if Python did not provide a valid ID, do it here
     if (_cpuId == -1 ) {
@@ -261,6 +259,13 @@ BaseCPU::BaseCPU(Params *p, bool is_checker)
     if (params()->isa.size() != numThreads) {
         fatal("Number of ISAs (%i) assigned to the CPU does not equal number "
               "of threads (%i).\n", params()->isa.size(), numThreads);
+    }
+    
+    //HwiSoo
+    for(int i=0; i<NumOfSymptom; i++)
+    {
+        readSymptom[i]=false; 
+        earlySymptom[i]=false;
     }
 }
 

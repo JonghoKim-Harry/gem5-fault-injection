@@ -71,6 +71,8 @@ struct BaseCPUParams;
 class CheckerCPU;
 class ThreadContext;
 
+#define NumOfSymptom 2
+
 struct AddressMonitor
 {
     AddressMonitor();
@@ -594,9 +596,11 @@ class BaseCPU : public MemObject
     bool correctLoad; //YOHAN: correct load insructions
     int injectReadSN; //YOHAN: Sequnce number of instruction which is corrupted
     int injectEarlySN; //YOHAN: Sequnce number of instruction which is corrupted
-	bool readSymptom; //YOHAN: Symptom is detected
-	bool earlySymptom; //YOHAN: Symptom is detected
 
+	bool readSymptom[NumOfSymptom]; //YOHAN: Symptom is detected
+	bool earlySymptom[NumOfSymptom]; //YOHAN: Symptom is detected. HwiSoo: [0] = Branch misprediction, [1] = Exception
+
+    
   public:
     void armMonitor(ThreadID tid, Addr address);
     bool mwait(ThreadID tid, PacketPtr pkt);
