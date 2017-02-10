@@ -74,7 +74,6 @@ class Pipeline : public Ticked
   public:
     enum DataFlow
     {
-        BUFFERED,
         INPUT,
         OUTPUT
     };

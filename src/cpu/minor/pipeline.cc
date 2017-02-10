@@ -184,7 +184,7 @@ Pipeline::drawDataflow(std::ostream& os, DataFlow flow) const
     const BranchData& f2ToF1_data = f2ToF1.buffer[-1];
 
     if(flow == DataFlow::INPUT) {
-        os << "_________________________________________________________________" << std::endl;
+        os << "______________________________________________________________________" << std::endl;
         os << "[SNAPSHOT]" << std::endl;
     }
 
@@ -202,7 +202,6 @@ Pipeline::drawDataflow(std::ostream& os, DataFlow flow) const
      * Draw input/output of pipeline registers
      * in which address is stored
      */
-    os << std::endl;
     if(flow == DataFlow::INPUT)
         os.width(16);
     else if(flow == DataFlow::OUTPUT)
@@ -260,6 +259,9 @@ Pipeline::drawDataflow(std::ostream& os, DataFlow flow) const
 
         /* [E->$] */
         os  << "[E->$] " << eToF1_data << std::endl;
+        os.width(7);
+        os << " ";
+        os << "Predicted: " << (eToF1_data.inst->predictedTaken?"T":"NT") << std::endl;
 
         /* [F->$] */
         os  << "[F->$] " << f2ToF1_data << std::endl;
@@ -455,6 +457,10 @@ Pipeline::evaluate()
     if (!cpu.isFaultInjectedToFu && cpu.injectFaultToFu)
         cpu.isFaultInjectedToFu = execute.injectFaultToFu();
 
+    // JONGHO: Output at the start of evaluate()
+    if(DTRACE(Bubble))
+        drawDataflow(debug_file, DataFlow::OUTPUT);
+
     /* Note that it's important to evaluate the stages in order to allow
      *  'immediate', 0-time-offset TimeBuffer activity to be visible from
      *  later stages to earlier ones in the same cycle */
@@ -466,10 +472,6 @@ Pipeline::evaluate()
     if (DTRACE(MinorTrace))
         minorTrace();
 
-    // JONGHO
-    if(DTRACE(Bubble))
-        drawDataflow(debug_file, DataFlow::OUTPUT);
-
     /* Update the time buffers after the stages */
     f1ToF2.evaluate();
     f2ToF1.evaluate();
@@ -477,7 +479,7 @@ Pipeline::evaluate()
     dToE.evaluate();
     eToF1.evaluate();
 
-    // JONGHO
+    // JONGHO: Input at the start of evaluate()
     if(DTRACE(Bubble))
         drawDataflow(debug_file, DataFlow::INPUT);
 
