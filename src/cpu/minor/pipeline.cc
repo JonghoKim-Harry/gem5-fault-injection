@@ -144,21 +144,32 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
 void
 Pipeline::drawStateWithAsciiArt(std::ostream& os) const
 {
-    const ForwardLineData& f1ToF2_data = f1ToF2.buffer[0];
-    const ForwardInstData& f2ToD_data = f2ToD.buffer[0];
-    const ForwardInstData& dToE_data = dToE.buffer[0];
-    const BranchData& eToF1_data = eToF1.buffer[0];
-    const BranchData& f2ToF1_data = f2ToF1.buffer[0];
+    const ForwardLineData& f1ToF2_data = f1ToF2.buffer[-1];
+    const ForwardInstData& f2ToD_data = f2ToD.buffer[-1];
+    const ForwardInstData& dToE_data = dToE.buffer[-1];
+    const BranchData& eToF1_data = eToF1.buffer[-1];
+    const BranchData& f2ToF1_data = f2ToF1.buffer[-1];
 
-    os  << "drawStateWithAsciiArt()" << std::endl;
-
+    /* [$->F] */
+    os  << "[$->F] ";
     f1ToF2_data.reportData(os);
-    os << std::endl;
+    os  << std::endl;
+
+    /* [F->D] */
+    os  << "[F->D] ";
     f2ToD_data.reportData(os);
-    os << std::endl;
+    os  << std::endl;
+
+    /* [D->E] */
+    os  << "[D->E] ";
     dToE_data.reportData(os);
-    os << std::endl;
-    os  << eToF1_data << std::endl << f2ToF1_data << std::endl;
+    os  << std::endl;
+
+    /* [E->$] */
+    os  << "[E->$] " << eToF1_data << std::endl;
+
+    /* [F->$] */
+    os  << "[F->$] " << f2ToF1_data << std::endl;
 }
 
 // JONGHO
@@ -258,6 +269,8 @@ Pipeline::minorTrace() const
 void
 Pipeline::evaluate()
 {
+    std::ostream& debug_file = Trace::output();
+
     // JONGHO
     /* Output of pipeline registers */
     ForwardLineData f1ToF2_output(*f1ToF2.output().outputWire);
@@ -366,6 +379,11 @@ Pipeline::evaluate()
     if (DTRACE(MinorTrace))
         minorTrace();
 
+    // JONGHO
+    debug_file << "_________________________________________________________________" << std::endl;
+    debug_file << "[SNAPSHOT] Tick: " << curTick() << std::endl;
+    drawStateWithAsciiArt(debug_file);
+
     /* Update the time buffers after the stages */
     f1ToF2.evaluate();
     f2ToF1.evaluate();
@@ -388,13 +406,6 @@ Pipeline::evaluate()
      */
 
     if(DTRACE(Bubble)) {
-        std::ostream& debug_file = Trace::output();
-
-        // TODO
-        drawStateWithAsciiArt(debug_file);
-
-        debug_file << "_________________________________________________________________" << std::endl;
-        debug_file << "[SNAPSHOT] Tick: " << curTick() << std::endl;
         const std::string f1ToF2_input_bb = f1ToF2_input.isBubble() ? " BB " : "data";
         const std::string f2ToD_input_bb = f2ToD_input.isBubble() ? " BB " : "data";
         const std::string dToE_input_bb = dToE_input.isBubble() ? " BB " : "data";
@@ -417,16 +428,22 @@ Pipeline::evaluate()
 
 
 */
+        /* 1st Line: BranchData.reason */
         debug_file  << std::left;
         debug_file.width(5);
         debug_file  << " ";
         debug_file.width(42);
+
+        if((f2ToF1_output.reason != BranchData::NoBranch) &&
+            (eToF1_output.reason != BranchData::NoBranch))
+            debug_file << std::endl;
         if(f2ToF1_output.reason != BranchData::NoBranch)
             debug_file  << f2ToF1_output.reason;
         if(eToF1_output.reason != BranchData::NoBranch)
             debug_file  << eToF1_output.reason;
         debug_file  << std::endl;
 
+        /* 2nd Line: BranchData.isBranch*/
         debug_file.width(5);
         debug_file  << " ";
         debug_file  << f2ToF1_output_bb;
@@ -440,6 +457,7 @@ Pipeline::evaluate()
         debug_file  << " ";
         debug_file  << eToF1_input_bb << std::endl;
 
+        /* 3rd~5th Line: Figure */
         debug_file.width(5);
         debug_file  << " ";
         debug_file  << "<--- f2ToF1 <-----+";
@@ -447,6 +465,7 @@ Pipeline::evaluate()
         debug_file  << " ";
         debug_file  << "<--- eToF1 <----+" << std::endl;
 
+        /* 4th Line */
         debug_file.width(23);
         debug_file  << " ";
         debug_file  << "|";
@@ -454,8 +473,10 @@ Pipeline::evaluate()
         debug_file  << " ";
         debug_file  << "|" << std::endl;
 
+        /* 5th Line */
         debug_file  << "(F1) ---> f1ToF2 ---> (F2) ---> f2ToD ---> (D) ---> dToE ---> (E)" << std::endl;
 
+        /* 6th Line */
         debug_file.width(5);
         debug_file << " ";
         debug_file << f1ToF2_input_bb;
@@ -478,7 +499,6 @@ Pipeline::evaluate()
         std::vector<Addr> fetch1_addr_list = InstInfo::fetch1_addr();
         std::vector<Addr> fetch2_addr_list = InstInfo::fetch2_addr();
         std::vector<Minor::MinorDynInstPtr> decode_op_list = InstInfo::decode_op();
-        //std::vector<Addr> microop_addr_list = InstInfo::microop_addr();
         std::vector<Addr> execute_addr_list = InstInfo::execute_addr();
         unsigned int max_size = std::max(std::max(std::max(fetch1_addr_list.size(), fetch2_addr_list.size()), decode_op_list.size()), execute_addr_list.size());
         debug_file << std::showbase << std::hex << std::left;
