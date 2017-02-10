@@ -72,6 +72,8 @@ class Pipeline : public Ticked
 {
   // JONGHO
   protected:
+    /* To draw ascii-arted picture of pipeline status */
+    void drawStateWithAsciiArt(std::ostream& os) const;
     unsigned long last_snapshot_time = 0;
 
   public:

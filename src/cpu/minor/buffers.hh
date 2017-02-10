@@ -219,6 +219,8 @@ class Latch : public Vulnerable
 {
   public:
     typedef MinorBuffer<Data> Buffer;
+    // JONGHO
+    friend class Pipeline;
 
   protected:
     /** Delays, in cycles, writing data into the latch and seeing it on the

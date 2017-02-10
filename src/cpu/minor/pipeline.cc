@@ -140,6 +140,28 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
 }
 
 // JONGHO
+/* To draw ascii-arted picture of pipeline status */
+void
+Pipeline::drawStateWithAsciiArt(std::ostream& os) const
+{
+    const ForwardLineData& f1ToF2_data = f1ToF2.buffer[0];
+    const ForwardInstData& f2ToD_data = f2ToD.buffer[0];
+    const ForwardInstData& dToE_data = dToE.buffer[0];
+    const BranchData& eToF1_data = eToF1.buffer[0];
+    const BranchData& f2ToF1_data = f2ToF1.buffer[0];
+
+    os  << "drawStateWithAsciiArt()" << std::endl;
+
+    f1ToF2_data.reportData(os);
+    os << std::endl;
+    f2ToD_data.reportData(os);
+    os << std::endl;
+    dToE_data.reportData(os);
+    os << std::endl;
+    os  << eToF1_data << std::endl << f2ToF1_data << std::endl;
+}
+
+// JONGHO
 /*
  *  Note that this method will be called at initialization stage,
  *  so you have to use only predefined-stats
@@ -367,6 +389,9 @@ Pipeline::evaluate()
 
     if(DTRACE(Bubble)) {
         std::ostream& debug_file = Trace::output();
+
+        // TODO
+        drawStateWithAsciiArt(debug_file);
 
         debug_file << "_________________________________________________________________" << std::endl;
         debug_file << "[SNAPSHOT] Tick: " << curTick() << std::endl;
