@@ -99,7 +99,7 @@ class ExpManager:
         gem5script_bench_binary = '-c ' + BENCH_BINARY[bench_name]
         gem5script_bench_option = BENCH_OPTION[bench_name]
         if gem5script_bench_option:
-            gem5script_bench_option = '-o ' + '\"' + str(bench_option) + '\"'
+            gem5script_bench_option = '-o ' + '\"' + str(gem5script_bench_option) + '\"'
             gem5script_bench_option = gem5script_bench_option.replace('$BENCH_NAME', bench_name)
             gem5script_bench_option = gem5script_bench_option.replace('$IDX', 'golden')
             gem5script_bench_option = gem5script_bench_option.replace('$COMP_INFO', 'golden')
