@@ -400,7 +400,7 @@ Pipeline::regStats()
                                 .desc("JONGHO: [F->$] BB\% among total time")
                                 ;
     f2ToF1_bubble_ticks_percentage = 100 * f2ToF1_bubble_ticks / simTicks;
-    f2ToF1_predicted_t_ticks.name("Pipereg.Fetch2Cache.predict_T_ticks")
+    f2ToF1_predT_ticks.name("Pipereg.Fetch2Cache.predT_ticks")
                             .desc("JONGHO: [F->$] How long it is predicted to be TAKEN?")
                             ;
 
@@ -714,7 +714,7 @@ Pipeline::evaluate()
      */
     if((!f2ToF1_output.isBubble()) && f2ToF1_output.isBranch()) {
         if(f2ToF1_output.inst->predictedTaken)
-            f2ToF1_predicted_t_ticks += (curTick() - last_snapshot_time);
+            f2ToF1_predT_ticks += (curTick() - last_snapshot_time);
     }
 
     /* End of profiling pipeline register data */

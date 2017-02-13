@@ -112,17 +112,20 @@ class Pipeline : public Ticked
     Stats::Scalar f2ToF1_bubble_ticks;
     Stats::Formula f2ToF1_bubble_ticks_percentage;
 
-    /*
-     * To profile branch target stored in pipeline register [E->$]
-     */
+    /**/
+    Stats::Scalar f2ToF1_predT_ticks;
     Stats::Scalar eToF1_predT_T_ticks;
-    Stats::Scalar eToF1_predT_T_count;
     Stats::Scalar eToF1_predT_WT_ticks;
-    Stats::Scalar eToF1_predT_WT_count;
     Stats::Scalar eToF1_predT_NT_ticks;
-    Stats::Scalar eToF1_predT_NT_count;
     Stats::Scalar eToF1_predNT_T_ticks;
+    //Stats::Scalar eToF1_predT_dropped_ticks;
+
+    Stats::Scalar f2ToF1_predT_count;
+    Stats::Scalar eToF1_predT_T_count;
+    Stats::Scalar eToF1_predT_WT_count;
+    Stats::Scalar eToF1_predT_NT_count;
     Stats::Scalar eToF1_predNT_T_count;
+    //Stats::Scalar eToF1_predT_dropped_count;
 
     /* P(T|pred-T)*/
     Stats::Formula prob_T_given_predT_percentage;
@@ -137,10 +140,6 @@ class Pipeline : public Ticked
     Stats::Formula eToF1_vul_ticks;
     Stats::Formula eToF1_vul_ticks_percentage;
 
-    /*
-     * To profile branch target prediction stored in pipeline register [F->$]
-     */
-    Stats::Scalar f2ToF1_predicted_t_ticks;
 
     /* Time in which data in [E->$] or [F->$] is vulnerable */
     Stats::Formula addr_vul_ticks;
