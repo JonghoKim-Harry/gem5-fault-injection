@@ -117,6 +117,8 @@ class Pipeline : public Ticked
      */
     Stats::Scalar eToF1_predT_T_ticks;
     Stats::Scalar eToF1_predT_T_count;
+    Stats::Scalar eToF1_predT_T_wrong_ticks;
+    Stats::Scalar eToF1_predT_T_wrong_count;
     Stats::Scalar eToF1_predT_NT_ticks;
     Stats::Scalar eToF1_predT_NT_count;
     Stats::Scalar eToF1_predNT_T_ticks;
@@ -128,10 +130,24 @@ class Pipeline : public Ticked
     /* P(NT|pred-T)*/
     Stats::Formula prob_NT_given_predT_percentage;
 
+    /* P(T-wrong|pred-T)*/
+    Stats::Formula prob_T_wrong_given_predT_percentage;
+
+    /* Time in which data in [E->$] is vulnerable */
+    Stats::Formula eToF1_vul_ticks;
+    Stats::Formula eToF1_vul_ticks_percentage;
+
     /*
      * To profile branch target prediction stored in pipeline register [F->$]
      */
     Stats::Scalar f2ToF1_predicted_t_ticks;
+
+    /* Time in which data in [E->$] or [F->$] is vulnerable */
+    Stats::Formula addr_vul_ticks;
+    /* P([E->$] Vul | Addr Vul) */
+    Stats::Formula eToF1_vul_given_addr_vul_ticks_percentage;
+    /* P([F->$] Vul | Addr Vul) */
+    Stats::Formula f2ToF1_vul_given_addr_vul_ticks_percentage;
 
   protected:
     MinorCPU &cpu;
