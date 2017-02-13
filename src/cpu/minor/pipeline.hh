@@ -144,8 +144,11 @@ class Pipeline : public Ticked
 
     /* Time in which data in [E->$] or [F->$] is vulnerable */
     Stats::Formula addr_vul_ticks;
+    Stats::Formula addr_vul_ticks_percentage;
+
     /* P([E->$] Vul | Addr Vul) */
     Stats::Formula eToF1_vul_given_addr_vul_ticks_percentage;
+
     /* P([F->$] Vul | Addr Vul) */
     Stats::Formula f2ToF1_vul_given_addr_vul_ticks_percentage;
 

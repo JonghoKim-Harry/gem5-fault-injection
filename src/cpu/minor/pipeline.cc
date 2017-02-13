@@ -410,6 +410,11 @@ Pipeline::regStats()
                     ;
     addr_vul_ticks = eToF1_predT_T_ticks + eToF1_predT_T_wrong_ticks + eToF1_predT_NT_ticks + eToF1_predNT_T_ticks;
 
+    addr_vul_ticks_percentage.name("Pipereg.AddrPipereg.vul_ticks_percentage")
+                    .desc("JONGHO: TIME in which data in [E->$] or [F->$] is vulnerable among runtime (%)")
+                    ;
+    addr_vul_ticks_percentage = 100 * addr_vul_ticks / simTicks;
+
     /* P([E->$] Vul | Addr Vul) */
     eToF1_vul_given_addr_vul_ticks_percentage.name("Pipereg.Execute2Cache.prob_given_addr_vul")
                                             .desc("JONGHO: P([E->$] Vul | Addr Vul) (%)")
