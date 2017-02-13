@@ -337,6 +337,37 @@ Pipeline::regStats()
                                 ;
     eToF1_bubble_ticks_percentage = 100 * eToF1_bubble_ticks / simTicks;
 
+    /* */
+    eToF1_predT_T_ticks.name("Pipereg.Execute2Cache.predT_T_ticks")
+                            .desc("JONGHO: [E->$] How long it is predicted to be TAKEN and then TAKEN?")
+                            ;
+    eToF1_predT_T_count.name("Pipereg.Execute2Cache.predT_T_count")
+                            .desc("JONGHO: [E->$] How many (dynamic) instruction is predicted to be TAKEN and then TAKEN?")
+                            ;
+    eToF1_predT_NT_ticks.name("Pipereg.Execute2Cache.predT_NT_ticks")
+                            .desc("JONGHO: [E->$] How long it is predicted to be TAKEN but NOT TAKEN?")
+                            ;
+    eToF1_predT_NT_count.name("Pipereg.Execute2Cache.predT_NT_count")
+                            .desc("JONGHO: [E->$] How many (dynamic) instruction is predicted to be TAKEN but NOT TAKEN?")
+                            ;
+    eToF1_predNT_T_ticks.name("Pipereg.Execute2Cache.predNT_T_ticks")
+                            .desc("JONGHO: [E->$] How long it is predicted to be NOT TAKEN but TAKEN?")
+                            ;
+    eToF1_predNT_T_count.name("Pipereg.Execute2Cache.predNT_T_count")
+                            .desc("JONGHO: [E->$] How many (dynamic) instruction is predicted to be NOT TAKEN but TAKEN?")
+                            ;
+
+    /**/
+    prob_T_given_predT_percentage.name("Pipereg.probability_T_given_predT")
+                                .desc("JONGHO: P(T|pred-T)")
+                                ;
+    prob_T_given_predT_percentage = 100 * eToF1_predT_T_count / (eToF1_predT_T_count + eToF1_predT_NT_count);
+
+    prob_NT_given_predT_percentage.name("Pipereg.probability_NT_given_predT")
+                                .desc("JONGHO: P(NT|pred-T)")
+                                ;
+    prob_NT_given_predT_percentage = 100 * eToF1_predT_NT_count / (eToF1_predT_T_count + eToF1_predT_NT_count);
+
     /* [F->$] */
     f2ToF1_bubble_ticks.name("Pipereg.Fetch2Cache.bubble_ticks")
                         .desc("JONGHO: [F->$] How long is it bubble?")
@@ -345,6 +376,9 @@ Pipeline::regStats()
                                 .desc("JONGHO: [F->$] BB\% among total time")
                                 ;
     f2ToF1_bubble_ticks_percentage = 100 * f2ToF1_bubble_ticks / simTicks;
+    f2ToF1_predicted_t_ticks.name("Pipereg.Fetch2Cache.predict_T_ticks")
+                            .desc("JONGHO: [F->$] How long it is predicted to be TAKEN?")
+                            ;
 }
 
 void
@@ -569,7 +603,10 @@ Pipeline::evaluate()
         }
     }
 
-    // JONGHO
+    /*
+     * JONGHO: Profile data in pipeline registers.
+     *         Just use pipeline register's output in SNAPSHOT
+     */
     if(f1ToF2_output.isBubble())
         f1ToF2_bubble_ticks += (curTick() - last_snapshot_time);
     if(f2ToD_output.isBubble())
@@ -581,6 +618,49 @@ Pipeline::evaluate()
     if(f2ToF1_output.isBubble() || (!f2ToF1_output.isBranch()))
         f2ToF1_bubble_ticks += (curTick() - last_snapshot_time);
 
+    /*
+     * To profile branch target stored in pipeline register [E->$]
+     */
+    switch(eToF1_output.reason) {
+        /*
+         * Predicted:  T
+         * Actual:     T
+         */
+        case BranchData::CorrectlyPredictedBranch:
+            eToF1_predT_T_ticks += (curTick() - last_snapshot_time);
+            ++ eToF1_predT_T_count;
+            break;
+        /*
+         * Predicted:  T
+         * Actual:    NT
+         */
+        case BranchData::BadlyPredictedBranch:
+            eToF1_predT_NT_ticks += (curTick() - last_snapshot_time);
+            ++ eToF1_predT_NT_count;
+            break;
+        /*
+         * Predicted: NT
+         * Actual:     T
+         */
+        case BranchData::UnpredictedBranch:
+            eToF1_predNT_T_ticks += (curTick() - last_snapshot_time);
+            ++ eToF1_predNT_T_count;
+            break;
+
+        /* Don't care these cases */
+        default:
+            break;
+    }
+
+    /*
+     * To profile branch target prediction stored in pipeline register [F->$]
+     */
+    if((!f2ToF1_output.isBubble()) && f2ToF1_output.isBranch()) {
+        if(f2ToF1_output.inst->predictedTaken)
+            f2ToF1_predicted_t_ticks += (curTick() - last_snapshot_time);
+    }
+
+    /* End of profiling pipeline register data */
     ++snapshot_count;
     last_snapshot_time = curTick();
 }

@@ -96,7 +96,11 @@ class Pipeline : public Ticked
     /* Statistics */
     Stats::Scalar snapshot_count;
 
-    /* Note that there is case that non-bubble is not vulnerable */
+    /*
+     * To profile how long time pipeline register is bubble
+     *
+     * Note that there is case that non-bubble is not vulnerable
+     */
     Stats::Scalar f1ToF2_bubble_ticks;
     Stats::Formula f1ToF2_bubble_ticks_percentage;
     Stats::Scalar f2ToD_bubble_ticks;
@@ -107,6 +111,27 @@ class Pipeline : public Ticked
     Stats::Formula eToF1_bubble_ticks_percentage;
     Stats::Scalar f2ToF1_bubble_ticks;
     Stats::Formula f2ToF1_bubble_ticks_percentage;
+
+    /*
+     * To profile branch target stored in pipeline register [E->$]
+     */
+    Stats::Scalar eToF1_predT_T_ticks;
+    Stats::Scalar eToF1_predT_T_count;
+    Stats::Scalar eToF1_predT_NT_ticks;
+    Stats::Scalar eToF1_predT_NT_count;
+    Stats::Scalar eToF1_predNT_T_ticks;
+    Stats::Scalar eToF1_predNT_T_count;
+
+    /* P(T|pred-T)*/
+    Stats::Formula prob_T_given_predT_percentage;
+
+    /* P(NT|pred-T)*/
+    Stats::Formula prob_NT_given_predT_percentage;
+
+    /*
+     * To profile branch target prediction stored in pipeline register [F->$]
+     */
+    Stats::Scalar f2ToF1_predicted_t_ticks;
 
   protected:
     MinorCPU &cpu;
