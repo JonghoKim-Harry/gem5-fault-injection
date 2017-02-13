@@ -344,10 +344,10 @@ Pipeline::regStats()
     eToF1_predT_T_count.name("Pipereg.Execute2Cache.predT_T_count")
                             .desc("JONGHO: [E->$] How many (dynamic) instruction is predicted to be TAKEN and then TAKEN?")
                             ;
-    eToF1_predT_T_wrong_ticks.name("Pipereg.Execute2Cache.predT_T_wrong_ticks")
+    eToF1_predT_WT_ticks.name("Pipereg.Execute2Cache.predT_WT_ticks")
                             .desc("JONGHO: [E->$] How long it is predicted to be TAKEN and then TAKEN, but wrong branch target?")
                             ;
-    eToF1_predT_T_wrong_count.name("Pipereg.Execute2Cache.predT_T_wrong_count")
+    eToF1_predT_WT_count.name("Pipereg.Execute2Cache.predT_WT_count")
                             .desc("JONGHO: [E->$] How many (dynamic) instruction is predicted to be TAKEN and then TAKEN, but wrong branch target?")
                             ;
     eToF1_predT_NT_ticks.name("Pipereg.Execute2Cache.predT_NT_ticks")
@@ -368,25 +368,25 @@ Pipeline::regStats()
     prob_T_given_predT_percentage.name("Pipereg.probability_T_given_predT")
                                 .desc("JONGHO: P(T|pred-T)")
                                 ;
-    prob_T_given_predT_percentage = 100 * eToF1_predT_T_count / (eToF1_predT_T_wrong_count + eToF1_predT_T_count + eToF1_predT_NT_count);
+    prob_T_given_predT_percentage = 100 * eToF1_predT_T_count / (eToF1_predT_WT_count + eToF1_predT_T_count + eToF1_predT_NT_count);
 
     /* P(NT|pred-T) */
     prob_NT_given_predT_percentage.name("Pipereg.probability_NT_given_predT")
                                 .desc("JONGHO: P(NT|pred-T)")
                                 ;
-    prob_NT_given_predT_percentage = 100 * eToF1_predT_NT_count / (eToF1_predT_T_wrong_count + eToF1_predT_T_count + eToF1_predT_NT_count);
+    prob_NT_given_predT_percentage = 100 * eToF1_predT_NT_count / (eToF1_predT_WT_count + eToF1_predT_T_count + eToF1_predT_NT_count);
 
-    /* P(T-wrong|pred-T) */
-    prob_T_wrong_given_predT_percentage.name("Pipereg.probability_T_wrong_given_predT")
-                                .desc("JONGHO: P(T-wrong|pred-T)")
+    /* P(WT|pred-T) */
+    prob_WT_given_predT_percentage.name("Pipereg.probability_WT_given_predT")
+                                .desc("JONGHO: P(WT|pred-T)")
                                 ;
-    prob_T_wrong_given_predT_percentage = 100 * eToF1_predT_T_wrong_count / (eToF1_predT_T_wrong_count + eToF1_predT_T_count + eToF1_predT_NT_count);
+    prob_WT_given_predT_percentage = 100 * eToF1_predT_WT_count / (eToF1_predT_WT_count + eToF1_predT_T_count + eToF1_predT_NT_count);
 
     /* Time in which data in [E->$] is vulnerable */
     eToF1_vul_ticks.name("Pipereg.Execute2Fetch.vulnerable_time")
                     .desc("JONGHO: Time in which data in [E->$] is vulnerable")
                     ;
-    eToF1_vul_ticks = eToF1_predT_T_wrong_ticks + eToF1_predT_NT_ticks + eToF1_predNT_T_ticks;
+    eToF1_vul_ticks = eToF1_predT_WT_ticks + eToF1_predT_NT_ticks + eToF1_predNT_T_ticks;
     eToF1_vul_ticks_percentage.name("Pipereg.Execute2Fetch.vulnerable_time_among_reuntime_percentage")
                                 .desc("JONGHO: Proportion of time in which data in [E->$] is vulnerable among runtime (%)")
                                 ;
@@ -408,7 +408,7 @@ Pipeline::regStats()
     addr_vul_ticks.name("Pipereg.AddrPipereg.vul_ticks")
                     .desc("JONGHO: TIME in which data in [E->$] or [F->$] is vulnerable")
                     ;
-    addr_vul_ticks = eToF1_predT_T_ticks + eToF1_predT_T_wrong_ticks + eToF1_predT_NT_ticks + eToF1_predNT_T_ticks;
+    addr_vul_ticks = eToF1_predT_T_ticks + eToF1_predT_WT_ticks + eToF1_predT_NT_ticks + eToF1_predNT_T_ticks;
 
     addr_vul_ticks_percentage.name("Pipereg.AddrPipereg.vul_ticks_percentage")
                     .desc("JONGHO: TIME in which data in [E->$] or [F->$] is vulnerable among runtime (%)")
@@ -419,7 +419,7 @@ Pipeline::regStats()
     eToF1_vul_given_addr_vul_ticks_percentage.name("Pipereg.Execute2Cache.prob_given_addr_vul")
                                             .desc("JONGHO: P([E->$] Vul | Addr Vul) (%)")
                                             ;
-    eToF1_vul_given_addr_vul_ticks_percentage = 100 * (eToF1_predT_T_wrong_ticks + eToF1_predT_NT_ticks + eToF1_predNT_T_ticks) / addr_vul_ticks;
+    eToF1_vul_given_addr_vul_ticks_percentage = 100 * (eToF1_predT_WT_ticks + eToF1_predT_NT_ticks + eToF1_predNT_T_ticks) / addr_vul_ticks;
 
     /* P([F->$] Vul | Addr Vul) */
     f2ToF1_vul_given_addr_vul_ticks_percentage.name("Pipereg.Fetch2Cache.prob_given_addr_vul")
@@ -679,12 +679,12 @@ Pipeline::evaluate()
             break;
 
         /*
-         * Predicted:  T (wrong branch target)
+         * Predicted: WT (wrong branch target)
          * Actual:     T
          */
         case BranchData::BadlyPredictedBranchTarget:
-            eToF1_predT_T_wrong_ticks += (curTick() - last_snapshot_time);
-            ++ eToF1_predT_T_wrong_count;
+            eToF1_predT_WT_ticks += (curTick() - last_snapshot_time);
+            ++ eToF1_predT_WT_count;
             break;
 
         /*

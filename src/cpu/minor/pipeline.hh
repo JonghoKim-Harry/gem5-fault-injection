@@ -117,8 +117,8 @@ class Pipeline : public Ticked
      */
     Stats::Scalar eToF1_predT_T_ticks;
     Stats::Scalar eToF1_predT_T_count;
-    Stats::Scalar eToF1_predT_T_wrong_ticks;
-    Stats::Scalar eToF1_predT_T_wrong_count;
+    Stats::Scalar eToF1_predT_WT_ticks;
+    Stats::Scalar eToF1_predT_WT_count;
     Stats::Scalar eToF1_predT_NT_ticks;
     Stats::Scalar eToF1_predT_NT_count;
     Stats::Scalar eToF1_predNT_T_ticks;
@@ -130,8 +130,8 @@ class Pipeline : public Ticked
     /* P(NT|pred-T)*/
     Stats::Formula prob_NT_given_predT_percentage;
 
-    /* P(T-wrong|pred-T)*/
-    Stats::Formula prob_T_wrong_given_predT_percentage;
+    /* P(WT|pred-T)*/
+    Stats::Formula prob_WT_given_predT_percentage;
 
     /* Time in which data in [E->$] is vulnerable */
     Stats::Formula eToF1_vul_ticks;
