@@ -125,12 +125,6 @@ class Pipeline : public Ticked
 
     /*
      * STATS WHICH NEVER DEPEND ON HARDWARE
-     *
-     *   @exec_branch_count: Number of branch instructions executed
-     *   @exec_uncond_branch_count: Number of unconditional branch
-     *                              instructions executed
-     *   @exec_cond_branch_count: Number of conditional branch instructions
-     *                            executed
      */
     enum BranchResult {
         UNCOND,
