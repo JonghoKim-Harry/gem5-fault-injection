@@ -678,7 +678,7 @@ Pipeline::evaluate()
     if(f2ToF1_output.isBubble() || (!f2ToF1_output.isBranch()))
         f2ToF1_bubble_ticks += (curTick() - last_snapshot_time);
 
-    if(eToF1_output.isBranch()) {
+    if(!eToF1_output.isBubble() && eToF1_output.inst->staticInst->isControl()) {
         StaticInstPtr branch_inst_ptr = eToF1_output.inst->staticInst;
         assert(!(branch_inst_ptr->isUncondCtrl() && branch_inst_ptr->isCondCtrl()));
         /*
