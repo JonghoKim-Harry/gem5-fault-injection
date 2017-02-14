@@ -90,6 +90,9 @@ class Pipeline : public Ticked
 
   // JONGHO
   public:
+    void checkDebugFlags();
+    void checkAssertions();
+
     /* Override method regStats() of class Ticked */
     void regStats() override;
 

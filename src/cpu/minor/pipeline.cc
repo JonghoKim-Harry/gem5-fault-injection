@@ -92,6 +92,10 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
         params.executeBranchDelay)))),
     needToSignalDrained(false)
 {
+    // JONGHO
+    registerExitCallback(new MakeCallback<Pipeline, &Pipeline::checkDebugFlags>(this));
+    registerExitCallback(new MakeCallback<Pipeline, &Pipeline::checkAssertions>(this));
+
     // JONGHO: Print all FUs if the debug flag "PrintAllFU" is set
     if(DTRACE(PrintAllFU)) {
         std::ostream& debug_file = Trace::output();
@@ -137,6 +141,22 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
     else if(params.injectComp == "f2ToF1") {
         f2ToF1.registerFi(params.injectTime, params.injectLoc);
     }
+}
+
+// JONGHO
+void
+Pipeline::checkDebugFlags()
+{
+    std::ostream& debug_file = Trace::output();
+    debug_file << "DEBUG FLAGS" << std::endl;
+    debug_file << " - Bubble: " << (Debug::Bubble?"ON":"OFF") << std::endl;
+}
+
+// JONGHO
+void
+Pipeline::checkAssertions()
+{
+    assert(exec_branch_count.value() == exec_uncond_branch_count.value() + exec_cond_branch_count.value());
 }
 
 // JONGHO
