@@ -120,13 +120,26 @@ class Pipeline : public Ticked
     Stats::Scalar eToF1_predNT_T_ticks;
     //Stats::Scalar eToF1_predT_dropped_ticks;
 
+    /*
+     * STATS WHICH NEVER DEPEND ON HARDWARE
+     *
+     *   @exec_branch_count: Number of branch instructions executed
+     *   @exec_uncond_branch_count: Number of unconditional branch
+     *                              instructions executed
+     *   @exec_cond_branch_count: Number of conditional branch instructions
+     *                            executed
+     */
+    Stats::Scalar exec_branch_count;
+    Stats::Scalar exec_uncond_branch_count;
+    Stats::Scalar exec_cond_branch_count;
+
     /* These stats RARELY DEPEND ON HARDWARE */
     Stats::Scalar predT_count;
     Stats::Scalar predT_T_count;
     Stats::Scalar predT_WT_count;
     Stats::Scalar predT_NT_count;
     Stats::Scalar predNT_T_count;
-    //Stats::Scalar eToF1_predT_dropped_count;
+    //Stats::Scalar predT_dropped_count;
 
     /* P(T|pred-T)*/
     Stats::Formula prob_T_given_predT_percentage;

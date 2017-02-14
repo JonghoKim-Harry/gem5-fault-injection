@@ -342,6 +342,17 @@ Pipeline::regStats()
                             .desc("JONGHO: [E->$] How long it is predicted to be TAKEN and then TAKEN?")
                             ;
 
+    /* STATS WHICH NEVER DEPEND ON HARDWARE */
+    exec_branch_count
+        .name("Inst.number_of_branch_executed")
+        .desc("JONGHO: Number of branch instruction executed");
+    exec_uncond_branch_count
+        .name("Inst.number_of_uncond_branch_executed")
+        .desc("JONGHO: Number of unconditional branch instruction executed");
+    exec_cond_branch_count
+        .name("Inst.number_of_cond_branch_executed")
+        .desc("JONGHO: Number of conditional branch instruction executed");
+
     /* These stats RARELY DEPEND ON HARDWARE */
     predT_T_count.name("Inst.predT_T_count")
                             .desc("JONGHO: How many (dynamic) instruction is predicted to be TAKEN and then TAKEN?")
@@ -666,6 +677,21 @@ Pipeline::evaluate()
         eToF1_bubble_ticks += (curTick() - last_snapshot_time);
     if(f2ToF1_output.isBubble() || (!f2ToF1_output.isBranch()))
         f2ToF1_bubble_ticks += (curTick() - last_snapshot_time);
+
+    if(eToF1_output.isBranch()) {
+        StaticInstPtr branch_inst_ptr = eToF1_output.inst->staticInst;
+        assert(!(branch_inst_ptr->isUncondCtrl() && branch_inst_ptr->isCondCtrl()));
+        /*
+         * This assertion will fail. Instruction 'svc' is neither
+         * unconditional nor conditional
+         */
+        // assert(branch_inst_ptr->isUncondCtrl() || branch_inst_ptr->isCondCtrl());
+        ++ exec_branch_count;
+        if(branch_inst_ptr->isUncondCtrl())
+            ++ exec_uncond_branch_count;
+        else if(branch_inst_ptr->isCondCtrl())
+            ++ exec_cond_branch_count;
+    }
 
     /*
      * To profile branch target stored in pipeline register [E->$]
