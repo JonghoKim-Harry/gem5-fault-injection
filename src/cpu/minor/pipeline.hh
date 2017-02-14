@@ -132,10 +132,13 @@ class Pipeline : public Ticked
      *   @exec_cond_branch_count: Number of conditional branch instructions
      *                            executed
      */
-    Stats::Scalar exec_branch_count;
-    Stats::Scalar exec_uncond_branch_count;
-    Stats::Scalar exec_cond_branch_count;
-    Stats::Scalar exec_cond_branch_taken_count;
+    enum BranchResult {
+        UNCOND,
+        COND_TAKEN,
+        COND_NOTTAKEN,
+        NUM_BRANCH_RESULT
+    };
+    Stats::Vector branch_result;
 
     /* These stats RARELY DEPEND ON HARDWARE */
     Stats::Scalar predT_count;

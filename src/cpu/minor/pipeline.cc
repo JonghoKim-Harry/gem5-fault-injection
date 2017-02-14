@@ -156,7 +156,6 @@ Pipeline::checkDebugFlags()
 void
 Pipeline::checkAssertions()
 {
-    assert(exec_branch_count.value() == exec_uncond_branch_count.value() + exec_cond_branch_count.value());
 }
 
 // JONGHO
@@ -363,18 +362,16 @@ Pipeline::regStats()
                             ;
 
     /* STATS WHICH NEVER DEPEND ON HARDWARE */
-    exec_branch_count
-        .name("Inst.number_of_branch_executed")
-        .desc("JONGHO: Number of branch instruction executed");
-    exec_uncond_branch_count
-        .name("Inst.number_of_uncond_branch_executed")
-        .desc("JONGHO: Number of unconditional branch instruction executed");
-    exec_cond_branch_count
-        .name("Inst.number_of_cond_branch_executed")
-        .desc("JONGHO: Number of conditional branch instruction executed");
-    exec_cond_branch_taken_count
-        .name("Inst.number_of_cond_branch_taken")
-        .desc("JONGHO: Number of conditional branch taken");
+    branch_result
+        .init(BranchResult::NUM_BRANCH_RESULT)
+        .name("Inst.branch_result")
+        .desc("JONGHO: Branch result distribution")
+        .flags(Stats::total | Stats::pdf)
+        ;
+
+    branch_result.subname(BranchResult::UNCOND, "Unconditional_Branch");
+    branch_result.subname(BranchResult::COND_TAKEN, "Conditional_Branch_Taken");
+    branch_result.subname(BranchResult::COND_NOTTAKEN, "Conditional_Branch_NotTaken");
 
     /* These stats RARELY DEPEND ON HARDWARE */
     predT_T_count.name("Inst.predT_T_count")
@@ -710,12 +707,10 @@ Pipeline::evaluate()
          * unconditional nor conditional
          */
         // assert(branch_inst_ptr->isUncondCtrl() || branch_inst_ptr->isCondCtrl());
-        ++ exec_branch_count;
-        if(branch_inst_ptr->isUncondCtrl())
-            ++ exec_uncond_branch_count;
+        if(branch_inst_ptr->isUncondCtrl()) {
+            ++ branch_result[BranchResult::UNCOND];
+        }
         else if(branch_inst_ptr->isCondCtrl()) {
-            ++ exec_cond_branch_count;
-
             switch(eToF1_output.reason) {
                 /* predicted T -> actually T*/
                 case BranchData::CorrectlyPredictedBranch:
@@ -723,8 +718,9 @@ Pipeline::evaluate()
                 case BranchData::BadlyPredictedBranchTarget:
                 /* predicted NT -> actually T*/
                 case BranchData::UnpredictedBranch:
-                    ++ exec_cond_branch_taken_count;
+                    ++ branch_result[BranchResult::COND_TAKEN];
                 default:
+                    ++ branch_result[BranchResult::COND_NOTTAKEN];
                     break;
             }
         }
