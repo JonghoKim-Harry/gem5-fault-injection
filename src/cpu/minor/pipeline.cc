@@ -316,50 +316,60 @@ Pipeline::regStats()
     /*
      * Register custom statistics for Minor CPU pipeline.
      */
-    snapshot_count.name("num_snapshot")
-                    .desc("JONGHO: Number of snapshots")
-                    ;
+    snapshot_count
+        .name("num_snapshot")
+        .desc("JONGHO: Number of snapshots")
+        ;
 
     /* [$->F] */
-    f1ToF2_bubble_ticks.name("Pipereg.Cache2Fetch.bubble_ticks")
-                        .desc("JONGHO: [$->F] How long is it bubble?")
-                        ;
-    f1ToF2_bubble_ticks_percentage.name("Pipereg.Cache2Fetch.bubble_ticks_percentage")
-                                .desc("JONGHO: [$->F] BB\% among total time")
-                                ;
+    f1ToF2_bubble_ticks
+        .name("Pipereg.Cache2Fetch.bubble_ticks")
+        .desc("JONGHO: [$->F] How long is it bubble?")
+        ;
+    f1ToF2_bubble_ticks_percentage
+        .name("Pipereg.Cache2Fetch.bubble_ticks_percentage")
+        .desc("JONGHO: [$->F] BB\% among total time")
+        ;
     f1ToF2_bubble_ticks_percentage = 100 * f1ToF2_bubble_ticks / simTicks;
 
     /* [F->D] */
-    f2ToD_bubble_ticks.name("Pipereg.Fetch2Decode.bubble_ticks")
-                        .desc("JONGHO: [F->D] How long is it bubble?")
-                        ;
-    f2ToD_bubble_ticks_percentage.name("Pipereg.Fetch2Decode.bubble_ticks_percentage")
-                                .desc("JONGHO: [F->D] BB\% among total time")
-                                ;
+    f2ToD_bubble_ticks
+        .name("Pipereg.Fetch2Decode.bubble_ticks")
+        .desc("JONGHO: [F->D] How long is it bubble?")
+        ;
+    f2ToD_bubble_ticks_percentage
+        .name("Pipereg.Fetch2Decode.bubble_ticks_percentage")
+        .desc("JONGHO: [F->D] BB\% among total time")
+        ;
     f2ToD_bubble_ticks_percentage = 100 * f2ToD_bubble_ticks / simTicks;
 
     /* [D->E] */
-    dToE_bubble_ticks.name("Pipereg.Decode2Execute.bubble_ticks")
-                        .desc("JONGHO: [D->E] How long is it bubble?")
-                        ;
-    dToE_bubble_ticks_percentage.name("Pipereg.Decode2Execute.bubble_ticks_percentage")
-                                .desc("JONGHO: [D->E] BB\% among total time")
-                                ;
+    dToE_bubble_ticks
+        .name("Pipereg.Decode2Execute.bubble_ticks")
+        .desc("JONGHO: [D->E] How long is it bubble?")
+        ;
+    dToE_bubble_ticks_percentage
+        .name("Pipereg.Decode2Execute.bubble_ticks_percentage")
+        .desc("JONGHO: [D->E] BB\% among total time")
+        ;
     dToE_bubble_ticks_percentage = 100 * dToE_bubble_ticks / simTicks;
 
     /* [E->$] */
-    eToF1_bubble_ticks.name("Pipereg.Execute2Cache.bubble_ticks")
-                        .desc("JONGHO: [E->$] How long is it bubble?")
-                        ;
-    eToF1_bubble_ticks_percentage.name("Pipereg.Execute2Cache.bubble_ticks_percentage")
-                                .desc("JONGHO: [E->$] BB\% among total time")
-                                ;
+    eToF1_bubble_ticks
+        .name("Pipereg.Execute2Cache.bubble_ticks")
+        .desc("JONGHO: [E->$] How long is it bubble?")
+        ;
+    eToF1_bubble_ticks_percentage
+        .name("Pipereg.Execute2Cache.bubble_ticks_percentage")
+        .desc("JONGHO: [E->$] BB\% among total time")
+        ;
     eToF1_bubble_ticks_percentage = 100 * eToF1_bubble_ticks / simTicks;
 
     /* */
-    eToF1_predT_T_ticks.name("Pipereg.Execute2Cache.predT_T_ticks")
-                            .desc("JONGHO: [E->$] How long it is predicted to be TAKEN and then TAKEN?")
-                            ;
+    eToF1_predT_T_ticks
+        .name("Pipereg.Execute2Cache.predT_T_ticks")
+        .desc("JONGHO: [E->$] How long it is predicted to be TAKEN and then TAKEN?")
+        ;
 
     /* STATS WHICH NEVER DEPEND ON HARDWARE */
     branch_result
@@ -374,90 +384,109 @@ Pipeline::regStats()
     branch_result.subname(BranchResult::COND_NOTTAKEN, "Conditional_Branch_NotTaken");
 
     /* These stats RARELY DEPEND ON HARDWARE */
-    predT_T_count.name("Inst.predT_T_count")
-                            .desc("JONGHO: How many (dynamic) instruction is predicted to be TAKEN and then TAKEN?")
-                            ;
-    eToF1_predT_WT_ticks.name("Pipereg.Execute2Cache.predT_WT_ticks")
-                            .desc("JONGHO: [E->$] How long it is predicted to be TAKEN and then TAKEN, but wrong branch target?")
-                            ;
-    predT_WT_count.name("Inst.predT_WT_count")
-                            .desc("JONGHO: How many (dynamic) instruction is predicted to be TAKEN and then TAKEN, but wrong branch target?")
-                            ;
-    eToF1_predT_NT_ticks.name("Pipereg.Execute2Cache.predT_NT_ticks")
-                            .desc("JONGHO: [E->$] How long it is predicted to be TAKEN but NOT TAKEN?")
-                            ;
-    predT_NT_count.name("Inst.predT_NT_count")
-                            .desc("JONGHO: How many (dynamic) instruction is predicted to be TAKEN but NOT TAKEN?")
-                            ;
-    eToF1_predNT_T_ticks.name("Pipereg.Execute2Cache.predNT_T_ticks")
-                            .desc("JONGHO: [E->$] How long it is predicted to be NOT TAKEN but TAKEN?")
-                            ;
-    predNT_T_count.name("Pipereg.predNT_T_count")
-                            .desc("JONGHO: How many (dynamic) instruction is predicted to be NOT TAKEN but TAKEN?")
-                            ;
+    predT_T_count
+        .name("Inst.predT_T_count")
+        .desc("JONGHO: How many (dynamic) instruction is predicted to be TAKEN and then TAKEN?")
+        ;
+    eToF1_predT_WT_ticks
+        .name("Pipereg.Execute2Cache.predT_WT_ticks")
+        .desc("JONGHO: [E->$] How long it is predicted to be TAKEN and then TAKEN, but wrong branch target?")
+        ;
+    predT_WT_count
+        .name("Inst.predT_WT_count")
+        .desc("JONGHO: How many (dynamic) instruction is predicted to be TAKEN and then TAKEN, but wrong branch target?")
+        ;
+    eToF1_predT_NT_ticks
+        .name("Pipereg.Execute2Cache.predT_NT_ticks")
+        .desc("JONGHO: [E->$] How long it is predicted to be TAKEN but NOT TAKEN?")
+        ;
+    predT_NT_count
+        .name("Inst.predT_NT_count")
+        .desc("JONGHO: How many (dynamic) instruction is predicted to be TAKEN but NOT TAKEN?")
+        ;
+    eToF1_predNT_T_ticks
+        .name("Pipereg.Execute2Cache.predNT_T_ticks")
+        .desc("JONGHO: [E->$] How long it is predicted to be NOT TAKEN but TAKEN?")
+        ;
+    predNT_T_count
+        .name("Pipereg.predNT_T_count")
+        .desc("JONGHO: How many (dynamic) instruction is predicted to be NOT TAKEN but TAKEN?")
+        ;
 
     /* Probabilities */
     /* P(T|pred-T) */
-    prob_T_given_predT_percentage.name("Pipereg.probability_T_given_predT")
-                                .desc("JONGHO: P(T|pred-T)")
-                                ;
+    prob_T_given_predT_percentage
+        .name("Pipereg.probability_T_given_predT")
+        .desc("JONGHO: P(T|pred-T)")
+        ;
     prob_T_given_predT_percentage = 100 * predT_T_count / (predT_WT_count + predT_T_count + predT_NT_count);
 
     /* P(NT|pred-T) */
-    prob_NT_given_predT_percentage.name("Pipereg.probability_NT_given_predT")
-                                .desc("JONGHO: P(NT|pred-T)")
-                                ;
+    prob_NT_given_predT_percentage
+        .name("Pipereg.probability_NT_given_predT")
+        .desc("JONGHO: P(NT|pred-T)")
+        ;
     prob_NT_given_predT_percentage = 100 * predT_NT_count / (predT_WT_count + predT_T_count + predT_NT_count);
 
     /* P(WT|pred-T) */
-    prob_WT_given_predT_percentage.name("Pipereg.probability_WT_given_predT")
-                                .desc("JONGHO: P(WT|pred-T)")
-                                ;
+    prob_WT_given_predT_percentage
+        .name("Pipereg.probability_WT_given_predT")
+        .desc("JONGHO: P(WT|pred-T)")
+        ;
     prob_WT_given_predT_percentage = 100 * predT_WT_count / (predT_WT_count + predT_T_count + predT_NT_count);
 
     /* Time in which data in [E->$] is vulnerable */
-    eToF1_vul_ticks.name("Pipereg.Execute2Fetch.vulnerable_time")
-                    .desc("JONGHO: Time in which data in [E->$] is vulnerable")
-                    ;
+    eToF1_vul_ticks
+        .name("Pipereg.Execute2Fetch.vulnerable_time")
+        .desc("JONGHO: Time in which data in [E->$] is vulnerable")
+        ;
     eToF1_vul_ticks = eToF1_predT_WT_ticks + eToF1_predT_NT_ticks + eToF1_predNT_T_ticks;
-    eToF1_vul_ticks_percentage.name("Pipereg.Execute2Fetch.vulnerable_time_among_reuntime_percentage")
-                                .desc("JONGHO: Proportion of time in which data in [E->$] is vulnerable among runtime (%)")
-                                ;
+    eToF1_vul_ticks_percentage
+        .name("Pipereg.Execute2Fetch.vulnerable_time_among_reuntime_percentage")
+        .desc("JONGHO: Proportion of time in which data in [E->$] is vulnerable among runtime (%)")
+        ;
     eToF1_vul_ticks_percentage = 100 * eToF1_vul_ticks / simTicks;
 
     /* [F->$] */
-    f2ToF1_bubble_ticks.name("Pipereg.Fetch2Cache.bubble_ticks")
-                        .desc("JONGHO: [F->$] How long is it bubble?")
-                        ;
-    f2ToF1_bubble_ticks_percentage.name("Pipereg.Fetch2Cache.bubble_ticks_percentage")
-                                .desc("JONGHO: [F->$] BB\% among total time")
-                                ;
+    f2ToF1_bubble_ticks
+        .name("Pipereg.Fetch2Cache.bubble_ticks")
+        .desc("JONGHO: [F->$] How long is it bubble?")
+        ;
+    f2ToF1_bubble_ticks_percentage
+        .name("Pipereg.Fetch2Cache.bubble_ticks_percentage")
+        .desc("JONGHO: [F->$] BB\% among total time")
+        ;
     f2ToF1_bubble_ticks_percentage = 100 * f2ToF1_bubble_ticks / simTicks;
-    f2ToF1_predT_ticks.name("Pipereg.Fetch2Cache.predT_ticks")
-                            .desc("JONGHO: [F->$] How long it is predicted to be TAKEN?")
-                            ;
+    f2ToF1_predT_ticks
+        .name("Pipereg.Fetch2Cache.predT_ticks")
+        .desc("JONGHO: [F->$] How long it is predicted to be TAKEN?")
+        ;
 
     /* Time in which data in [E->$] or [F->$] is vulnerable */
-    addr_vul_ticks.name("Pipereg.AddrPipereg.vul_ticks")
-                    .desc("JONGHO: TIME in which data in [E->$] or [F->$] is vulnerable")
-                    ;
+    addr_vul_ticks
+        .name("Pipereg.AddrPipereg.vul_ticks")
+        .desc("JONGHO: TIME in which data in [E->$] or [F->$] is vulnerable")
+        ;
     addr_vul_ticks = eToF1_predT_T_ticks + eToF1_predT_WT_ticks + eToF1_predT_NT_ticks + eToF1_predNT_T_ticks;
 
-    addr_vul_ticks_percentage.name("Pipereg.AddrPipereg.vul_ticks_percentage")
-                    .desc("JONGHO: TIME in which data in [E->$] or [F->$] is vulnerable among runtime (%)")
-                    ;
+    addr_vul_ticks_percentage
+        .name("Pipereg.AddrPipereg.vul_ticks_percentage")
+        .desc("JONGHO: TIME in which data in [E->$] or [F->$] is vulnerable among runtime (%)")
+        ;
     addr_vul_ticks_percentage = 100 * addr_vul_ticks / simTicks;
 
     /* P([E->$] Vul | Addr Vul) */
-    eToF1_vul_given_addr_vul_ticks_percentage.name("Pipereg.Execute2Cache.prob_given_addr_vul")
-                                            .desc("JONGHO: P([E->$] Vul | Addr Vul) (%)")
-                                            ;
+    eToF1_vul_given_addr_vul_ticks_percentage
+        .name("Pipereg.Execute2Cache.prob_given_addr_vul")
+        .desc("JONGHO: P([E->$] Vul | Addr Vul) (%)")
+        ;
     eToF1_vul_given_addr_vul_ticks_percentage = 100 * (eToF1_predT_WT_ticks + eToF1_predT_NT_ticks + eToF1_predNT_T_ticks) / addr_vul_ticks;
 
     /* P([F->$] Vul | Addr Vul) */
-    f2ToF1_vul_given_addr_vul_ticks_percentage.name("Pipereg.Fetch2Cache.prob_given_addr_vul")
-                                            .desc("JONGHO: P([F->$] Vul | Addr Vul) (%)")
-                                            ;
+    f2ToF1_vul_given_addr_vul_ticks_percentage
+        .name("Pipereg.Fetch2Cache.prob_given_addr_vul")
+        .desc("JONGHO: P([F->$] Vul | Addr Vul) (%)")
+        ;
     f2ToF1_vul_given_addr_vul_ticks_percentage = 100 * eToF1_predT_T_ticks / addr_vul_ticks;
 }
 
