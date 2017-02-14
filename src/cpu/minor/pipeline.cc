@@ -372,6 +372,9 @@ Pipeline::regStats()
     exec_cond_branch_count
         .name("Inst.number_of_cond_branch_executed")
         .desc("JONGHO: Number of conditional branch instruction executed");
+    exec_cond_branch_taken_count
+        .name("Inst.number_of_cond_branch_taken")
+        .desc("JONGHO: Number of conditional branch taken");
 
     /* These stats RARELY DEPEND ON HARDWARE */
     predT_T_count.name("Inst.predT_T_count")
@@ -698,6 +701,7 @@ Pipeline::evaluate()
     if(f2ToF1_output.isBubble() || (!f2ToF1_output.isBranch()))
         f2ToF1_bubble_ticks += (curTick() - last_snapshot_time);
 
+    /* Profile instruction-specific informations */
     if(!eToF1_output.isBubble() && eToF1_output.inst->staticInst->isControl()) {
         StaticInstPtr branch_inst_ptr = eToF1_output.inst->staticInst;
         assert(!(branch_inst_ptr->isUncondCtrl() && branch_inst_ptr->isCondCtrl()));
@@ -709,8 +713,21 @@ Pipeline::evaluate()
         ++ exec_branch_count;
         if(branch_inst_ptr->isUncondCtrl())
             ++ exec_uncond_branch_count;
-        else if(branch_inst_ptr->isCondCtrl())
+        else if(branch_inst_ptr->isCondCtrl()) {
             ++ exec_cond_branch_count;
+
+            switch(eToF1_output.reason) {
+                /* predicted T -> actually T*/
+                case BranchData::CorrectlyPredictedBranch:
+                /* predicted WT -> actually T*/
+                case BranchData::BadlyPredictedBranchTarget:
+                /* predicted NT -> actually T*/
+                case BranchData::UnpredictedBranch:
+                    ++ exec_cond_branch_taken_count;
+                default:
+                    break;
+            }
+        }
     }
 
     /*

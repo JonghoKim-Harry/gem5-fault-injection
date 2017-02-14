@@ -135,6 +135,7 @@ class Pipeline : public Ticked
     Stats::Scalar exec_branch_count;
     Stats::Scalar exec_uncond_branch_count;
     Stats::Scalar exec_cond_branch_count;
+    Stats::Scalar exec_cond_branch_taken_count;
 
     /* These stats RARELY DEPEND ON HARDWARE */
     Stats::Scalar predT_count;
