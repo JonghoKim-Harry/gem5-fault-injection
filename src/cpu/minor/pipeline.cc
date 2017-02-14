@@ -372,16 +372,16 @@ Pipeline::regStats()
         ;
 
     /* STATS WHICH NEVER DEPEND ON HARDWARE */
-    branch_result
-        .init(BranchResult::NUM_BRANCH_RESULT)
-        .name("Inst.branch_result")
-        .desc("JONGHO: Branch result distribution")
+    dyn_branch_inst_type
+        .init(DynBranchInstType::NUM_DYN_BRANCH_INST_TYPE)
+        .name("Inst.dyn_branch_inst_type")
+        .desc("JONGHO: Branch instruction type distribution")
         .flags(Stats::total | Stats::pdf)
         ;
 
-    branch_result.subname(BranchResult::UNCOND, "Unconditional_Branch");
-    branch_result.subname(BranchResult::COND_TAKEN, "Conditional_Branch_Taken");
-    branch_result.subname(BranchResult::COND_NOTTAKEN, "Conditional_Branch_NotTaken");
+    dyn_branch_inst_type.subname(DynBranchInstType::UNCOND, "Unconditional_Branch");
+    dyn_branch_inst_type.subname(DynBranchInstType::COND_TAKEN, "Conditional_Branch_Taken");
+    dyn_branch_inst_type.subname(DynBranchInstType::COND_NOTTAKEN, "Conditional_Branch_NotTaken");
 
     /* These stats RARELY DEPEND ON HARDWARE */
     predT_T_count
@@ -737,7 +737,7 @@ Pipeline::evaluate()
          */
         // assert(branch_inst_ptr->isUncondCtrl() || branch_inst_ptr->isCondCtrl());
         if(branch_inst_ptr->isUncondCtrl()) {
-            ++ branch_result[BranchResult::UNCOND];
+            ++ dyn_branch_inst_type[DynBranchInstType::UNCOND];
         }
         else if(branch_inst_ptr->isCondCtrl()) {
             switch(eToF1_output.reason) {
@@ -747,9 +747,9 @@ Pipeline::evaluate()
                 case BranchData::BadlyPredictedBranchTarget:
                 /* predicted NT -> actually T*/
                 case BranchData::UnpredictedBranch:
-                    ++ branch_result[BranchResult::COND_TAKEN];
+                    ++ dyn_branch_inst_type[DynBranchInstType::COND_TAKEN];
                 default:
-                    ++ branch_result[BranchResult::COND_NOTTAKEN];
+                    ++ dyn_branch_inst_type[DynBranchInstType::COND_NOTTAKEN];
                     break;
             }
         }

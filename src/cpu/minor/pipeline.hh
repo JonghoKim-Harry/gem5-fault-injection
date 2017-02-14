@@ -126,15 +126,14 @@ class Pipeline : public Ticked
     /*
      * STATS WHICH NEVER DEPEND ON HARDWARE
      */
-    enum BranchResult {
+    enum DynBranchInstType {
         UNCOND,
         COND_TAKEN,
         COND_NOTTAKEN,
-        NUM_BRANCH_RESULT
+        NUM_DYN_BRANCH_INST_TYPE
     };
-    Stats::Vector branch_result;
+    Stats::Vector dyn_branch_inst_type;
 
-    /* These stats RARELY DEPEND ON HARDWARE */
     Stats::Scalar predT_count;
     Stats::Scalar predT_T_count;
     Stats::Scalar predT_WT_count;
