@@ -741,9 +741,40 @@ Pipeline::evaluate()
     if(f2ToF1_output.isBubble() || (!f2ToF1_output.isBranch()))
         f2ToF1_bubble_ticks += (curTick() - last_snapshot_time);
 
+    /* Check assertions about instruction */
+    StaticInstPtr static_inst_ptr = eToF1_output.inst->staticInst;
+
+    if(static_inst_ptr) {
+        /*
+         * There is NO instruction which is syscall and control flow.
+         * This assertion have succeeded on benchmarks:
+         *  - stringsearch
+         *  - matmul
+         *  - susan
+         *  - jpeg
+         *  - gsm
+         */
+       assert(!(static_inst_ptr->isSyscall() && static_inst_ptr->isControl()));
+    }
+
+    if(eToF1_output.isBranch() && static_inst_ptr) {
+        /* This assertion will fail */
+        //assert(static_inst_ptr->isSyscall() || static_inst_ptr->isControl());
+    }
+
     /* Profile instruction-specific informations */
     if(!eToF1_output.isBubble() && eToF1_output.inst->staticInst->isControl()) {
         StaticInstPtr branch_inst_ptr = eToF1_output.inst->staticInst;
+        /*
+         * Every control flow instruction is either
+         * unconditional or conditional.
+         * This assertion have succeeded on benchmarks:
+         *  - stringsearch
+         *  - matmul
+         *  - susan
+         *  - jpeg
+         *  - gsm
+         */
         assert(!(branch_inst_ptr->isUncondCtrl() && branch_inst_ptr->isCondCtrl()));
         /*
          * This assertion will fail. Instruction 'svc' is neither
