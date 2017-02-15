@@ -132,7 +132,24 @@ class Pipeline : public Ticked
         COND_NOTTAKEN,
         NUM_DYN_BRANCH_INST_TYPE
     };
+
     Stats::Vector dyn_branch_inst_type;
+
+    /* */
+    enum BranchResult {
+        BRANCH_TAKEN,
+        BRANCH_NOTTAKEN,
+        NUM_BRANCH_RESULT
+    };
+    enum BPResult {
+        BP_TAKEN,
+        BP_NOTTAKEN,
+        BP_WRONGTAKEN,
+        NUM_BP_RESULT
+    };
+
+    Stats::Vector2d eToF1_count;
+    //Stats::Vector2d eToF1_ticks;
 
     Stats::Scalar predT_count;
     Stats::Scalar predT_T_count;

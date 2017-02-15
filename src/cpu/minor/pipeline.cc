@@ -383,6 +383,20 @@ Pipeline::regStats()
     dyn_branch_inst_type.subname(DynBranchInstType::COND_TAKEN, "Conditional_Branch_Taken");
     dyn_branch_inst_type.subname(DynBranchInstType::COND_NOTTAKEN, "Conditional_Branch_NotTaken");
 
+    /* */
+    eToF1_count
+        .init(BranchResult::NUM_BRANCH_RESULT, BPResult::NUM_BP_RESULT)
+        .name("eToF1.target_addr")
+        .desc("JONGHO: Branch & Branch Prediction Result of Data Stored in [E->$]")
+        .flags(Stats::nozero | Stats::total | Stats::pdf)
+        ;
+
+    eToF1_count.subname(BranchResult::BRANCH_TAKEN, "branch_TAKEN");
+    eToF1_count.subname(BranchResult::BRANCH_NOTTAKEN, "branch_NOT_TAKEN");
+    eToF1_count.ysubname(BPResult::BP_TAKEN, "bp_TAKEN");
+    eToF1_count.ysubname(BPResult::BP_NOTTAKEN, "bp_NOT_TAKEN");
+    eToF1_count.ysubname(BPResult::BP_WRONGTAKEN, "bp_WRONG_TAKEN");
+
     /* These stats RARELY DEPEND ON HARDWARE */
     predT_T_count
         .name("Inst.predT_T_count")
@@ -766,6 +780,7 @@ Pipeline::evaluate()
         case BranchData::CorrectlyPredictedBranch:
             eToF1_predT_T_ticks += (curTick() - last_snapshot_time);
             ++ predT_T_count;
+            ++ eToF1_count[BranchResult::BRANCH_TAKEN][BPResult::BP_TAKEN];
             break;
 
         /*
@@ -775,6 +790,7 @@ Pipeline::evaluate()
         case BranchData::BadlyPredictedBranchTarget:
             eToF1_predT_WT_ticks += (curTick() - last_snapshot_time);
             ++ predT_WT_count;
+            ++ eToF1_count[BranchResult::BRANCH_TAKEN][BPResult::BP_WRONGTAKEN];
             break;
 
         /*
@@ -784,6 +800,7 @@ Pipeline::evaluate()
         case BranchData::BadlyPredictedBranch:
             eToF1_predT_NT_ticks += (curTick() - last_snapshot_time);
             ++ predT_NT_count;
+            ++ eToF1_count[BranchResult::BRANCH_NOTTAKEN][BPResult::BP_TAKEN];
             break;
 
         /*
@@ -793,9 +810,13 @@ Pipeline::evaluate()
         case BranchData::UnpredictedBranch:
             eToF1_predNT_T_ticks += (curTick() - last_snapshot_time);
             ++ predNT_T_count;
+            ++ eToF1_count[BranchResult::BRANCH_TAKEN][BPResult::BP_NOTTAKEN];
             break;
 
         default:
+            // TODO: Find out NT-NT cases
+            if(eToF1_output.inst->triedToPredict)
+                ++ eToF1_count[BranchResult::BRANCH_NOTTAKEN][BPResult::BP_NOTTAKEN];
             break;
     }
 
