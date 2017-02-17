@@ -475,6 +475,8 @@ ForwardInstData::injectFault(const unsigned int loc)
             const uint32_t golden_bin = golden_static_wrapper->machInst;
             const std::string golden_inst = golden_static_wrapper->generateDisassembly(addr, debugSymbolTable);
 
+            /** fault-injected binary instruction */
+            const uint32_t faulty_bin = BITFLIP(golden_bin, valid_loc % BIT_PER_INST);
             /** 
              *  Check if the original instruction is macro operation.
              *  If an instruction is macro operation, it will be decomposed
@@ -491,27 +493,21 @@ ForwardInstData::injectFault(const unsigned int loc)
              *     the instruction is decoded: Until decode stage,
              *     isMicro() will always return FALSE
              */
-            if(golden_static_wrapper->isMacroop())
+            if(golden_static_wrapper->isMacroop()) {
                 DPRINTF(FIReport, "     * type: ARM Instruction (supposed to be decomposed)\n");
-            else if(golden_static_wrapper->isMicroop())
+                goto bitflip_arm_instruction;
+            }
+            else if(golden_static_wrapper->isMicroop()) {
                 DPRINTF(FIReport, "     * type: uop (Micro Operation)\n");
-            else
+                /**/
+                // TODO
+            }
+            else {
                 DPRINTF(FIReport, "     * type: ARM Instruction\n");
-
-            /** fault-injected binary instruction */
-            const uint32_t faulty_bin = BITFLIP(golden_bin, valid_loc % BIT_PER_INST);
-
-            /**
-             *  Replace original instruction with fault-injected instruction
-             *
-             *   - Changes in golden_static_wrapper have NO EFFECT on fault-
-             *     injected instruction. We have to generate new StaticInstPtr
-             *
-             *   - Change target_dynamic_wrapper->staticInst to the generated
-             *     StaticInstPtr
-             */
-            ArmISA::Decoder *decoder = new ArmISA::Decoder(nullptr);
-            target_dynamic_wrapper->staticInst = decoder->decodeInst(faulty_bin);
+bitflip_arm_instruction:
+                ArmISA::Decoder *decoder = new ArmISA::Decoder(nullptr);
+                target_dynamic_wrapper->staticInst = decoder->decodeInst(faulty_bin);
+            }
 
             /**
              *  We can NOT use cached faulty instruction,
