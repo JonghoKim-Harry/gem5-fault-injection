@@ -482,11 +482,21 @@ ForwardInstData::injectFault(const unsigned int loc)
              *  must be a single instruction.
              *
              *  Note that either isMacro() or isMicro() is valid in same time:
-             *    isMacro() is valid until the instruction is decoded, while
-             *    isMicro() is valid right after the instruction is decoded
+             *
+             *   - isMacro() can return TRUE value until
+             *     the instruction is decoded: After decode stage,
+             *     isMacro() will always return FALSE
+             *
+             *   - isMicro() can return TRUE right after
+             *     the instruction is decoded: Until decode stage,
+             *     isMicro() will always return FALSE
              */
-            const bool golden_is_macroop = golden_static_wrapper->isMacroop();
-            DPRINTF(FIReport, "     * type: %s\n", golden_is_macroop ? "Macro Operation":"Single Instruction");
+            if(golden_static_wrapper->isMacroop())
+                DPRINTF(FIReport, "     * type: ARM Instruction (supposed to be decomposed)\n");
+            else if(golden_static_wrapper->isMicroop())
+                DPRINTF(FIReport, "     * type: uop (Micro Operation)\n");
+            else
+                DPRINTF(FIReport, "     * type: ARM Instruction\n");
 
             /** fault-injected binary instruction */
             const uint32_t faulty_bin = BITFLIP(golden_bin, valid_loc % BIT_PER_INST);
