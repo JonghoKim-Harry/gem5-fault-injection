@@ -1,3 +1,7 @@
+# Ignore root all except src/
+/*
+!src/*
+
 *.pyc
 tags
 build
@@ -5,3 +9,4 @@ build
 m5out
 parsetab.py
 *cscope*
+*.sh
