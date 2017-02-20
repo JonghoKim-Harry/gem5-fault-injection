@@ -164,13 +164,6 @@ Decode::evaluate()
                 StaticInstPtr parent_static_inst = NULL;
                 MinorDynInstPtr output_inst = inst;
 
-                // JONGHO
-                if(!inst->isFault()) {
-                    assert(static_inst->numSrcRegs() >= 0);
-                    assert(static_inst->numDestRegs() >= 0);
-                    /* This assertion will fail */
-                    //assert(static_inst->numSrcRegs() + static_inst->numDestRegs() > 0);
-                }
 
                 if (inst->isFault()) {
                     DPRINTF(Decode, "Fault being passed: %d\n",
@@ -199,6 +192,11 @@ Decode::evaluate()
                     output_inst->pc = decode_info.microopPC;
                     output_inst->staticInst = static_micro_inst;
                     output_inst->fault = NoFault;
+
+                    // JONGHO
+                    assert(static_micro_inst->numSrcRegs() >= 0);
+                    assert(static_micro_inst->numDestRegs() >= 0);
+                    assert(static_micro_inst->numSrcRegs() + static_micro_inst->numDestRegs() > 0);
 
                     /* Allow a predicted next address only on the last
                      *  microop */
@@ -237,6 +235,12 @@ Decode::evaluate()
                         decode_info.inMacroop = false;
                     }
                 } else {
+                    // JONGHO
+                    assert(static_inst->numSrcRegs() >= 0);
+                    assert(static_inst->numDestRegs() >= 0);
+                    /* This instruction will fail on benchmark 'jpeg' */
+                    //assert(static_inst->numSrcRegs() + static_inst->numDestRegs() > 0);
+
                     /* Doesn't need decomposing, pass on instruction */
                     // JONGHO: More Logging
                     ExtMachInst bin = output_inst->staticInst->machInst;
