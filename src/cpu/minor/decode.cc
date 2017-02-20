@@ -164,13 +164,22 @@ Decode::evaluate()
                 StaticInstPtr parent_static_inst = NULL;
                 MinorDynInstPtr output_inst = inst;
 
+                // JONGHO
+                if(!inst->isFault()) {
+                    assert(static_inst->numSrcRegs() >= 0);
+                    assert(static_inst->numDestRegs() >= 0);
+                    /* This assertion will fail */
+                    //assert(static_inst->numSrcRegs() + static_inst->numDestRegs() > 0);
+                }
+
                 if (inst->isFault()) {
                     DPRINTF(Decode, "Fault being passed: %d\n",
                         inst->fault->name());
 
                     decode_info.inputIndex++;
                     decode_info.inMacroop = false;
-                } else if (static_inst->isMacroop()) {
+                }
+                else if (static_inst->isMacroop()) {
                     /* Generate a new micro-op */
                     StaticInstPtr static_micro_inst;
 
