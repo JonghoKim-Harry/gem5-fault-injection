@@ -477,6 +477,10 @@ ForwardInstData::injectFault(const unsigned int loc)
 
             /** fault-injected binary instruction */
             const uint32_t faulty_bin = BITFLIP(golden_bin, valid_loc % BIT_PER_INST);
+
+            /* Print C++ typeid of target instruction */
+            DPRINTF(FIReport, "     * typeid: %s\n", typeid(*golden_static_wrapper).name());
+
             /** 
              *  Check if the original instruction is macro operation.
              *  If an instruction is macro operation, it will be decomposed
