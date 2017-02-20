@@ -170,7 +170,7 @@ class BranchData: public VulnerableData /* : public ReportIF, public BubbleIF */
      *
      * @loc: Index of a bit flipped by fault injection
      */
-    void injectFault(const unsigned int loc) override;
+    void corrupt(const unsigned int loc) override;
 };
 
 /** Print a branch reason enum */
@@ -266,7 +266,7 @@ class ForwardLineData : public VulnerableData /* : public ReportIF, public Bubbl
      *
      * @loc: Index of a bit flipped by fault injection
      */
-    void injectFault(const unsigned int loc) override;
+    void corrupt(const unsigned int loc) override;
 };
 
 /** Maximum number of instructions that can be carried by the pipeline. */
@@ -327,7 +327,7 @@ class ForwardInstData : public VulnerableData /* : public ReportIF, public Bubbl
      * This method inject fault into a single ARM instruction before decoded,
      * which is in f2ToD.
      */
-    void injectFault(const unsigned int loc) override;
+    void corrupt(const unsigned int loc) override;
 };
 
 }

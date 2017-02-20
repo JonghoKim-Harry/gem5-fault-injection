@@ -287,7 +287,7 @@ class Latch : public Vulnerable
     {
         DPRINTF(FICallTrace, "injectFault() @Latch\n");
         Data& vul_data = *output().outputWire;
-        vul_data.injectFault(loc);
+        vul_data.corrupt(loc);
     }
 };
 

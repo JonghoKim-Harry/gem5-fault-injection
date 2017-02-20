@@ -168,9 +168,9 @@ operator <<(std::ostream &os, const BranchData &branch)
 
 // JONGHO
 void
-BranchData::injectFault(const unsigned int loc)
+BranchData::corrupt(const unsigned int loc)
 {
-    DPRINTF(FICallTrace, "injectFault() @BranchData\n");
+    DPRINTF(FICallTrace, "corrupt() @BranchData\n");
 
     DPRINTF(FIReport, "--- Fault Injection ---\n");
     DPRINTF(FIReport, "     @BranchData\n");
@@ -298,9 +298,9 @@ ForwardLineData::reportData(std::ostream &os) const
 
 // JONGHO
 void
-ForwardLineData::injectFault(const unsigned int loc)
+ForwardLineData::corrupt(const unsigned int loc)
 {
-    DPRINTF(FICallTrace, "injectFault() @ForwardLineData\n");
+    DPRINTF(FICallTrace, "corrupt() @ForwardLineData\n");
 
     /** 32-bit ISA */
     const unsigned int BYTE_PER_INST = sizeof(uint32_t);
@@ -425,9 +425,9 @@ ForwardInstData::reportData(std::ostream &os) const
 }
 
 void
-ForwardInstData::injectFault(const unsigned int loc)
+ForwardInstData::corrupt(const unsigned int loc)
 {
-    DPRINTF(FICallTrace, "injectFault() @ForwardInstData\n");
+    DPRINTF(FICallTrace, "corrupt() @ForwardInstData\n");
 
     /** 32-bit ISA */
     const unsigned int BIT_PER_INST = sizeof(uint32_t) * BIT_PER_BYTE;

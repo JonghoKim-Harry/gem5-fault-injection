@@ -84,7 +84,7 @@ class VulnerableData
      *
      *  You should override this method.
      */
-    virtual void injectFault(const unsigned int loc) = 0;
+    virtual void corrupt(const unsigned int loc) = 0;
 }; // class VulnerableData
 
 #endif // __BASE_VULNERABLE_HH__
