@@ -265,6 +265,8 @@ class ExpManager:
             outdir = bench_name + '/' + comp_info
             with open(outdir + '/' + 'debug_' + str(idx) + '.txt', 'r') as debug_read:
                 for line in debug_read:
+                    if '->' in line:
+                        change_by_flip = ':'.join(line.split(':')[2:]).strip()
                     if '* inst:' in line:
                         change_by_flip = line.split('* inst:')[1].strip()
                     if 'BUBBLE' in line:
