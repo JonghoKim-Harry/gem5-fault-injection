@@ -424,10 +424,23 @@ ForwardInstData::reportData(std::ostream &os) const
     }
 }
 
+// JONGHO
 void
 ForwardInstData::corrupt(const unsigned int loc)
 {
-    DPRINTF(FICallTrace, "corrupt() @ForwardInstData\n");
+    // TODO: Remove this code.
+    corruptInst(loc);
+}
+
+// JONGHO
+/* 
+ * Target HW component: Pipeline Register [F->D]
+ * Target data: ARM Instruction
+ */
+void
+ForwardInstData::corruptInst(const unsigned int loc)
+{
+    DPRINTF(FICallTrace, "corruptInst() @ForwardInstData\n");
 
     /** 32-bit ISA */
     const unsigned int BIT_PER_INST = sizeof(uint32_t) * BIT_PER_BYTE;
@@ -435,6 +448,7 @@ ForwardInstData::corrupt(const unsigned int loc)
     /** Print out fault injection information */
     DPRINTF(FIReport, "--- Fault Injection ---\n");
     DPRINTF(FIReport, "     @ForwardInstData\n");
+    DPRINTF(FIReport, "     * target HW component: Pipeline Register [F->D]\n");
 
     if(isBubble())
         DPRINTF(FIReport, "     * Injected into BUBBLE@ForwardInstData\n");
@@ -457,6 +471,7 @@ ForwardInstData::corrupt(const unsigned int loc)
         else if(target_dynamic_wrapper->isFault())
             DPRINTF(FIReport, "     * Injected into FAULT\n");
         else {
+            DPRINTF(FIReport, "     * target data: ARM Instruction\n");
             /**
              *  We can get address only if the instruction is
              *  neither bubble nor fault
@@ -480,38 +495,8 @@ ForwardInstData::corrupt(const unsigned int loc)
 
             /* Print C++ typeid of target instruction */
             DPRINTF(FIReport, "     * typeid: %s\n", typeid(*golden_static_wrapper).name());
-
-            /** 
-             *  Check if the original instruction is macro operation.
-             *  If an instruction is macro operation, it will be decomposed
-             *  into several micro operations. Otherwise, an instruction
-             *  must be a single instruction.
-             *
-             *  Note that either isMacro() or isMicro() is valid in same time:
-             *
-             *   - isMacro() can return TRUE value until
-             *     the instruction is decoded: After decode stage,
-             *     isMacro() will always return FALSE
-             *
-             *   - isMicro() can return TRUE right after
-             *     the instruction is decoded: Until decode stage,
-             *     isMicro() will always return FALSE
-             */
-            if(golden_static_wrapper->isMacroop()) {
-                DPRINTF(FIReport, "     * type: ARM Instruction (supposed to be decomposed)\n");
-                goto bitflip_arm_instruction;
-            }
-            else if(golden_static_wrapper->isMicroop()) {
-                DPRINTF(FIReport, "     * type: uop (Micro Operation)\n");
-                /**/
-                // TODO
-            }
-            else {
-                DPRINTF(FIReport, "     * type: ARM Instruction\n");
-bitflip_arm_instruction:
-                ArmISA::Decoder *decoder = new ArmISA::Decoder(nullptr);
-                target_dynamic_wrapper->staticInst = decoder->decodeInst(faulty_bin);
-            }
+            ArmISA::Decoder *decoder = new ArmISA::Decoder(nullptr);
+            target_dynamic_wrapper->staticInst = decoder->decodeInst(faulty_bin);
 
             /**
              *  We can NOT use cached faulty instruction,
@@ -521,8 +506,18 @@ bitflip_arm_instruction:
 
             /**  Print out changes of instruction by soft error */
             DPRINTF(FIReport, "     * Flip inst: %#x %s -> %#x %s\n", golden_bin, golden_inst, faulty_bin, faulty_inst);
-        }
+           }
     }
 }
 
+// JONGHO
+/* 
+ * Target HW component: Pipeline Register [D->E]
+ * Target data: ARM Instruction or uop
+ */
+void
+ForwardInstData::corruptOp(const unsigned int loc)
+{
 }
+
+} // namespace Minor

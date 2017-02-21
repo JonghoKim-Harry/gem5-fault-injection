@@ -328,6 +328,18 @@ class ForwardInstData : public VulnerableData /* : public ReportIF, public Bubbl
      * which is in f2ToD.
      */
     void corrupt(const unsigned int loc) override;
+
+    /* 
+     * Target HW component: Pipeline Register [F->D]
+     * Target data: ARM Instruction
+     */
+    void corruptInst(const unsigned int loc);
+
+    /* 
+     * Target HW component: Pipeline Register [D->E]
+     * Target data: ARM Instruction or uop
+     */
+    void corruptOp(const unsigned int loc);
 };
 
 }
