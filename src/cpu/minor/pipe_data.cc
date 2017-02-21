@@ -429,7 +429,7 @@ void
 ForwardInstData::corrupt(const unsigned int loc)
 {
     // TODO: Remove this code.
-    corruptInst(loc);
+    corruptOp(loc);
 }
 
 // JONGHO
@@ -525,6 +525,89 @@ ForwardInstData::corruptInst(const unsigned int loc)
 void
 ForwardInstData::corruptOp(const unsigned int loc)
 {
+    DPRINTF(FICallTrace, "corruptOp() @ForwardInstData\n");
+
+    /* Print out fault injection information */
+    DPRINTF(FIReport, "--- Fault Injection ---\n");
+    DPRINTF(FIReport, "     @ForwardInstData\n");
+    DPRINTF(FIReport, "     * target HW component: Pipeline Register [D->E]\n");
+
+    if(isBubble()) {
+        DPRINTF(FIReport, "     * Injected into BUBBLE@ForwardInstData\n");
+        return;
+    }
+
+    DPRINTF(FIReport, "     * loc:  %u\n", loc);
+
+    /* Select instruction to inject fault into */
+    // TODO
+    unsigned int inst_index = 0;
+    MinorDynInstPtr dynamic_inst = insts[inst_index];
+
+    if(dynamic_inst->isBubble()) {
+        DPRINTF(FIReport, "     * Injected into BUBBLE@MinorDynInst\n");
+        return;
+    }
+
+    if(dynamic_inst->isFault()) {
+        DPRINTF(FIReport, "     * Injected into FAULT\n");
+        return;
+    }
+
+    DPRINTF(FIReport, "     * target data: ARM instruction or uop\n");
+
+    StaticInstPtr static_inst = dynamic_inst->staticInst;
+    if(static_inst->numSrcRegs() + static_inst->numDestRegs() == 0) {
+        DPRINTF(FIReport, "     * NO src nor dest register\n");
+        return;
+    }
+
+    /*
+     * If control flow reach HERE, actual bit flip will happen
+     */
+    const unsigned int num_reg_used = static_inst->numSrcRegs() + static_inst->numDestRegs();
+    const unsigned int range = num_reg_used * sizeof(RegIndex) * BIT_PER_BYTE;
+    unsigned int reg_idx = (loc % range) / (sizeof(RegIndex) * BIT_PER_BYTE);
+    const unsigned int bit_idx = loc % (sizeof(RegIndex) * BIT_PER_BYTE);
+    const bool corrupt_srcreg = (reg_idx < static_inst->numSrcRegs()) ? true : false;
+    DPRINTF(FIReport, "     * bit: %u\n", bit_idx);
+
+    const std::string golden_op = static_inst->generateDisassembly(0, debugSymbolTable);
+    DPRINTF(FIReport, "     * op: %s\n", golden_op);
+
+    /**/
+    std::stringstream srcreg_info, destreg_info;
+    for(int i=0; i<static_inst->numSrcRegs(); ++i)
+        srcreg_info << static_inst->srcRegIdx(i) << " ";
+    if(static_inst->numSrcRegs() == 0)
+        srcreg_info << "None";
+    for(int i=0; i<static_inst->numDestRegs(); ++i)
+        destreg_info << static_inst->destRegIdx(i) << " ";
+    if(static_inst->numDestRegs() == 0)
+        destreg_info << "None";
+
+    if(corrupt_srcreg) {
+        static_inst->_srcRegIdx[reg_idx] = BITFLIP(static_inst->srcRegIdx(reg_idx), bit_idx);
+
+        /**/
+        DPRINTF(FIReport, "     * Flip %u-th srcReg (reg idx = %u)\n", reg_idx + 1, reg_idx);
+        srcreg_info << " ->  ";
+        for(int i=0; i<static_inst->numSrcRegs(); ++i)
+            srcreg_info << static_inst->srcRegIdx(i) << " ";
+    }
+    else {
+        reg_idx -= static_inst->numSrcRegs();
+        static_inst->_destRegIdx[reg_idx] = BITFLIP(static_inst->destRegIdx(reg_idx), bit_idx);
+
+        /**/
+        DPRINTF(FIReport, "     * Flip %u-th destReg (reg idx = %u)\n", reg_idx + 1, reg_idx);
+        destreg_info << " ->  ";
+        for(int i=0; i<static_inst->numDestRegs(); ++i)
+            destreg_info << static_inst->destRegIdx(i) << " ";
+    }
+
+    DPRINTF(FIReport, "     * src reg: %s\n", srcreg_info.str());
+    DPRINTF(FIReport, "     * dest reg: %s\n", destreg_info.str());
 }
 
 } // namespace Minor

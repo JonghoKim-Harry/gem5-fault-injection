@@ -228,8 +228,9 @@ class StaticInst : public RefCounted, public StaticInstFlags
     /// The binary machine instruction.
     const ExtMachInst machInst;
 
-  protected:
-
+  // JONGHO
+  //protected:
+  public:
     /// See destRegIdx().
     RegIndex _destRegIdx[MaxInstDestRegs];
     /// See srcRegIdx().
