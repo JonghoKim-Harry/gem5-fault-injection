@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <vector>
+#include <functional>
 #define BITFLIP(data, bit) (data ^ (1 << (bit)))
 #define BIT_PER_BYTE 8
 
@@ -45,7 +46,7 @@ class Vulnerable
      *  You should NOT modify or override this method.
      *  We've already prevented it by using the keyword "final"
      */
-    virtual void registerFi(unsigned int time, unsigned int loc) final;
+    virtual void registerFi(unsigned int time, unsigned int loc, std::function<void(const unsigned int)> method=NULL) final;
  
     /**
      *  Your own implementation of fault injection into a hardware component
@@ -57,15 +58,18 @@ class Vulnerable
      *  Note that this method is called at the end of registerFi(),
      *  so you just register fault injections with registerFi() and it's done
      */
-    virtual void injectFault(const unsigned int loc) = 0;
+    virtual void injectFault(const unsigned int loc, std::function<void(unsigned int)> method=NULL) = 0;
  
     class FiInfo {
       public:
         friend class Vulnerable;
-        FiInfo(unsigned int _t, unsigned int _l, Vulnerable *_v);
+        FiInfo(unsigned int _t, unsigned int _l, Vulnerable *_v, std::function<void(unsigned int)> _m=NULL);
         unsigned int injTime;
         unsigned int injLoc;
         Vulnerable *target;
+
+        /* Data Corruption Method */
+        std::function<void(const unsigned int)> method = NULL;
 
       protected:
         unsigned int id;

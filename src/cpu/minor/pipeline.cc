@@ -131,10 +131,14 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
         f1ToF2.registerFi(params.injectTime, params.injectLoc);
     }
     else if(params.injectComp == "f2ToD") {
-        f2ToD.registerFi(params.injectTime, params.injectLoc);
+        /* Data Corruption Method */
+        std::function<void(const unsigned int)> method = std::bind(&ForwardInstData::corruptInst, f2ToD.output().outputWire, std::placeholders::_1);
+        f2ToD.registerFi(params.injectTime, params.injectLoc, method);
     }
     else if(params.injectComp == "dToE") {
-        dToE.registerFi(params.injectTime, params.injectLoc);
+        /* Data Corruption Method */
+        std::function<void(const unsigned int)> method = std::bind(&ForwardInstData::corruptOp, dToE.output().outputWire, std::placeholders::_1);
+        dToE.registerFi(params.injectTime, params.injectLoc, method);
     }
     else if(params.injectComp == "eToF1") {
         eToF1.registerFi(params.injectTime, params.injectLoc);

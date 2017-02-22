@@ -428,8 +428,7 @@ ForwardInstData::reportData(std::ostream &os) const
 void
 ForwardInstData::corrupt(const unsigned int loc)
 {
-    // TODO: Remove this code.
-    corruptOp(loc);
+    fatal("You can NOT use corrupt() for ForwardInstData - Use corruptInst() or corruptOp()\n");
 }
 
 // JONGHO

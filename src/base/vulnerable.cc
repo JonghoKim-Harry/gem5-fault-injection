@@ -15,9 +15,9 @@ namespace
 
 /** This method is "final" method */
 void
-Vulnerable::registerFi(unsigned int time, unsigned int loc)
+Vulnerable::registerFi(unsigned int time, unsigned int loc, std::function<void(const unsigned int)> method)
 {
-    Vulnerable::FiInfo& fi_info = *new Vulnerable::FiInfo(time, loc, this);
+    Vulnerable::FiInfo& fi_info = *new Vulnerable::FiInfo(time, loc, this, method);
     DPRINTF(FIReport, "--- Fault-injection Registered ---\n");
     DPRINTF(FIReport, "     * id:          %u\n", fi_info.id);
     DPRINTF(FIReport, "     * time:        %u\n", time);
@@ -35,13 +35,11 @@ Vulnerable::registerFi(unsigned int time, unsigned int loc)
  *
  * All information about a fault injection is stored in this constructor
  */
-Vulnerable::FiInfo::FiInfo(unsigned int _time, unsigned int _loc, Vulnerable *_vul)
+Vulnerable::FiInfo::FiInfo(unsigned int _time, unsigned int _loc, Vulnerable *_vul, std::function<void(const unsigned int)> _m)
+    : injTime(_time), injLoc(_loc), target(_vul), method(_m)
 {
     ++fi_count;
     id = fi_count;
-    injTime = _time;
-    injLoc  = _loc;
-    target = _vul;
 }
 
 /**
@@ -55,7 +53,7 @@ Vulnerable::evaluate()
 {
     for(std::vector<FiInfo>::iterator iter = remainingFi.begin(); iter != remainingFi.end();) {
         if(iter->injTime < curTick()) {
-            iter->target->injectFault(iter->injLoc);
+            iter->target->injectFault(iter->injLoc, iter->method);
             iter = remainingFi.erase(iter);
        }
         else
