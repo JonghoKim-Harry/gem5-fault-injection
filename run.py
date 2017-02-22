@@ -58,7 +58,10 @@ class ExpManager:
     BIT_LENGTH = {
         'f1ToF2': 512,       # 64 Byte = 512 bit
         'f2ToD': 64,
-        'dToE': 1920,
+        # 1 Byte = 8 bit, sizeof(RegIndex) = 2
+        # MAX(n(src reg)) = 34, MAX(n(dest reg)) = 8
+        # numInsts = 2
+        'dToE': 8 * 2 * (34+8) * 2,
         'eToF1': 32,
         'f2ToF1': 32
     }

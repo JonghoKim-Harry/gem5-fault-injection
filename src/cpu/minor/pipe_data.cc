@@ -537,12 +537,13 @@ ForwardInstData::corruptOp(const unsigned int loc)
         return;
     }
 
-    DPRINTF(FIReport, "     * loc:  %u\n", loc);
+    /* With our config, MAX(n(src reg)) = 34, MAX(n(dest reg)) = 8 */
+    const unsigned int MAX_BIT_USAGE_PER_OP = sizeof(RegIndex) * BIT_PER_BYTE * (StaticInst::MaxInstSrcRegs + StaticInst::MaxInstDestRegs);
+    const unsigned int MAX_BIT_USAGE = MAX_BIT_USAGE_PER_OP * numInsts;
 
     /* Select instruction to inject fault into */
-    // TODO
-    unsigned int inst_index = 0;
-    MinorDynInstPtr dynamic_inst = insts[inst_index];
+    const unsigned int inst_idx = (loc % MAX_BIT_USAGE) / MAX_BIT_USAGE_PER_OP;
+    MinorDynInstPtr dynamic_inst = insts[inst_idx];
 
     if(dynamic_inst->isBubble()) {
         DPRINTF(FIReport, "     * Injected into BUBBLE@MinorDynInst\n");
@@ -554,8 +555,6 @@ ForwardInstData::corruptOp(const unsigned int loc)
         return;
     }
 
-    DPRINTF(FIReport, "     * target data: ARM instruction or uop\n");
-
     StaticInstPtr static_inst = dynamic_inst->staticInst;
     if(static_inst->numSrcRegs() + static_inst->numDestRegs() == 0) {
         DPRINTF(FIReport, "     * NO src nor dest register\n");
@@ -565,15 +564,24 @@ ForwardInstData::corruptOp(const unsigned int loc)
     /*
      * If control flow reach HERE, actual bit flip will happen
      */
+
+    /*
+     * Parent instruction of the target op.
+     *
+     * If ARM instruction, parent instruction is itself.
+     * If uop, parent instruction is macro operation that
+     * the target uop comes from
+     */
+    DPRINTF(FIReport, "     * parent addr: %#x\n", dynamic_inst->pc.instAddr());
+    std::string type = static_inst->isMicroop() ? "ARM instruction" : "ARM uop";
+    DPRINTF(FIReport, "     * target op: %s%s\n", type, static_inst->generateDisassembly(0, debugSymbolTable));
+
     const unsigned int num_reg_used = static_inst->numSrcRegs() + static_inst->numDestRegs();
     const unsigned int range = num_reg_used * sizeof(RegIndex) * BIT_PER_BYTE;
     unsigned int reg_idx = (loc % range) / (sizeof(RegIndex) * BIT_PER_BYTE);
     const unsigned int bit_idx = loc % (sizeof(RegIndex) * BIT_PER_BYTE);
     const bool corrupt_srcreg = (reg_idx < static_inst->numSrcRegs()) ? true : false;
-    DPRINTF(FIReport, "     * bit: %u\n", bit_idx);
-
-    const std::string golden_op = static_inst->generateDisassembly(0, debugSymbolTable);
-    DPRINTF(FIReport, "     * op: %s\n", golden_op);
+    DPRINTF(FIReport, "     * bit index: %u (= 2^%u)\n", bit_idx, bit_idx);
 
     /**/
     std::stringstream srcreg_info, destreg_info;

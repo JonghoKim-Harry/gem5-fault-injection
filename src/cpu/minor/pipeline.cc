@@ -93,12 +93,13 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
     needToSignalDrained(false)
 {
     // JONGHO
+    std::ostream& debug_file = Trace::output();
+    // JONGHO
     registerExitCallback(new MakeCallback<Pipeline, &Pipeline::checkDebugFlags>(this));
     registerExitCallback(new MakeCallback<Pipeline, &Pipeline::checkAssertions>(this));
 
     // JONGHO: Print all FUs if the debug flag "PrintAllFU" is set
     if(DTRACE(PrintAllFU)) {
-        std::ostream& debug_file = Trace::output();
         execute.printAllFU(debug_file);
     }
 
