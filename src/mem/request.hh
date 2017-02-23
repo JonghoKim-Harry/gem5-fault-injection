@@ -351,7 +351,11 @@ class Request
     AtomicOpFunctor *atomicOpFunctor;
 
   public:
-
+    //HwiSoo
+    Addr symptom_pc;
+    InstSeqNum symptom_seqNum;
+    
+    
     /**
      * Minimal constructor. No fields are initialized. (Note that
      *  _flags and privateFlags are cleared by Flags default

@@ -22,7 +22,8 @@ elif(bench == 'gsm'):
 elif(bench == 'jpeg'):
 	runtime = 17637096000 #valid for DC LAB server
 elif(bench == 'bitcount'):
-	runtime = 23239140000 #valid for DC LAB server
+	#runtime = 23239140000 #valid for DC LAB server
+	runtime = 2409772000 #valid for DC LAB server (input 7500)    
 elif(bench == 'qsort'):
 	runtime = 16505757500 #valid for DC LAB server
 elif(bench == 'dijkstra'):
@@ -38,7 +39,7 @@ elif(bench == 'typese'):
 elif(bench == 'patricia'):
 	runtime = 99999999999999
 elif(bench == 'sha'):
-	runtime = 99999999999999
+	runtime = 4890363000
 elif(bench == 'ispell'):
 	runtime = 99999999999999
 
@@ -164,28 +165,56 @@ for i in range(int(start), int(end)):
 			f.write("failure\t")
 			
 		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
+		found=False;
 		for line in fi_read:
 			line2 = line.strip().split('=')
 			if "Misprediction Early length" in line:
 				f.write(line2[1] + "\t")
-			if "Misprediction Read length" in line:
-				f.write(line2[1] + "\t")				
-
+				found=True;
+		if not found:
+			f.write("Empty" + "\t")
+		
 		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
+		found=False;
+		for line in fi_read:
+			line2 = line.strip().split('=')
+			if "Misprediction Read length" in line:
+				f.write(line2[1] + "\t")
+				found=True;
+		if not found:
+			f.write("Empty" + "\t")
+		
+		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
+		found=False;
 		for line in fi_read:
 			line2 = line.strip().split('=')
 			if "Exception Early length" in line:
 				f.write(line2[1] + "\t")
-			if "Exception Read length" in line:
-				f.write(line2[1] + "\t")
+				found=True;
+		if not found:
+			f.write("Empty" + "\t")
 
 		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
+		found=False;
+		for line in fi_read:
+			line2 = line.strip().split('=')		
+			if "Exception Read length" in line:
+				f.write(line2[1] + "\t")
+				found=True;
+		if not found:
+			f.write("Empty" + "\t")
+
+		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
+		found=False;
 		for line in fi_read:
 			line2 = line.strip().split('=')
 			if "Exception Name" in line:
 				f.write(line2[1] + "\t")
-        
-        
+				found=True;
+		if not found:
+			f.write("Empty" + "\t")
+		
+		
 		f.write("\n")
 					
 		#os.system("rm -rf " + bench + "/" + injectArch + "/FI_" + str(i) + "_*")

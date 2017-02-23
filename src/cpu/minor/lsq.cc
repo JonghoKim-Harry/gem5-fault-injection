@@ -1066,6 +1066,10 @@ LSQ::tryToSend(LSQRequestPtr request)
     } else {
         PacketPtr packet = request->getHeadPacket();
 
+        //HwiSoo
+        packet->req->symptom_pc = request->inst->pc.instAddr();
+        packet->req->symptom_seqNum = request->inst->id.execSeqNum;
+        
         DPRINTF(MinorMem, "Trying to send request: %s addr: 0x%x\n",
             *(request->inst), packet->req->getVaddr());
 
