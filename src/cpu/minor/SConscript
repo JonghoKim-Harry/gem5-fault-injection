@@ -78,3 +78,6 @@ if 'MinorCPU' in env['CPU_MODELS']:
 
     # JONGHO: To checkout *bubbles*
     DebugFlag('Bubble', 'To checkout bubble')
+
+    # JONGHO: To check VFP information
+    DebugFlag('VfpTrace', 'To check up VFP information')

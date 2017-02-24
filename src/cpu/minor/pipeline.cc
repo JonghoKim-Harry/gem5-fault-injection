@@ -57,6 +57,7 @@
 #include "debug/Bubble.hh"
 #include "debug/PrintAllFU.hh"
 #include "debug/ForwardInstData.hh"
+#include "debug/VfpTrace.hh"
 
 namespace Minor
 {
@@ -94,6 +95,15 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
 {
     // JONGHO
     std::ostream& debug_file = Trace::output();
+
+    // JONGHO
+    /* See <arch/arm/registers.hh> */
+    if(Debug::VfpTrace) {
+        debug_file
+            << "n(float regs) = " << TheISA::NumFloatRegs << std::endl
+            << "FP_Reg_Base = " << TheISA::FP_Reg_Base << std::endl;
+    }
+
     // JONGHO
     registerExitCallback(new MakeCallback<Pipeline, &Pipeline::checkDebugFlags>(this));
     registerExitCallback(new MakeCallback<Pipeline, &Pipeline::checkAssertions>(this));

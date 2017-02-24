@@ -61,6 +61,7 @@
 #include "base/instinfo.hh"
 #include "debug/Completion.hh"
 #include "debug/InstInfo.hh"
+#include "debug/VfpTrace.hh"
 #include "base/softerror.hh"
 
 namespace Minor
@@ -1414,6 +1415,13 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
 			
             // JONGHO
             InstInfo::print_instinfo(inst);
+
+            // JONGHO TODO:
+            ThreadContext *thread = cpu.getContext(thread_id);
+            for(int i=0; i<160; ++i) {
+                FloatReg float_reg = thread->readFloatReg(i);
+                DPRINTF(VfpTrace, "readFloatReg(%d) = %f\n", i, float_reg);
+            }
 
             if (completed_mem_ref)
                 num_mem_refs_committed++;
