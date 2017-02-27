@@ -177,61 +177,64 @@ BranchData::corrupt(const unsigned int loc)
 
     if(isBubble()) {
         DPRINTF(FIReport, "     * Injected into BUBBLE\n");
+        exit(1);
     }
-    else {
-        if(!isBranch()) {
-            DPRINTF(FIReport, "     * Injected into BUBBLE (No Branch)\n");
-        }
-        else {
-        /* Fault Injection HERE */
 
-        std::string why_branch;
-        switch (reason) {
-            case NoBranch:
-            case CorrectlyPredictedBranch:
-            case SuspendThread:
-            case Interrupt:
-            case HaltFetch:
-                break;
-
-            /* Change of stream (Fetch1 should act on) */
-            case UnpredictedBranch:
-                why_branch = "UnpredictedBranch";
-                break;
-            case BranchPrediction:
-                why_branch = "BranchPrediction";
-                break;
-            case BadlyPredictedBranchTarget:
-                why_branch = "BadlyPredictedBranchTarget";
-                break;
-            case BadlyPredictedBranch:
-                why_branch = "BadlyPredictedBranch";
-                break;
-        }
-            
-        DPRINTF(FIReport, "     * fetching caused by: %s\n", why_branch);
-
-        /** These values are all unavailable when it is not branch */
-        // Address of instruction which cause branch
-        if(inst) {
-            const Addr cause_inst_addr = inst->pc.pc();
-            const ExtMachInst cause_bin_inst = inst->staticInst->machInst;
-            const std::string cause_inst = inst->staticInst->generateDisassembly(cause_inst_addr, debugSymbolTable);
-            DPRINTF(FIReport, "     * inst which cause fetching: %#x: %#x %s\n", cause_inst_addr, cause_bin_inst, cause_inst);
-        }
-
-        // Golden Target Address
-        const Addr golden_target_addr = target.pc();
-
-        // Bit Flip
-        target.set(BITFLIP(golden_target_addr, loc%32));
-
-        // Faulty Target Address
-        const Addr faulty_target_addr = target.pc();
-
-        DPRINTF(FIReport, "     * Flip target address: %#x -> %#x (%s)\n", golden_target_addr, faulty_target_addr, why_branch);
-        }
+    if(!isBranch()) {
+        DPRINTF(FIReport, "     * Injected into BUBBLE (No Branch)\n");
+        exit(1);
     }
+
+    /* Fault Injection HERE */
+    std::string why_branch;
+
+    switch (reason) {
+        case NoBranch:
+        case CorrectlyPredictedBranch:
+        case SuspendThread:
+        case Interrupt:
+        case HaltFetch:
+            break;
+
+        /* Change of stream (Fetch1 should act on) */
+        case UnpredictedBranch:
+            why_branch = "UnpredictedBranch";
+            break;
+
+        case BranchPrediction:
+            why_branch = "BranchPrediction";
+            break;
+
+        case BadlyPredictedBranchTarget:
+            why_branch = "BadlyPredictedBranchTarget";
+            break;
+
+        case BadlyPredictedBranch:
+            why_branch = "BadlyPredictedBranch";
+            break;
+    }
+
+    DPRINTF(FIReport, "     * fetching caused by: %s\n", why_branch);
+
+    /** These values are all unavailable when it is not branch */
+    // Address of instruction which cause branch
+    if(inst) {
+        const Addr cause_inst_addr = inst->pc.pc();
+        const ExtMachInst cause_bin_inst = inst->staticInst->machInst;
+        const std::string cause_inst = inst->staticInst->generateDisassembly(cause_inst_addr, debugSymbolTable);
+        DPRINTF(FIReport, "     * inst which cause fetching: %#x: %#x %s\n", cause_inst_addr, cause_bin_inst, cause_inst);
+    }
+
+    // Golden Target Address
+    const Addr golden_target_addr = target.pc();
+
+    // Bit Flip
+    target.set(BITFLIP(golden_target_addr, loc%32));
+
+    // Faulty Target Address
+    const Addr faulty_target_addr = target.pc();
+
+    DPRINTF(FIReport, "     * Flip target address: %#x -> %#x (%s)\n", golden_target_addr, faulty_target_addr, why_branch);
 }
 
 void
@@ -451,7 +454,7 @@ ForwardInstData::corruptInst(const unsigned int loc)
 
     if(isBubble()) {
         DPRINTF(FIReport, "     * Injected into BUBBLE@ForwardInstData\n");
-        return;
+        exit(1);
     }
 
     /*
@@ -469,12 +472,12 @@ ForwardInstData::corruptInst(const unsigned int loc)
 
     if(target_dynamic_wrapper->isBubble()) {
         DPRINTF(FIReport, "     * Injected into BUBBLE@MinorDynInst\n");
-        return;
+        exit(1);
     }
 
     if(target_dynamic_wrapper->isFault()) {
         DPRINTF(FIReport, "     * Injected into FAULT\n");
-        return;
+        exit(1);
     }
 
     DPRINTF(FIReport, "     * target data: ARM Instruction\n");
@@ -533,7 +536,7 @@ ForwardInstData::corruptOp(const unsigned int loc)
 
     if(isBubble()) {
         DPRINTF(FIReport, "     * Injected into BUBBLE@ForwardInstData\n");
-        return;
+        exit(1);
     }
 
     /* With our config, MAX(n(src reg)) = 34, MAX(n(dest reg)) = 8 */
@@ -546,18 +549,18 @@ ForwardInstData::corruptOp(const unsigned int loc)
 
     if(dynamic_inst->isBubble()) {
         DPRINTF(FIReport, "     * Injected into BUBBLE@MinorDynInst\n");
-        return;
+        exit(1);
     }
 
     if(dynamic_inst->isFault()) {
         DPRINTF(FIReport, "     * Injected into FAULT\n");
-        return;
+        exit(1);
     }
 
     StaticInstPtr static_inst = dynamic_inst->staticInst;
     if(static_inst->numSrcRegs() + static_inst->numDestRegs() == 0) {
-        DPRINTF(FIReport, "     * NO src nor dest register\n");
-        return;
+        DPRINTF(FIReport, "     * BUBBLE: NO src nor dest register\n");
+        exit(1);
     }
 
     /*

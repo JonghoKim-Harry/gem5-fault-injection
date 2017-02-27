@@ -261,6 +261,7 @@ class ExpManager:
             #
             change_by_flip = ''
             target_mnemonic = ''
+            bubble = False
             outdir = bench_name + '/' + comp_info
             with open(outdir + '/' + 'debug_' + str(idx) + '.txt', 'r') as debug_read:
                 for line in debug_read:
@@ -270,8 +271,10 @@ class ExpManager:
                         change_by_flip = line.split('* inst:')[1].strip()
                     if 'BUBBLE' in line:
                         change_by_flip = 'BUBBLE' + line.split('BUBBLE')[1].strip()
+                        bubble = True
                     if 'FAULT' in line:
                         change_by_flip = 'FAULT'
+                        bubble = True
                     if 'Flip inst' in line:
                         # [$->F] Example
                         # 83207000: global:      * Flip inst: 0xe50b64a4   str   r6, [fp, #-1188] -> 0xe10b64a4   tst   fp, r4, LSR #9
@@ -287,7 +290,11 @@ class ExpManager:
                         # (ex)   43809000: global:      * Flip target address: 0x1da88 -> 0x1da98
             # <F/NF> <comp2> <inst (=target mnemonic)> <runtime> <bench name> <change/etc>
             #para2 = ''
-            para2 = '\t'.join([single_exp_result.failure, inj_comp2, target_mnemonic, single_exp_result.runtime_percent, bench_name, change_by_flip])
+            if (not bubble) and single_exp_result.failure:
+                isFailure = 'F'
+            else:
+                isFailure = 'NF'
+            para2 = '\t'.join([isFailure, inj_comp2, target_mnemonic, single_exp_result.runtime_percent, bench_name, change_by_flip])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]).strip() + '\n')
