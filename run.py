@@ -241,7 +241,7 @@ class ExpManager:
         digest = open(bench_name + '/' + 'digest_' + exp_info + '.txt', 'w')
 
         #  Write headline of digest
-        digest.write('\t'.join(['exp#', 'time', 'bit', 'F/NF', 'comp2', 'runtime', 'benchmark', 'inst']) + '\n')
+        digest.write('\t'.join(['exp#', 'time', 'bit', 'F/NF', 'comp2', 'inst', 'runtime', 'benchmark', 'change/etc']) + '\n')
         digest.write('-' * 80 + '\n')
 
         #  Iterating several experiments
@@ -260,11 +260,7 @@ class ExpManager:
             #  Read debug file
             #
             change_by_flip = ''
-            actual_inject = True
-            mnemonic = ''
-            inject_at = ''
-            inst = ''
-            bubble = ''
+            target_mnemonic = ''
             outdir = bench_name + '/' + comp_info
             with open(outdir + '/' + 'debug_' + str(idx) + '.txt', 'r') as debug_read:
                 for line in debug_read:
@@ -276,19 +272,22 @@ class ExpManager:
                         change_by_flip = 'BUBBLE' + line.split('BUBBLE')[1].strip()
                     if 'FAULT' in line:
                         change_by_flip = 'FAULT'
-                    if 'Empty' in line:
-                        actual_inject = False
-                    if 'mnemonic' in line:
-                        mnemonic = line.split('mnemonic:')[1].split()[0]
-                    if ('Injection') in line and ('@' in line):
-                        inject_at = '@' + line.split('@')[1].split()[0]
-                    if 'Flip' in line:
+                    if 'Flip inst' in line:
+                        # [$->F] Example
+                        # 83207000: global:      * Flip inst: 0xe50b64a4   str   r6, [fp, #-1188] -> 0xe10b64a4   tst   fp, r4, LSR #9
+                        # [F->D] Example
+                        # (ex) 76628500: global:      * Flip inst: 0xe3530c0a   cmps   r3, #2560 -> 0xe3730c0a   cmns   r3, #2560
+                        target_mnemonic = line.split(':')[3].split()[1]
+                    if 'target op' in line:
+                        # [D->E] Example
+                        # 151534500: global:      * target op: ARM uop  ldr   r4, [fp, #-1116]
+                        target_mnemonic = line.split(':')[3].split()[2]
+
+                        # [E->$] Example
                         # (ex)   43809000: global:      * Flip target address: 0x1da88 -> 0x1da98
-                        change_by_flip = ' '.join(':'.join(line.split(':')[3:]).split()).strip()
-                        
-            # <F/NF> <stage> <inst> <target> <runtime> <bench name>
+            # <F/NF> <comp2> <inst (=target mnemonic)> <runtime> <bench name> <change/etc>
             #para2 = ''
-            para2 = '\t'.join([single_exp_result.failure, inj_comp2, '', single_exp_result.runtime_percent, bench_name, change_by_flip, mnemonic, inject_at, single_exp_result.failure_reason])
+            para2 = '\t'.join([single_exp_result.failure, inj_comp2, target_mnemonic, single_exp_result.runtime_percent, bench_name, change_by_flip])
             
             # Write one line to digest file
             digest.write('\t'.join([para1, para2]).strip() + '\n')
