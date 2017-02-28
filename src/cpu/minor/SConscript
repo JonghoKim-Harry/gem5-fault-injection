@@ -73,6 +73,7 @@ if 'MinorCPU' in env['CPU_MODELS']:
     DebugFlag('FIProfiling', 'Profiling for LSQ')
     DebugFlag('Symptom', 'Trace symptoms')              # YOHAN: Symptom event log
     DebugFlag('SymptomFI', 'Trace symptoms after FI')   # YOHAN: Symptom event log
+    DebugFlag('Rollback', 'Estimating overhead from re-execution')   # YOHAN: Symptom event log
 
     CompoundFlag('Minor', [
         'MinorCPU', 'MinorExecute', 'MinorInterrupt', 'MinorMem',
