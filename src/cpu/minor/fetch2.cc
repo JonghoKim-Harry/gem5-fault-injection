@@ -47,6 +47,7 @@
 #include "debug/Branch.hh"
 #include "debug/Fetch.hh"
 #include "debug/MinorTrace.hh"
+#include "debug/Symptom.hh" //YOHAN: Trace symptoms (branch mis-prediction
 
 // JONGHO
 #include "base/instinfo.hh"
@@ -134,6 +135,11 @@ Fetch2::updateBranchPrediction(const BranchData &branch)
     /* Don't even consider instructions we didn't try to predict or faults */
     if (inst->isFault() || !inst->triedToPredict)
         return;
+	
+	//YOHAN
+    // Addr addr = inst->pc.instAddr();
+    // std::string my_inst = inst->staticInst->generateDisassembly(addr, debugSymbolTable);
+	// DPRINTF(Symptom, "YOHAN %s\n", my_inst);
 
     switch (branch.reason) {
       case BranchData::NoBranch:
@@ -157,18 +163,21 @@ Fetch2::updateBranchPrediction(const BranchData &branch)
         DPRINTF(Branch, "Unpredicted branch seen inst: %s\n", *inst);
         branchPredictor.squash(inst->id.fetchSeqNum,
             branch.target, true, inst->id.threadId);
+        //DPRINTF(Symptom, "%#x\t%s\tNotTaken\tTaken\tYes\n", inst->pc.instAddr(), my_inst); //YOHAN
         break;
       case BranchData::CorrectlyPredictedBranch:
         /* Predicted taken, was taken */
         DPRINTF(Branch, "Branch predicted correctly inst: %s\n", *inst);
         branchPredictor.update(inst->id.fetchSeqNum,
             inst->id.threadId);
+        //DPRINTF(Symptom, "%#x\t%s\tTaken\tTaken\tNo\n", inst->pc.instAddr(), my_inst); //YOHAN
         break;
       case BranchData::BadlyPredictedBranch:
         /* Predicted taken, not taken */
         DPRINTF(Branch, "Branch mis-predicted inst: %s\n", *inst);
         branchPredictor.squash(inst->id.fetchSeqNum,
             branch.target /* Not used */, false, inst->id.threadId);
+        //DPRINTF(Symptom, "%#x\t%s\tTaken\tNotTaken\tYes\n", inst->pc.instAddr(), my_inst); //YOHAN
         break;
       case BranchData::BadlyPredictedBranchTarget:
         /* Predicted taken, was taken but to a different target */
@@ -176,6 +185,7 @@ Fetch2::updateBranchPrediction(const BranchData &branch)
             *inst, branch.target);
         branchPredictor.squash(inst->id.fetchSeqNum,
             branch.target, true, inst->id.threadId);
+        //DPRINTF(Symptom, "%#x\t%s\tTaken\tMisTaken\tYes\n", inst->pc.instAddr(), my_inst); //YOHAN
         break;
     }
 }

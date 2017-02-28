@@ -40,6 +40,7 @@
 #include "cpu/minor/decode.hh"
 #include "cpu/minor/pipeline.hh"
 #include "debug/Decode.hh"
+#include "debug/FI.hh" //YOHAN
 
 // JONGHO
 #include "base/instinfo.hh"
@@ -268,7 +269,6 @@ Decode::evaluate()
 #if TRACING_ON
                 dynInstAddTracing(output_inst, parent_static_inst, cpu);
 #endif
-
                 /* Step to next sequence number */
                 decode_info.execSeqNum++;
 

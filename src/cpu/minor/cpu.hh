@@ -134,19 +134,14 @@ class MinorCPU : public BaseCPU
     uint64_t correctTime;
     bool correctRf;
 
-        //HwiSoo
-        unsigned injectFaultLSQ;
+    //HwiSoo
+    unsigned injectFaultLSQ;
     unsigned checkFaultLSQ;
     unsigned LSQEntrySize;
-
     bool injectLSQ;
     bool checkLSQ;
 
     void exitCallback();
-
-    std::map<int, uint64_t> faultyRegs;
-
-
 
   protected:
      /** Return a reference to the data port. */
@@ -160,10 +155,7 @@ class MinorCPU : public BaseCPU
 
     ~MinorCPU();
 
-  public:
-  
-
-  
+  public:  
   
     /** Starting, waking and initialisation */
     void init() override;
@@ -234,7 +226,6 @@ class MinorCPU : public BaseCPU
     //HwiSoo
     void injectFaultRegFunc(); 
     uint64_t originalRegData;
-    
 };
 
 #endif /* __CPU_MINOR_CPU_HH__ */

@@ -237,7 +237,7 @@ SimpleThread::flipRegFile (uint64_t injectLoc, uint64_t *originalRegData)
         DPRINTF(FI, "Flipping int reg %d from %#x to %#x\n", injectLoc/32, intRegs[injectLoc/32], bit_flip);
         //DPRINTF(FI, "TheISA::NumIntRegs is %d\n", TheISA::NumIntRegs);
         intRegs[injectLoc/32] = bit_flip;
-		injectIdx = injectLoc/32;
+        injectIdx = injectLoc/32;
         return true;
     } else {
         *originalRegData = floatRegs.i[injectLoc/32];  //.i? .f?
@@ -248,4 +248,18 @@ SimpleThread::flipRegFile (uint64_t injectLoc, uint64_t *originalRegData)
         return true;
     }
     return false;    
+}
+
+//YOHAN: readIntReg for analysis
+uint64_t
+SimpleThread::readIntReg2(int reg_idx)
+{        
+    return intRegs[reg_idx];
+}
+
+//YOHAN: setIntReg for analysis
+void
+SimpleThread::setIntReg2(int reg_idx, uint64_t val)
+{
+    intRegs[reg_idx] = val;
 }

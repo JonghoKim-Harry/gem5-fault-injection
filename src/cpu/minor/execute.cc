@@ -56,6 +56,8 @@
 #include "debug/PCEvent.hh"
 #include "debug/ShsTemp.hh" //YOHAN
 #include "debug/FI.hh" //YOHAN
+#include "debug/SymptomFI.hh" //YOHAN
+#include "debug/Symptom.hh" //YOHAN
 
 // JONGHO
 #include "base/instinfo.hh"
@@ -230,6 +232,10 @@ Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
     ThreadContext *thread = cpu.getContext(inst->id.threadId);
     const TheISA::PCState &pc_before = inst->pc;
     TheISA::PCState target = thread->pcState();
+    
+    //YOHAN
+    Addr addr = inst->pc.instAddr();
+    std::string my_inst = inst->staticInst->generateDisassembly(addr, debugSymbolTable);
 
     /* Force a branch for SerializeAfter instructions at the end of micro-op
      *  sequence when we're not suspended */
@@ -267,7 +273,25 @@ Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
             DPRINTF(Branch, "Predicted a branch from 0x%x to 0x%x but"
                 " none happened inst: %s\n",
                 inst->pc.instAddr(), inst->predictedTarget.instAddr(), *inst);
-
+                
+            DPRINTF(Symptom, "%#x\t%s\tTaken\tNotTaken\tIncorrect\t%d\n", inst->pc.instAddr(), my_inst, inst->id.execSeqNum); //YOHAN
+            
+            if(cpu.injectReadSN != -1 && !cpu.readSymptom[0]) {
+                if(inst->id.execSeqNum >= cpu.injectReadSN)
+                    DPRINTF(SymptomFI, "Misprediction Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN); //YOHAN
+                else
+                    DPRINTF(SymptomFI, "Misprediction Read length=-1\n"); //YOHAN
+                cpu.readSymptom[0] = true;
+            }
+            
+            if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[0]) {
+                if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                    DPRINTF(SymptomFI, "Misprediction Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN); //YOHAN
+                else
+                    DPRINTF(SymptomFI, "Misprediction Early length=-1\n"); //YOHAN
+                cpu.earlySymptom[0] = true;
+            }
+            
             reason = BranchData::BadlyPredictedBranch;
         } else if (inst->predictedTarget == target) {
             /* Branch prediction got the right target, kill the branch and
@@ -277,6 +301,8 @@ Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
             DPRINTF(Branch, "Predicted a branch from 0x%x to 0x%x correctly"
                 " inst: %s\n",
                 inst->pc.instAddr(), inst->predictedTarget.instAddr(), *inst);
+                
+            DPRINTF(Symptom, "%#x\t%s\tTaken\tTaken\tCorrect\t%d\n", inst->pc.instAddr(), my_inst, inst->id.execSeqNum); //YOHAN
 
             reason = BranchData::CorrectlyPredictedBranch;
         } else {
@@ -285,6 +311,24 @@ Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
                     " but got the wrong target (actual: 0x%x) inst: %s\n",
                     inst->pc.instAddr(), inst->predictedTarget.instAddr(),
                     target.instAddr(), *inst);
+                    
+            DPRINTF(Symptom, "%#x\t%s\tTaken\tMisTaken\tIncorrect\t%d\n", inst->pc.instAddr(), my_inst, inst->id.execSeqNum); //YOHAN
+            
+            if(cpu.injectReadSN != -1 && !cpu.readSymptom[0]) {
+                if(inst->id.execSeqNum >= cpu.injectReadSN)
+                    DPRINTF(SymptomFI, "Misprediction Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN); //YOHAN
+                else
+                    DPRINTF(SymptomFI, "Misprediction Read length=-1\n"); //YOHAN
+                cpu.readSymptom[0] = true;
+            }
+            
+            if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[0]) {
+                if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                    DPRINTF(SymptomFI, "Misprediction Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN); //YOHAN
+                else
+                    DPRINTF(SymptomFI, "Misprediction Early length=-1\n"); //YOHAN
+                cpu.earlySymptom[0] = true;
+            }
 
             reason = BranchData::BadlyPredictedBranchTarget;
         }
@@ -292,9 +336,30 @@ Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
         /* Unpredicted branch */
         DPRINTF(Branch, "Unpredicted branch from 0x%x to 0x%x inst: %s\n",
             inst->pc.instAddr(), target.instAddr(), *inst);
+        
+        //YOHAN
+        DPRINTF(Symptom, "%#x\t%s\tNotTaken\tTaken\tIncorrect\t%d\n", inst->pc.instAddr(), my_inst, inst->id.execSeqNum); //YOHAN
+        
+        if(cpu.injectReadSN != -1 && !cpu.readSymptom[0]) {
+            if(inst->id.execSeqNum >= cpu.injectReadSN)
+                DPRINTF(SymptomFI, "Misprediction Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN); //YOHAN
+            else
+                DPRINTF(SymptomFI, "Misprediction Read length=-1\n"); //YOHAN
+            cpu.readSymptom[0] = true;
+        }
+        
+        if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[0]) {
+            if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                DPRINTF(SymptomFI, "Misprediction Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN); //YOHAN
+            else
+                DPRINTF(SymptomFI, "Misprediction Early length=-1\n"); //YOHAN
+            cpu.earlySymptom[0] = true;
+        }
 
         reason = BranchData::UnpredictedBranch;
     } else {
+        if(inst->triedToPredict)
+            DPRINTF(Symptom, "%#x\t%s\tNotTaken\tNotTaken\tCorrect\t%d\n", inst->pc.instAddr(), my_inst, inst->id.execSeqNum); //YOHAN
         /* No branch at all */
         reason = BranchData::NoBranch;
     }
@@ -351,16 +416,45 @@ Execute::handleMemResponse(MinorDynInstPtr inst,
         /* Invoke memory faults. */
         DPRINTF(MinorMem, "Completing fault from DTLB access: %s\n",
             response->fault->name());
-
+            
+        //HwiSoo
+        DPRINTF(Symptom, "Exec:Completing fault from DTLB access:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+            inst->id,inst->pc.instAddr(), inst->id.execSeqNum, response->fault->name());
+            
         if (inst->staticInst->isPrefetch()) {
             DPRINTF(MinorMem, "Not taking fault on prefetch: %s\n",
                 response->fault->name());
+            //HwiSoo
+            DPRINTF(Symptom, "Exec:Not taking fault on prefetch:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, response->fault->name());
 
             /* Don't assign to fault */
         } else {
             /* Take the fault raised during the TLB/memory access */
             fault = response->fault;
 
+            //HwiSoo
+            DPRINTF(Symptom, "Exec:Completing fault from DTLB access(Invoke):id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, response->fault->name());            
+            
+            //HwiSoo
+            if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
+                if(inst->id.execSeqNum >= cpu.injectReadSN)
+                    DPRINTF(SymptomFI, "Exception Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN);
+                else
+                    DPRINTF(SymptomFI, "Exception Read length=-1\n");
+                cpu.readSymptom[1] = true;
+            }
+            
+            if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[1]) {
+                if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                    DPRINTF(SymptomFI, "Exception Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN);
+                else
+                    DPRINTF(SymptomFI, "Exception Early length=-1\n");
+                cpu.earlySymptom[1] = true;
+                DPRINTF(SymptomFI, "Exception Name=%s\n", fault->name());
+            }
+            
             fault->invoke(thread, inst->staticInst);
         }
     } else if (!packet) {
@@ -391,6 +485,29 @@ Execute::handleMemResponse(MinorDynInstPtr inst,
             /* Invoke fault created by instruction completion */
             DPRINTF(MinorMem, "Fault in memory completeAcc: %s\n",
                 fault->name());
+            //HwiSoo
+            DPRINTF(Symptom, "Exec:Fault in memory completeAcc:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name());
+                
+            //HwiSoo
+            if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
+                if(inst->id.execSeqNum >= cpu.injectReadSN)
+                    DPRINTF(SymptomFI, "Exception Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN);
+                else
+                    DPRINTF(SymptomFI, "Exception Read length=-1\n");
+                cpu.readSymptom[1] = true;
+            }
+            
+            if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[1]) {
+                if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                    DPRINTF(SymptomFI, "Exception Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN);
+                else
+                    DPRINTF(SymptomFI, "Exception Early length=-1\n");
+                cpu.earlySymptom[1] = true;
+                DPRINTF(SymptomFI, "Exception Name=%s\n", fault->name());
+            }
+
+            
             fault->invoke(thread, inst->staticInst);
         } else {
             /* Stores need to be pushed into the store buffer to finish
@@ -404,11 +521,14 @@ Execute::handleMemResponse(MinorDynInstPtr inst,
     }
 
     lsq.popResponse(response);
-
+    
     if (inst->traceData) {
         inst->traceData->setPredicate((use_context_predicate ?
             context.readPredicate() : false));
     }
+    
+    if(cpu.traceMask)
+        inst->corruptedPred = (use_context_predicate ? context.readPredicate() : false);
 
     doInstCommitAccounting(inst);
 
@@ -428,6 +548,10 @@ Execute::takeInterrupt(ThreadID thread_id, BranchData &branch)
     DPRINTF(MinorInterrupt, "Considering interrupt status from PC: %s\n",
         cpu.getContext(thread_id)->pcState());
 
+    //HwiSoo
+    DPRINTF(Symptom, "Interrupt:Considering interrupt status from PC: %s\n",
+        cpu.getContext(thread_id)->pcState());
+        
     Fault interrupt = cpu.getInterruptController(thread_id)->getInterrupt
         (cpu.getContext(thread_id));
 
@@ -435,13 +559,36 @@ Execute::takeInterrupt(ThreadID thread_id, BranchData &branch)
         /* The interrupt *must* set pcState */
         cpu.getInterruptController(thread_id)->updateIntrInfo
             (cpu.getContext(thread_id));
+        
+        //HwiSoo
+        DPRINTF(Symptom, "Interrupt:Invoking interrupt: %s to PC: %s\n",
+            interrupt->name(), cpu.getContext(thread_id)->pcState());
+
+        //HwiSoo, Finding a way to check SeqNum
+        if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
+            //if(inst->id.execSeqNum >= cpu.injectReadSN)
+            //    DPRINTF(SymptomFI, "Exception Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN);
+            //else
+                DPRINTF(SymptomFI, "Exception Read length=-1\n");
+            cpu.readSymptom[1] = true;
+        }
+        
+        if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[1]) {
+            //if(inst->id.execSeqNum >= cpu.injectEarlySN)
+            //    DPRINTF(SymptomFI, "Exception Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN);
+            //else
+                DPRINTF(SymptomFI, "Exception Early length=-1\n");
+            cpu.earlySymptom[1] = true;
+            DPRINTF(SymptomFI, "Exception Name=Interrupt(%s)\n", interrupt->name());        
+        }
+        
         interrupt->invoke(cpu.getContext(thread_id));
 
         assert(!lsq.accessesInFlight());
 
         DPRINTF(MinorInterrupt, "Invoking interrupt: %s to PC: %s\n",
             interrupt->name(), cpu.getContext(thread_id)->pcState());
-
+            
         /* Assume that an interrupt *must* cause a branch.  Assert this? */
 
         updateBranchData(thread_id, BranchData::Interrupt,
@@ -480,15 +627,22 @@ Execute::executeMemRefInst(MinorDynInstPtr inst, BranchData &branch,
         if (init_fault != NoFault) {
             DPRINTF(MinorExecute, "Fault on memory inst: %s"
                 " initiateAcc: %s\n", *inst, init_fault->name());
+            //HwiSoo. note that it does not invoke exception handler
+            DPRINTF(Symptom, "Exec:Fault on memory inst:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, init_fault->name());
             fault = init_fault;
         } else {
             /* Only set this if the instruction passed its
              * predicate */
             passed_predicate = context.readPredicate();
-
+            
             /* Set predicate in tracing */
             if (inst->traceData)
                 inst->traceData->setPredicate(passed_predicate);
+            
+            //YOHAN
+            if(cpu.traceMask)
+                inst->corruptedPred = passed_predicate;
 
             /* If the instruction didn't pass its predicate (and so will not
              *  progress from here)  Try to branch to correct and branch
@@ -901,6 +1055,13 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
 
     bool completed_inst = true;
     fault = NoFault;
+    
+    //YOHAN
+    inst->needReExecute = false;
+    if( (cpu.injectReg || cpu.injectLSQ) && cpu.injectEarlySN == -1) {
+        cpu.injectEarlySN = inst->id.execSeqNum;
+        DPRINTF(FI, "cpu.injectEarlySN is %d\n", cpu.injectEarlySN);
+    }
 
     /* Is the thread for this instruction suspended?  In that case, just
      *  stall as long as there are no pending interrupts */
@@ -914,7 +1075,28 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
 
         DPRINTF(MinorExecute, "Fault inst reached Execute: %s\n",
             inst->fault->name());
-
+        //HwiSoo
+        DPRINTF(Symptom, "Exec:Fault inst reached Execute:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+            inst->id,inst->pc.instAddr(), inst->id.execSeqNum, inst->fault->name());
+            
+        //HwiSoo
+        if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
+            if(inst->id.execSeqNum >= cpu.injectReadSN)
+                DPRINTF(SymptomFI, "Exception Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN);
+            else
+                DPRINTF(SymptomFI, "Exception Read length=-1\n");
+            cpu.readSymptom[1] = true;
+        }
+        
+        if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[1]) {
+            if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                DPRINTF(SymptomFI, "Exception Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN);
+            else
+                DPRINTF(SymptomFI, "Exception Early length=-1\n");
+            cpu.earlySymptom[1] = true;
+            DPRINTF(SymptomFI, "Exception Name=%s\n", inst->fault->name());
+        }
+        
         fault = inst->fault;
         inst->fault->invoke(thread, NULL);
 
@@ -932,14 +1114,26 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
          *  memory queues.  When a response comes back from memory,
          *  Execute::commit will commit it.
          */
+         
+        //YOHAN: If all the soruce registers of memory instruction is corrected
+        if(inst->staticInst->isStore() && cpu.correctStore)
+            correctInst(inst);
+        
+        if(inst->staticInst->isLoad() && cpu.correctLoad)
+            correctInst(inst);
+         
         bool predicate_passed = false;
         bool completed_mem_inst = executeMemRefInst(inst, branch,
             predicate_passed, fault);
-
+            
         if (completed_mem_inst && fault != NoFault) {
             if (early_memory_issue) {
                 DPRINTF(MinorExecute, "Fault in early executing inst: %s\n",
                     fault->name());
+                    
+                //HwiSoo
+                DPRINTF(Symptom, "Exec:Fault in early executing inst:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                    inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name());
                 /* Don't execute the fault, just stall the instruction
                  *  until it gets to the head of inFlightInsts */
                 inst->canEarlyIssue = false;
@@ -949,6 +1143,28 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
             } else {
                 DPRINTF(MinorExecute, "Fault in execute: %s\n",
                     fault->name());
+                //HwiSoo
+                DPRINTF(Symptom, "Exec:Fault in execute:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                    inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name());
+                
+                //HwiSoo
+                if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
+                    if(inst->id.execSeqNum >= cpu.injectReadSN)
+                        DPRINTF(SymptomFI, "Exception Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN);
+                    else
+                        DPRINTF(SymptomFI, "Exception Read length=-1\n");
+                    cpu.readSymptom[1] = true;
+                }
+                
+                if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[1]) {
+                    if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                        DPRINTF(SymptomFI, "Exception Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN);
+                    else
+                        DPRINTF(SymptomFI, "Exception Early length=-1\n");
+                    cpu.earlySymptom[1] = true;
+                    DPRINTF(SymptomFI, "Exception Name=%s\n", fault->name());
+                }
+                
                 fault->invoke(thread, NULL);
 
                 tryToBranch(inst, fault, branch);
@@ -971,12 +1187,46 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
          * backwards, so no other branches may evaluate this cycle*/
         completed_inst = false;
     } else {
+        //YOHAN: preExecute
+        
+        bool needPreExecute = false;
+        
+        if(cpu.traceMask) {
+            std::map<int, uint64_t>::iterator regMap;
+
+            for(regMap = cpu.RCDBP.begin(); regMap != cpu.RCDBP.end(); regMap++) {
+                for(int i = 0; i < inst->staticInst->numSrcRegs(); i++) {
+                    if(inst->staticInst->srcRegIdx(i) == regMap->first) {
+                        needPreExecute = true;
+                        break;
+                    }
+                }
+            }
+
+            for(regMap = cpu.RCDAP.begin(); regMap != cpu.RCDAP.end(); regMap++) {
+                for(int i = 0; i < inst->staticInst->numSrcRegs(); i++) {
+                    if(inst->staticInst->srcRegIdx(i) == regMap->first) {
+                        needPreExecute = true;
+                        break;
+                    }
+                }
+            }        
+
+            if(needPreExecute) {
+                preExecute(inst);
+            }
+        }
+
         ExecContext context(cpu, *cpu.threads[thread_id], *this, inst);
-
         DPRINTF(MinorExecute, "Committing inst: %s\n", *inst);
-
+        
         fault = inst->staticInst->execute(&context,
             inst->traceData);
+
+        //YOHAN
+        if(cpu.traceMask) {
+            inst->corruptedPred = context.readPredicate();
+        }
 
         /* Set the predicate for tracing and dump */
         if (inst->traceData)
@@ -987,6 +1237,29 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
         if (fault != NoFault) {
             DPRINTF(MinorExecute, "Fault in execute of inst: %s fault: %s\n",
                 *inst, fault->name());
+            //HwiSoo
+            DPRINTF(Symptom, "Exec:Fault in execute of inst:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name());
+            
+            //HwiSoo
+            if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
+                if(inst->id.execSeqNum >= cpu.injectReadSN)
+                    DPRINTF(SymptomFI, "Exception Read length=%d\n", inst->id.execSeqNum - cpu.injectReadSN);
+                else
+                    DPRINTF(SymptomFI, "Exception Read length=-1\n");
+                cpu.readSymptom[1] = true;
+            }
+            
+            if(cpu.injectEarlySN != -1 && !cpu.earlySymptom[1]) {
+                if(inst->id.execSeqNum >= cpu.injectEarlySN)
+                    DPRINTF(SymptomFI, "Exception Early length=%d\n", inst->id.execSeqNum - cpu.injectEarlySN);
+                else
+                    DPRINTF(SymptomFI, "Exception Early length=-1\n");
+                cpu.earlySymptom[1] = true;
+                DPRINTF(SymptomFI, "Exception Name=%s\n", fault->name());
+            }
+
+                
             fault->invoke(thread, inst->staticInst);
         }
 
@@ -1292,7 +1565,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                             *inst, inst->minimumCommitCycle - now);
                         completed_inst = false;
                     } else {
-						
+                        
                         completed_inst = commitInst(inst,
                             early_memory_issue, branch, fault,
                             committed_inst, issued_mem_ref);
@@ -1367,7 +1640,17 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
         if (completed_inst && !(issued_mem_ref && fault == NoFault)) {
             /* Note that this includes discarded insts */
             DPRINTF(MinorExecute, "Completed inst: %s\n", *inst);
- 
+            
+            // JONGHO
+            if(inst && inst->pc.instAddr() && inst->staticInst) {
+                Addr addr = inst->pc.instAddr();
+                std::string my_inst = inst->staticInst->generateDisassembly(addr, debugSymbolTable);
+                DPRINTF(Completion, ">> Completed inst %#x: %s\n", addr, my_inst);
+                if(discard_inst) {
+                    DPRINTF(Completion, "<< Discarded inst %#x: %s\n", addr, my_inst);
+                }
+            }
+
             /* Got to the end of a full instruction? */
             ex_info.lastCommitWasEndOfMacroop = inst->isFault() ||
                 inst->isLastOpInInst();
@@ -1404,7 +1687,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
 
             if (num_insts_committed == commitLimit)
                 DPRINTF(MinorExecute, "Reached inst commit limit\n");
-
+          
             /* Re-set the time of the instruction if that's required for
              * tracing */
             if (inst->traceData) {
@@ -1412,17 +1695,108 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     inst->traceData->setWhen(curTick());
                 inst->traceData->dump();
             }
-			
+            
             // JONGHO
             InstInfo::print_instinfo(inst);
-
-            // JONGHO TODO:
-            ThreadContext *thread = cpu.getContext(thread_id);
-            for(int i=0; i<160; ++i) {
-                FloatReg float_reg = thread->readFloatReg(i);
-                DPRINTF(VfpTrace, "readFloatReg(%d) = %f\n", i, float_reg);
+            
+            //YOHAN: validate exeuction
+            
+            if(cpu.traceMask) {
+                std::map<int, uint64_t>::iterator regMap;
+                Addr addr = inst->pc.instAddr();
+                std::string my_inst = inst->staticInst->generateDisassembly(addr, debugSymbolTable);
+                
+                int offsetReg = -1;
+                
+                for(regMap = cpu.RCDBP.begin(); regMap != cpu.RCDBP.end(); regMap++) {
+                    for(int i = 0; i < inst->staticInst->numSrcRegs(); i++) {
+                        if(inst->staticInst->srcRegIdx(i) == regMap->first) {
+                            offsetReg = regMap->first;
+                            break;
+                        }
+                    }
+                }
+                
+                if(inst->staticInst->isMemRef()) {
+                    std::map<Addr, uint64_t>::iterator memMap;
+                    
+                    if(inst->needReExecute) {
+                        if(inst->staticInst->isStore()) {
+                            cpu.MCD[inst->memAddr] = 0;
+                            DPRINTF(FI, "Mem %#x is inserted into MCD by %s\n", inst->memAddr, my_inst);
+                            //DPRINTF(FI, "YOHAN D: %#x, A: %#x\n", inst->memData, inst->memAddr);
+                            if(offsetReg != -1) {
+                                cpu.RCDAP[offsetReg] =  cpu.RCDBP[offsetReg];
+                                cpu.RCDBP.erase(offsetReg);
+                                DPRINTF(FI, "Reg %d is inserted into RCDAP by %s\n", offsetReg, my_inst);
+                            }
+                        }
+                    }
+                    else {
+                        if(inst->staticInst->isStore()) {
+                            for(memMap = cpu.MCD.begin(); memMap != cpu.MCD.end(); memMap++) {
+                                if(inst->memAddr == memMap->first) {
+                                    DPRINTF(FI, "Mem %#x is overwritten by %s\n", memMap->first, my_inst);
+                                    cpu.MCD.erase(memMap->first);
+                                }
+                            }
+                        }
+                        
+                        else if(inst->staticInst->isLoad()) {
+                            for(int i = 0; i < inst->staticInst->numDestRegs(); i++) {
+                                if(cpu.inRCDAP (inst->staticInst->destRegIdx(i))) {
+                                    cpu.RCDAP.erase(inst->staticInst->destRegIdx(i));
+                                    DPRINTF(FI, "Reg %d is overwritten by %s\n", inst->staticInst->destRegIdx(i), my_inst);
+                                }
+                                
+                                else if(cpu.inRCDBP (inst->staticInst->destRegIdx(i))) {
+                                    cpu.RCDBP.erase(inst->staticInst->destRegIdx(i));
+                                    DPRINTF(FI, "Reg %d is overwritten by DD\n", inst->staticInst->destRegIdx(i));
+                                }
+                            }
+                        }
+                        // else if(inst->staticInst->isLoad()) {
+                            // for(memMap = cpu.MCD.begin(); memMap != cpu.MCD.end(); memMap++) {
+                                // if(inst->memAddr == memMap->first) {
+                                    // for(int i = 0; i < inst->staticInst->numDestRegs(); i++) {
+                                        // if(inst->staticInst->numDestRegs() < TheISA::NumIntRegs) {
+                                            // DPRINTF(FI, "Reg %d is inserted into RCDBP (orig\n", inst->staticInst->destRegIdx(i));
+                                            // cpu.RCDBP[inst->staticInst->destRegIdx(i)] = 
+                                        // }
+                                    // }
+                                // }
+                            // }
+                        // }
+                    }
+                }
+                
+                else {
+                    if(inst->needReExecute)
+                        validateExecute(inst);
+                    
+                    else {
+                        for(regMap = cpu.RCDBP.begin(); regMap != cpu.RCDBP.end(); regMap++) {
+                            for(int i = 0; i < inst->staticInst->numDestRegs(); i++) {
+                                if(inst->staticInst->destRegIdx(i) == regMap->first) {
+                                    DPRINTF(FI, "Reg %d is masked by DD (%s)\n", regMap->first, my_inst);
+                                    cpu.RCDBP.erase(inst->staticInst->destRegIdx(i));
+                                }
+                            }
+                        }
+                        
+                        for(regMap = cpu.RCDAP.begin(); regMap != cpu.RCDAP.end(); regMap++) {
+                            for(int i = 0; i < inst->staticInst->numDestRegs(); i++) {
+                                if(inst->staticInst->destRegIdx(i) == regMap->first) {
+                                    DPRINTF(FI, "Reg %d is overwritten by %s\n", regMap->first, my_inst);
+                                    cpu.RCDAP.erase(inst->staticInst->destRegIdx(i));
+                                }
+                            }
+                        }
+                    }
+                }
+                //YOHAN END
             }
-
+            
             if (completed_mem_ref)
                 num_mem_refs_committed++;
 
@@ -1960,4 +2334,305 @@ void Execute::printAllFU(std::ostream& os) const {
     }
 }
 
+//YOHAN: Exit when corrupted reg is not used
+void
+Execute::preExecute(MinorDynInstPtr inst)
+{
+    int numSrcRegs = inst->staticInst->numSrcRegs();
+    int numDestRegs = inst->staticInst->numDestRegs();
+    std::map<int, uint64_t>::iterator regMap;
+       
+    for(int i = 0; i < numSrcRegs; i++) {
+        if(inst->staticInst->srcRegIdx(i) < TheISA::NumIntRegs)
+            inst->staticInst->corruptedSrcReg[i] = readIntReg(inst, inst->staticInst->srcRegIdx(i));
+
+        else if(isFlag(inst->staticInst->srcRegIdx(i)))
+            inst->staticInst->corruptedSrcReg[i] = cpu.threads[0]->readCCReg(inst->staticInst->srcRegIdx(i)-1536);
+    }
+    
+    for(int i = 0; i < numSrcRegs; i++) {
+        if(inst->staticInst->srcRegIdx(i) < TheISA::NumIntRegs) {
+            for(regMap = cpu.RCDBP.begin(); regMap != cpu.RCDBP.end(); regMap++) {
+                if(inst->staticInst->srcRegIdx(i) == regMap->first) {
+                    setIntReg(inst, regMap->first, regMap->second);
+                    //DPRINTF(FI, "Reg %d is restored to %#x from %#x\n", regMap->first, regMap->second, inst->staticInst->corruptedSrcReg[i]);
+                }
+            }
+            
+            for(regMap = cpu.RCDAP.begin(); regMap != cpu.RCDAP.end(); regMap++) {
+                if(inst->staticInst->srcRegIdx(i) == regMap->first) {
+                    setIntReg(inst, regMap->first, regMap->second);
+                    //DPRINTF(FI, "Reg %d is restored to %#x from %#x\n", regMap->first, regMap->second, inst->staticInst->corruptedSrcReg[i]);
+                }
+            }
+        }
+        
+        else if(isFlag(inst->staticInst->srcRegIdx(i))) {
+            for(regMap = cpu.RCDBP.begin(); regMap != cpu.RCDBP.end(); regMap++) {
+                if(inst->staticInst->srcRegIdx(i) == regMap->first) {
+                    cpu.threads[0]->setCCReg(regMap->first-1536, regMap->second);
+                    //DPRINTF(FI, "Reg %d is restored to %#x\n", regMap->first, regMap->second);
+                }
+            }
+            
+            for(regMap = cpu.RCDAP.begin(); regMap != cpu.RCDAP.end(); regMap++) {
+                if(inst->staticInst->srcRegIdx(i) == regMap->first) {
+                    cpu.threads[0]->setCCReg(regMap->first-1536, regMap->second);
+                    //DPRINTF(FI, "Reg %d is restored to %#x\n", regMap->first, regMap->second);
+                }
+            }
+        }
+    }
+    
+    ExecContext context(cpu, *cpu.threads[inst->id.threadId], *this, inst);
+    inst->staticInst->execute(&context, inst->traceData);
+    inst->origPred = context.readPredicate();
+
+    for(int i = 0; i < numDestRegs; i++) {
+        if(inst->staticInst->destRegIdx(i) < TheISA::NumIntRegs) {
+            inst->staticInst->origDestReg[i] = readIntReg(inst, inst->staticInst->destRegIdx(i));
+        }
+        
+        else if(isFlag(inst->staticInst->destRegIdx(i))) {
+            inst->staticInst->origDestReg[i] = cpu.threads[0]->readCCReg(inst->staticInst->destRegIdx(i)-1536);
+        }
+    }
+
+    for(int i = 0; i < numSrcRegs; i++) {
+        if(inst->staticInst->srcRegIdx(i) < TheISA::NumIntRegs) {
+            setIntReg(inst, inst->staticInst->srcRegIdx(i), inst->staticInst->corruptedSrcReg[i]);
+        }
+        
+        else if(isFlag(inst->staticInst->srcRegIdx(i))) {
+            cpu.threads[0]->setCCReg(inst->staticInst->srcRegIdx(i)-1536, inst->staticInst->corruptedSrcReg[i]);
+        }
+    }
+}
+
+//YOHAN: Valiudate execution results
+void
+Execute::validateExecute(MinorDynInstPtr inst)
+{
+    int numSrcRegs = inst->staticInst->numSrcRegs();
+    int numDestRegs = inst->staticInst->numDestRegs();
+    std::map<int, uint64_t>::iterator regMap;
+    bool * redunDest;// = -1;
+    redunDest = new bool [numDestRegs];
+    update = new bool [numSrcRegs];
+    ExecContext context(cpu, *cpu.threads[inst->id.threadId], *this, inst);
+    
+    bool condition;
+    
+    for(int i = 0; i < numSrcRegs; i++) {
+        if(cpu.inRCDBP(inst->staticInst->srcRegIdx(i)) || cpu.inRCDAP(inst->staticInst->srcRegIdx(i))) {
+            if(inst->staticInst->srcRegIdx(i) < TheISA::NumIntRegs) {
+                condition = false;
+                break;
+            }
+        }
+        condition = true;
+    }
+    
+    Addr addr = inst->pc.instAddr();
+    std::string my_inst = inst->staticInst->generateDisassembly(addr, debugSymbolTable);
+    
+    if(inst->origPred != inst->corruptedPred) {
+        DPRINTF(FI, "Incorrect branch is taken\n");
+        clearCD();
+        return;
+    }
+    
+    for(int i = 0; i < numSrcRegs; i++) {
+        update[i] = false;
+    }
+    
+    for(int i = 0; i < numDestRegs; i++) {
+        redunDest[i] = false;
+    }
+    
+    for(int i = 0; i < numDestRegs; i++) {
+        if(inst->staticInst->destRegIdx(i) < TheISA::NumIntRegs || isFlag(inst->staticInst->destRegIdx(i))) {
+            if(cpu.inRCDBP(inst->staticInst->destRegIdx(i)) || cpu.inRCDAP(inst->staticInst->destRegIdx(i))) {
+                cpu.RCDBP.erase(inst->staticInst->destRegIdx(i));
+                cpu.RCDAP.erase(inst->staticInst->destRegIdx(i));
+                //redunDest = inst->staticInst->destRegIdx(i);
+                redunDest[i] = true;
+            }
+            
+            if(inst->staticInst->destRegIdx(i) < TheISA::NumIntRegs) {
+                if(inst->staticInst->origDestReg[i] == readIntReg(inst, inst->staticInst->destRegIdx(i))) {
+                    if(condition || !inst->corruptedPred)
+                        DPRINTF(FI, "Reg %d is masked by conditional execution (%s)\n", inst->staticInst->destRegIdx(i), my_inst);
+                    else
+                        DPRINTF(FI, "Reg %d is masked by %s\n", inst->staticInst->destRegIdx(i), my_inst);
+                    for(int j = 0; j < numSrcRegs; j++) {
+                        if(inst->staticInst->srcRegIdx(j) == inst->staticInst->destRegIdx(i)) {
+                            inst->staticInst->corruptedSrcReg[j] = readIntReg(inst, inst->staticInst->destRegIdx(i));
+                        }
+                    }
+                }
+                else {
+                    cpu.RCDBP[inst->staticInst->destRegIdx(i)] = inst->staticInst->origDestReg[i];
+                    DPRINTF(FI, "Reg %d is inserted into RCDBP by %s (original data: %#x)\n", inst->staticInst->destRegIdx(i), my_inst, inst->staticInst->origDestReg[i]);
+                    if(!redunDest[i]) {
+                        for(int j = 0; j < numSrcRegs; j++) {
+                            if(inst->staticInst->srcRegIdx(j) == inst->staticInst->destRegIdx(i)) {
+                                update[j] = true;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            else if(isFlag(inst->staticInst->destRegIdx(i))) {
+                if(inst->staticInst->origDestReg[i] == cpu.threads[0]->readCCReg(inst->staticInst->destRegIdx(i)-1536)) {
+                    if(condition || !inst->corruptedPred)
+                        DPRINTF(FI, "Reg %d is masked by conditional execution (%s)\n", inst->staticInst->destRegIdx(i), my_inst);
+                    else if(isCompare(inst))
+                        DPRINTF(FI, "Reg %d is masked by compare instruction (%s)\n", inst->staticInst->destRegIdx(i), my_inst);
+                    else
+                        DPRINTF(FI, "Reg %d is masked by flag update (%s)\n", inst->staticInst->destRegIdx(i), my_inst);
+                    for(int j = 0; j < numSrcRegs; j++) {
+                        if(inst->staticInst->srcRegIdx(j) == inst->staticInst->destRegIdx(i)) {
+                            inst->staticInst->corruptedSrcReg[j] = cpu.threads[0]->readCCReg(inst->staticInst->destRegIdx(i)-1536);
+                        }
+                    }
+                }
+                
+                else {
+                    cpu.RCDBP[inst->staticInst->destRegIdx(i)] = inst->staticInst->origDestReg[i];
+                    DPRINTF(FI, "Reg %d is inserted into RCDBP by %s (original data: %#x)\n", inst->staticInst->destRegIdx(i), my_inst, inst->staticInst->origDestReg[i]);
+                    if(redunDest[i]) {
+                        for(int j = 0; j < numSrcRegs; j++) {
+                            if(inst->staticInst->srcRegIdx(j) == inst->staticInst->destRegIdx(i)) {
+                                update[j] = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for(int i = 0; i < numSrcRegs; i++) {
+        if(inst->staticInst->srcRegIdx(i) < TheISA::NumIntRegs) {
+            if(cpu.inRCDBP(inst->staticInst->srcRegIdx(i)) && !update[i]) {
+                cpu.RCDAP[inst->staticInst->srcRegIdx(i)] =  cpu.RCDBP[inst->staticInst->srcRegIdx(i)];
+                cpu.RCDBP.erase(inst->staticInst->srcRegIdx(i));
+                DPRINTF(FI, "Reg %d is inserted into RCDAP by %s (original data: %#x)\n", inst->staticInst->srcRegIdx(i), my_inst, cpu.RCDAP[inst->staticInst->srcRegIdx(i)]);
+            }
+        }
+        
+        else if(isFlag(inst->staticInst->srcRegIdx(i))) {
+            if(cpu.inRCDBP(inst->staticInst->srcRegIdx(i)) && !update[i]) {
+                cpu.RCDAP[inst->staticInst->srcRegIdx(i)] =  cpu.RCDBP[inst->staticInst->srcRegIdx(i)];
+                cpu.RCDBP.erase(inst->staticInst->srcRegIdx(i));
+                DPRINTF(FI, "Reg %d is inserted into RCDAP by %s (original data: %#x)\n", inst->staticInst->srcRegIdx(i), my_inst, cpu.RCDAP[inst->staticInst->srcRegIdx(i)]);
+            }
+        }
+    }
+}
+
+//YOHAN: Valiudate execution results
+void
+Execute::correctInst(MinorDynInstPtr inst)
+{
+    int numSrcRegs = inst->staticInst->numSrcRegs();
+    std::map<int, uint64_t>::iterator regMap;
+    Addr addr = inst->pc.instAddr();
+    std::string my_inst = inst->staticInst->generateDisassembly(addr, debugSymbolTable);
+    
+    for(int i=0; i<numSrcRegs; i++) {
+        if(cpu.traceReg && inst->staticInst->srcRegIdx(i) == cpu.injectLoc/32) {
+            cpu.traceReg = false;
+            DPRINTF(FI, "Corrupted reg %d is corrected by %s %#x\n", inst->staticInst->srcRegIdx(i), my_inst, inst->id);
+        }
+        
+        if(cpu.inRCDBP(inst->staticInst->srcRegIdx(i))) {
+            if(inst->staticInst->srcRegIdx(i) < TheISA::NumIntRegs)
+                setIntReg(inst, inst->staticInst->srcRegIdx(i), cpu.RCDBP[inst->staticInst->srcRegIdx(i)]);
+            else if(isFlag(inst->staticInst->srcRegIdx(i)))
+                cpu.threads[0]->setCCReg(inst->staticInst->srcRegIdx(i)-1536, cpu.RCDBP[inst->staticInst->srcRegIdx(i)]);
+            cpu.RCDBP.erase(inst->staticInst->srcRegIdx(i));
+            DPRINTF(FI, "Reg %d is corrected by %s\n", inst->staticInst->srcRegIdx(i), my_inst);
+        }
+        
+        else if(cpu.inRCDAP(inst->staticInst->srcRegIdx(i))){
+            if(inst->staticInst->srcRegIdx(i) < TheISA::NumIntRegs)
+                setIntReg(inst, inst->staticInst->srcRegIdx(i), cpu.RCDAP[inst->staticInst->srcRegIdx(i)]);
+            else if(isFlag(inst->staticInst->srcRegIdx(i)))
+                cpu.threads[0]->setCCReg(inst->staticInst->srcRegIdx(i)-1536, cpu.RCDAP[inst->staticInst->srcRegIdx(i)]);
+            cpu.RCDAP.erase(inst->staticInst->srcRegIdx(i));
+            DPRINTF(FI, "Reg %d is corrected by %s\n", inst->staticInst->srcRegIdx(i), my_inst);
+        }
+    }
+}
+
+//YOHAN: read Int Regs
+uint64_t
+Execute::readIntReg(MinorDynInstPtr inst, int reg_idx)
+{
+    uint64_t temp;
+    if(reg_idx == 15)
+        temp = inst->predictedTarget.instAddr();
+    else
+        temp = cpu.threads[0]->readIntReg2(reg_idx);
+    //DPRINTF(FI, "Reading int reg %d as %#x\n", reg_idx, temp);
+    return temp;
+}
+//YOHAN: read Int Regs
+void
+Execute::setIntReg(MinorDynInstPtr inst, int reg_idx, uint64_t reg_data)
+{
+    //DPRINTF(FI, "Setting int reg %d to %#x\n", reg_idx, reg_data);
+    Addr temp = reg_data;
+    if(reg_idx == 15)
+        inst->predictedTarget.set(temp);
+    else
+        cpu.threads[0]->setIntReg2(reg_idx, reg_data);
+}
+
+//YOHAN: reg_idx in flag?
+bool
+Execute::isFlag(int reg_idx)
+{
+    if(reg_idx == 1536 || reg_idx == 1538 || reg_idx == 1537)
+        return true;
+    
+    return false;
+}
+
+//YOHAN: clear all RCD and MCD
+void
+Execute::clearCD()
+{
+    std::map<int, uint64_t>::iterator regMap;
+    std::map<Addr, uint64_t>::iterator memMap;
+    
+    for(regMap = cpu.RCDBP.begin(); regMap != cpu.RCDBP.end(); regMap++) {
+        cpu.RCDBP.erase(regMap->first);
+    }
+    
+    for(regMap = cpu.RCDAP.begin(); regMap != cpu.RCDAP.end(); regMap++) {
+        cpu.RCDAP.erase(regMap->first);
+    }
+    
+    for(memMap = cpu.MCD.begin(); memMap != cpu.MCD.end(); memMap++) {
+        cpu.MCD.erase(memMap->first);
+    }
+}
+
+//YOHAN: inst is compare instruction?
+bool
+Execute::isCompare(MinorDynInstPtr inst)
+{
+    int numCmps = 2;
+    std::string cmp[numCmps] = {"cmps", "cmns"};
+    for(int i=0; i<numCmps; i++) {
+        if(cmp[i].compare(inst->staticInst->getName()) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
 }

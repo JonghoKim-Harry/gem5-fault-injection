@@ -618,6 +618,7 @@ Pipeline::evaluate()
      */
     Vulnerable::evaluate();
 
+	//YOHAN: Inject fault into register file
     cpu.injectFaultRegFunc();
 
     //HwiSoo

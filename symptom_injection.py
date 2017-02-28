@@ -22,7 +22,8 @@ elif(bench == 'gsm'):
 elif(bench == 'jpeg'):
 	runtime = 17637096000 #valid for DC LAB server
 elif(bench == 'bitcount'):
-	runtime = 23239140000 #valid for DC LAB server
+	#runtime = 23239140000 #valid for DC LAB server
+	runtime = 2409772000 #valid for DC LAB server (input 7500)    
 elif(bench == 'qsort'):
 	runtime = 16505757500 #valid for DC LAB server
 elif(bench == 'dijkstra'):
@@ -38,7 +39,7 @@ elif(bench == 'typese'):
 elif(bench == 'patricia'):
 	runtime = 99999999999999
 elif(bench == 'sha'):
-	runtime = 99999999999999
+	runtime = 4890363000
 elif(bench == 'ispell'):
 	runtime = 99999999999999
 
@@ -63,15 +64,14 @@ for i in range(int(start), int(end)):
         #injectTime = 9841886
         #injectLoc = 65
         f = open(str(bench) + "/val_" + str(injectArch)+"_"+str(start)+"_"+str(end)+".txt", 'a')
-        s = open(str(bench) + "/sec_" + str(injectArch)+"_"+str(start)+"_"+str(end)+".txt", 'a')
 
         f.write(str(injectTime) + "\t" + str(injectLoc) + "\t")
 
 	if (injectArch == "Reg"):
 		if(bench == 'susan') or (bench == 'jpeg'):
-			os.system("./inject_output.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + str(i).zfill(5)  + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
+			os.system("./symptom_inject_output.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + str(i).zfill(5)  + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
 		else:
-			os.system("./inject.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
+			os.system("./symptom_inject.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
 			
 		non_failure = False
 		fi_read = file(bench+"/FI_" + str(injectArch)+ "_" + str(i))
@@ -117,105 +117,10 @@ for i in range(int(start), int(end)):
 		elif(failure is False and non_failure is False):
 			previous = "sdc"
 
-		contReadIdx = 0
 		second_complete = False
 		read = False
 		correctTime = []
 
-		if(contRead):
-			s.write(str(i)+"\n")
-			fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
-			linecount = 0
-			previous_op = "ND"
-			for line in fi_read:
-				line2 = line.strip().split(':')
-				line3 = line.strip().split(' ')
-				if "read" in line:
-					if previous_op != line3[8]:
-						correctTime.append(line2[0])
-						previous_op = line3[8]
-						linecount += 1
-					else:
-						correctTime[linecount-1] = line2[0]
-			#print correctTime
-				
-			if linecount == 1:
-				root = previous_op
-			
-			else:
-				#fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
-				#for line in fi_read:
-				print "Second-level analysis"
-				for contReadIdx in range(0, linecount):	
-					#line2 = line.strip().split(':')
-					#line3 = line.strip().split(' ')
-					#if "read" in line:
-						#correctTime = line2[0]
-					if(bench == 'susan') or (bench == 'jpeg'):
-						os.system("./second_output.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + str(i).zfill(5) + " " + str(contReadIdx) +  " " + str(correctTime[contReadIdx]) + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i) + "_" + str(contReadIdx))
-					else:
-						os.system("./second.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) +  " " + str(contReadIdx) +  " " + str(correctTime[contReadIdx]) + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i) + "_" + str(contReadIdx))
-					
-					fi_read_second = file(bench+"/FI_" + str(injectArch)+ "_" + str(i) + "_" + str(contReadIdx))
-					for line_second in fi_read_second:
-						if "NF" in line_second:
-							non_failure = True
-							s.write("NF\t")
-						else:
-							second_complete = True
-							non_failure = False
-							s.write("F\t")
-					
-					root_candidate = "ND"
-							
-					fi_read_second = file(bench+"/"+injectArch+"/FI_"+str(i)+"_"+str(contReadIdx))
-					for line_second in fi_read_second:
-						line2_second = line_second.strip().split(' ')
-						if "Corrupted" in line_second:
-							if "read" in line_second and read is False:
-								read = True
-								s.write(line2_second[8] + "\t")
-								root_candidate = line2_second[8]
-							elif "read" in line_second and read is True:
-								s.write(line2_second[8] + "\t")
-								root_candidate = line2_second[8]
-							elif "overwritten" in line_second and read is False:
-								s.write("overwritten\t" + line2_second[4] + "\t" + line2_second[8] + "\t")
-							elif "unused" in line_second:
-								s.write("unused\t" + line2_second[4] + "\t\t")
-							
-					failure = True
-					stat_read = file(bench+"/"+injectArch+"/stats_" + str(i)+"_"+str(contReadIdx))
-					root = "ND"
-					for line in stat_read:
-						pattern = re.compile(r'\s+')
-						line = re.sub(pattern, '', line)
-						line2 = line.strip().split(' ')
-						if "sim_ticks" in line:
-							sim_ticks = int(re.findall('\d+', line)[0])
-							s.write(str(float(sim_ticks)/runtime*100) + "\n")
-							failure = False
-							if(float(sim_ticks)/runtime*100 >= 200):
-								if(previous == "infinite"):
-									root = root_candidate
-							elif(float(sim_ticks)/runtime*100 > 100 and non_failure is True):
-								if(previous == "timing"):
-									root = root_candidate
-							
-					if(failure):
-						s.write("failure\n")
-						if(previous == "halt"):
-							root = root_candidate
-					elif(failure is False and non_failure is False):
-						if(previous == "sdc"):
-							root = root_candidate
-						
-					#contReadIdx += 1
-					
-					if (root != "ND"):
-						s.write("\n")
-						break
-	
 		fi_read = file(bench+"/FI_" + str(injectArch)+ "_" + str(i))
 		for line in fi_read:
 			if "NF" in line:
@@ -230,18 +135,18 @@ for i in range(int(start), int(end)):
 			if "Corrupted" in line:
 				if "read" in line and contRead is False:
 					read = True
-					f.write("read\t" + line2[4] + "\t" + line2[8] + "\t")
+					f.write("read\t" + line2[4] + "\t")
 					break
 				elif "read" in line and contRead is True:
 					contRead = True
-					f.write("read\t" + line2[4] + "\t" + root + "\t")
+					f.write("read\t" + line2[4] + "\t")
 					break
 				elif "overwritten" in line and read is False:
-					f.write("overwritten\t" + line2[4] + "\t" + line2[8] + "\t")
+					f.write("overwritten\t" + line2[4] + "\t")
 				elif "unused" in line:
-					f.write("unused\t" + line2[4] + "\t\t")
+					f.write("unused\t" + line2[4] + "\t")
 				elif "corrected" in line:
-					f.write("corrected\t" + line2[4] + "\t\t")
+					f.write("corrected\t" + line2[4] + "\t")
 		
 		failure = True
 		stat_read = file(bench+"/"+injectArch+"/stats_" + str(i))
@@ -258,87 +163,60 @@ for i in range(int(start), int(end)):
 				
 		if(failure):
 			f.write("failure\t")
-		
-		incBranch = False
-		logical = False
-		shift = False
-		dd = False
-		cmp = False
-		cond = False
-		flag = False
-		correct = False
-		branch = False
-		mult = False
-		etc = False
-				
-		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
-		for line in fi_read:
-			if "Incorrect branch" in line:
-				incBranch = True
-			elif "masked" in line and "DD" in line:
-				dd = True
-			elif "masked" in line and ("cmps" in line or "cmns" in line or "compare" in line):
-				cmp = True
-			elif "masked" in line and ("ASR" in line or "LSL" in line or "LSR" in line or "ROR" in line or "RRX" in line):
-				shift = True
-			elif "masked" in line and ("and" in line or "orr" in line):
-				logical = True
-			elif "masked" in line and ("conditional" in line):
-				cond = True
-			elif "masked" in line and ("flag" in line):
-				cond = True
-			elif "masked" in line and ("bl" in line):
-				branch = True
-			elif "masked" in line and ("mull" in line or "mla" in line):
-				mult = True
-			elif "corrected by memory instruction" in line:
-				correct = True
-			elif "masked" in line:
-				etc = True
-				line3 = line.strip().split(' ')
-				print line3
-		
-		if(incBranch):
-			f.write("incorrect branch\t")
-		else:
-			f.write("\t")
-		if(dd):
-			f.write("dynamically dead\t")
-		else:
-			f.write("\t")
-		if(cmp):
-			f.write("compare\t")
-		else:
-			f.write("\t")
-		if(logical):
-			f.write("logical\t")
-		else:
-			f.write("\t")
-		if(shift):
-			f.write("shift\t")
-		else:
-			f.write("\t")
-		if(mult):
-			f.write("multiply\t")
-		else:
-			f.write("\t")
-		if(cond):
-			f.write("conditional execution\t")
-		else:
-			f.write("\t")
-		if(branch):
-			f.write("store link regiter\t")
-		else:
-			f.write("\t")
-		if(correct):
-			f.write("corrected\t")
-		else:
-			f.write("\t")
-		if(etc):
-			f.write("etc\n")
-		else:
-			f.write("\t\n")
 			
+		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
+		found=False;
+		for line in fi_read:
+			line2 = line.strip().split('=')
+			if "Misprediction Early length" in line:
+				f.write(line2[1] + "\t")
+				found=True;
+		if not found:
+			f.write("Empty" + "\t")
+		
+		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
+		found=False;
+		for line in fi_read:
+			line2 = line.strip().split('=')
+			if "Misprediction Read length" in line:
+				f.write(line2[1] + "\t")
+				found=True;
+		if not found:
+			f.write("Empty" + "\t")
+		
+		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
+		found=False;
+		for line in fi_read:
+			line2 = line.strip().split('=')
+			if "Exception Early length" in line:
+				f.write(line2[1] + "\t")
+				found=True;
+		if not found:
+			f.write("Empty" + "\t")
+
+		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
+		found=False;
+		for line in fi_read:
+			line2 = line.strip().split('=')		
+			if "Exception Read length" in line:
+				f.write(line2[1] + "\t")
+				found=True;
+		if not found:
+			f.write("Empty" + "\t")
+
+		fi_read = file(bench+"/"+injectArch+"/FI_"+str(i))
+		found=False;
+		for line in fi_read:
+			line2 = line.strip().split('=')
+			if "Exception Name" in line:
+				f.write(line2[1] + "\t")
+				found=True;
+		if not found:
+			f.write("Empty" + "\t")
+		
+		
+		f.write("\n")
+					
 		#os.system("rm -rf " + bench + "/" + injectArch + "/FI_" + str(i) + "_*")
 		#os.system("rm -rf " + bench + "/" + injectArch + "/FI_" + str(i))
 		#os.system("rm -rf " + bench + "/" + injectArch + "/result_" + str(i) + "_*")
@@ -408,4 +286,3 @@ for i in range(int(start), int(end)):
                         f.write("failure\n")
 
         f.close()
-        s.close()

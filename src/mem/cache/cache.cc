@@ -63,6 +63,7 @@
 #include "mem/cache/mshr.hh"
 #include "mem/cache/prefetch/base.hh"
 #include "sim/sim_exit.hh"
+#include "debug/Symptom.hh"
 
 Cache::Cache(const CacheParams *p)
     : BaseCache(p, p->system->cacheLineSize()),
@@ -330,6 +331,9 @@ Cache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
             pkt->getAddr(), pkt->getSize(), pkt->isSecure() ? "s" : "ns",
             blk ? "hit " + blk->print() : "miss");
 
+    //HwiSoo
+    if(!blk&&!pkt->req->isInstFetch())
+        DPRINTF(Symptom, "CacheMiss:PC:%x:seqNum:%d\n", pkt->req->symptom_pc, pkt->req->symptom_seqNum);
 
     if (pkt->isEviction()) {
         // We check for presence of block in above caches before issuing

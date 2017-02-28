@@ -135,7 +135,12 @@ BaseCPU::BaseCPU(Params *p, bool is_checker)
       functionTraceStream(nullptr), currentFunctionStart(0),
       currentFunctionEnd(0), functionEntryTick(0),
       addressMonitor(p->numThreads),
-	  traceReg(false)
+      traceReg(false), //YOHAN
+      traceMask(p->traceMask), //YOHAN
+      correctStore (p->correctStore), //YOHAN
+      correctLoad (p->correctLoad), //YOHAN
+      injectReadSN (-1), //YOHAN
+      injectEarlySN (-1) //YOHAN
 {
     // if Python did not provide a valid ID, do it here
     if (_cpuId == -1 ) {
@@ -254,6 +259,13 @@ BaseCPU::BaseCPU(Params *p, bool is_checker)
     if (params()->isa.size() != numThreads) {
         fatal("Number of ISAs (%i) assigned to the CPU does not equal number "
               "of threads (%i).\n", params()->isa.size(), numThreads);
+    }
+    
+    //HwiSoo
+    for(int i=0; i<NumOfSymptom; i++)
+    {
+        readSymptom[i]=false; 
+        earlySymptom[i]=false;
     }
 }
 
@@ -781,4 +793,35 @@ BaseCPU::traceFunctionsInternal(Addr pc)
                  curTick() - functionEntryTick, curTick(), sym_str);
         functionEntryTick = curTick();
     }
+}
+
+//YOHAN
+//YOHAN: reg_idx in RCDBP?
+bool
+BaseCPU::inRCDBP(int reg_idx)
+{
+    std::map<int, uint64_t>::iterator regMap;
+    
+    for(regMap = RCDBP.begin(); regMap != RCDBP.end(); regMap++) {
+        if(reg_idx == regMap->first) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+    
+//YOHAN: reg_idx in RCDAP?
+bool
+BaseCPU::inRCDAP(int reg_idx)
+{
+    std::map<int, uint64_t>::iterator regMap;
+    
+    for(regMap = RCDAP.begin(); regMap != RCDAP.end(); regMap++) {
+        if(reg_idx == regMap->first) {
+            return true;
+        }
+    }
+    
+    return false;
 }

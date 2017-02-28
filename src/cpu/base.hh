@@ -71,6 +71,8 @@ struct BaseCPUParams;
 class CheckerCPU;
 class ThreadContext;
 
+#define NumOfSymptom 2
+
 struct AddressMonitor
 {
     AddressMonitor();
@@ -580,9 +582,25 @@ class BaseCPU : public MemObject
     std::vector<AddressMonitor> addressMonitor;
 
   public:
-	bool traceReg; // YOHAN: Trace behaviors of fault injected register
+    bool traceReg; // YOHAN: Trace behaviors of fault injected register
     bool instRead; //YOHAN: Corrupted data is read by insructions, not syscall
+    std::map<int, uint64_t> RCDBP; //YOHAN: Registers which contain Corrupted Data Before Propagation 
+    std::map<int, uint64_t> RCDAP; //YOHAN: Registers which contain Corrupted Data After Propagation
+    std::map<Addr, uint64_t> MCD; //YOHAN: Memory address which contain Corrupted Data
+    Addr traceAddr; //YOHAN: Trace address
+    Addr traceMask; //YOHAN: Trace masking effects
+    uint64_t readId; //YOHAN: Trace address
+    bool inRCDBP(int reg_idx);
+    bool inRCDAP(int reg_idx);
+    bool correctStore; //YOHAN: correct store instructions
+    bool correctLoad; //YOHAN: correct load insructions
+    int injectReadSN; //YOHAN: Sequnce number of instruction which is corrupted
+    int injectEarlySN; //YOHAN: Sequnce number of instruction which is corrupted
 
+	bool readSymptom[NumOfSymptom]; //YOHAN: Symptom is detected
+	bool earlySymptom[NumOfSymptom]; //YOHAN: Symptom is detected. HwiSoo: [0] = Branch misprediction, [1] = Exception
+
+    
   public:
     void armMonitor(ThreadID tid, Addr address);
     bool mwait(ThreadID tid, PacketPtr pkt);

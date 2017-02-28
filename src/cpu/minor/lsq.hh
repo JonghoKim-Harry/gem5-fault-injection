@@ -738,7 +738,7 @@ class LSQ : public Named
     MinorCPU::MinorCPUPort &getDcachePort() { return dcachePort; }
 
     void minorTrace() const;
-	
+    
 
     //HwiSoo : LSQ FI, fault injection to LSQ
     void injectFaultLSQFunc();

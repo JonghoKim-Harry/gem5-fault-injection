@@ -196,6 +196,13 @@ class MinorDynInst : public RefCounted
     StaticInstPtr staticInst;
 
     InstId id;
+    
+    //YOHAN
+    Addr memAddr; //Memory address
+    uint64_t memData; //Memory data
+    bool origPred; //Original predicate
+    bool corruptedPred; //Corrupted predicate
+    bool needReExecute; //need to be reexecuted?
 
     /** Trace information for this instruction's execution */
     Trace::InstRecord *traceData;

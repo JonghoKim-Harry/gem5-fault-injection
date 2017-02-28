@@ -126,7 +126,9 @@ class SimpleThread : public ThreadState
     //HwiSoo
     bool flipRegFile (uint64_t injectLoc, uint64_t *originalRegData);
     int totalNumPhysRegs() {return TheISA::NumIntRegs+TheISA::NumFloatRegs;}
-  
+    //YOHAN
+    uint64_t readIntReg2(int reg_idx);
+    void setIntReg2(int reg_idx, uint64_t val);  
   
     std::string name() const
     {
@@ -238,8 +240,8 @@ class SimpleThread : public ThreadState
 #endif
         isa->clear();
     }
-	
-	unsigned injectIdx;
+    
+    unsigned injectIdx;
 
     //
     // New accessors for new decoder.
@@ -251,8 +253,6 @@ class SimpleThread : public ThreadState
         //uint64_t flipped_data(readIntRegFlat(flatIndex));
         if(baseCpu->traceReg && injectIdx == reg_idx && !baseCpu->instRead) {
             DPRINTF(FI, "Corrupted reg %d is read by syscall\n", reg_idx);
-            //baseCpu->traceReg = false;
-            //setIntReg(reg_idx, baseCpu->originalRegData);
         }
         
         baseCpu->instRead = false;
@@ -261,9 +261,7 @@ class SimpleThread : public ThreadState
         uint64_t regVal(readIntRegFlat(flatIndex));
         DPRINTF(IntRegs, "Reading int reg %d (%d) as %#x.\n",
                 reg_idx, flatIndex, regVal);
-        //        reg_idx, flatIndex, flipped_data);
         return regVal;
-        //return flipped_data;
     }
 
     FloatReg readFloatReg(int reg_idx)
@@ -304,7 +302,7 @@ class SimpleThread : public ThreadState
 
     void setIntReg(int reg_idx, uint64_t val)
     {
-		//YOHAN: Behaviors of corrupted register (syscall)
+        //YOHAN: Behaviors of corrupted register (syscall)
         if(baseCpu->traceReg && injectIdx == reg_idx) {
             DPRINTF(FI, "Corrupted reg %d is overwritten by syscall\n", reg_idx);
             baseCpu->traceReg = false;
