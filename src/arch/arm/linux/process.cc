@@ -86,7 +86,7 @@ unameFunc64(SyscallDesc *desc, int callnum, LiveProcess *process,
 
     strcpy(name->sysname, "Linux");
     strcpy(name->nodename, "gem5");
-    strcpy(name->release, "3.7.0+");
+    strcpy(name->release, "4.4.0");
     strcpy(name->version, "#1 SMP Sat Dec  1 00:00:00 GMT 2012");
     strcpy(name->machine, "armv8l");
 

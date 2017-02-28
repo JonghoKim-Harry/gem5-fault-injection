@@ -33,7 +33,7 @@ elif(bench == 'crc'):
 	runtime = 1091403357500 #valid for DC LAB server
 elif(bench == 'fft'):
 	runtime = 28748840000
-elif(bench == 'typese'):
+elif(bench == 'typeset'):
 	runtime = 83872940000
 elif(bench == 'patricia'):
 	runtime = 99999999999999
