@@ -58,6 +58,7 @@
 #include "debug/FI.hh" //YOHAN
 #include "debug/SymptomFI.hh" //YOHAN
 #include "debug/Symptom.hh" //YOHAN
+#include "debug/Rollback.hh" //YOHAN
 
 // JONGHO
 #include "debug/Completion.hh"
@@ -732,7 +733,7 @@ Execute::issue(ThreadID thread_id)
         Fault fault = inst->fault;
         bool discarded = false;
         bool issued_mem_ref = false;
-
+		
         if (inst->isBubble()) {
             /* Skip */
             issued = true;
@@ -750,6 +751,7 @@ Execute::issue(ThreadID thread_id)
                 *inst, thread.streamSeqNum);
             issued = true;
             discarded = true;
+			DPRINTF(Rollback, "%d\n", inst->id.execSeqNum); //YOHAN
         } else {
             /* Try and issue an instruction into an FU, assume we didn't and
              * fix that in the loop */
@@ -1414,7 +1416,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                 DPRINTF(MinorExecute, "Discarding mem inst: %s as its"
                     " stream state was unexpected, expected: %d\n",
                     *inst, ex_info.streamSeqNum);
-
+				
                 lsq.popResponse(mem_response);
             } else {
                 handleMemResponse(inst, mem_response, branch, fault);
@@ -1622,7 +1624,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                 ex_info.inFUMemInsts->pop();
             }
         }
-
+		
         // JONGHO
         if (SoftError::faulty_inst_id_tracked && (!SoftError::faulty_inst_id_logged) && SoftError::faulty_inst_id.pseudo_equal(inst->id)) {
             DPRINTF(FI, "Faulty Inst Detected @ Execute\n");
@@ -1640,6 +1642,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
         if (completed_inst && !(issued_mem_ref && fault == NoFault)) {
             /* Note that this includes discarded insts */
             DPRINTF(MinorExecute, "Completed inst: %s\n", *inst);
+			DPRINTF(Rollback, "%d\n", inst->id.execSeqNum); //YOHAN
             
             // JONGHO
             if(inst && inst->pc.instAddr() && inst->staticInst) {
