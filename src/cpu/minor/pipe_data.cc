@@ -42,7 +42,7 @@
 // JONGHO
 #include "arch/arm/decoder.hh"
 #include "debug/FICallTrace.hh"
-#include "debug/FIReport.hh"
+#include "debug/FI.hh"
 
 namespace Minor
 {
@@ -172,16 +172,16 @@ BranchData::corrupt(const unsigned int loc)
 {
     DPRINTF(FICallTrace, "corrupt() @BranchData\n");
 
-    DPRINTF(FIReport, "--- Fault Injection ---\n");
-    DPRINTF(FIReport, "     @BranchData\n");
+    DPRINTF(FI, "--- Fault Injection ---\n");
+    DPRINTF(FI, "     @BranchData\n");
 
     if(isBubble()) {
-        DPRINTF(FIReport, "     * Injected into BUBBLE\n");
+        DPRINTF(FI, "     * Injected into BUBBLE\n");
         exit(1);
     }
 
     if(!isBranch()) {
-        DPRINTF(FIReport, "     * Injected into BUBBLE (No Branch)\n");
+        DPRINTF(FI, "     * Injected into BUBBLE (No Branch)\n");
         exit(1);
     }
 
@@ -214,7 +214,7 @@ BranchData::corrupt(const unsigned int loc)
             break;
     }
 
-    DPRINTF(FIReport, "     * fetching caused by: %s\n", why_branch);
+    DPRINTF(FI, "     * fetching caused by: %s\n", why_branch);
 
     /** These values are all unavailable when it is not branch */
     // Address of instruction which cause branch
@@ -222,7 +222,7 @@ BranchData::corrupt(const unsigned int loc)
         const Addr cause_inst_addr = inst->pc.pc();
         const ExtMachInst cause_bin_inst = inst->staticInst->machInst;
         const std::string cause_inst = inst->staticInst->generateDisassembly(cause_inst_addr, debugSymbolTable);
-        DPRINTF(FIReport, "     * inst which cause fetching: %#x: %#x %s\n", cause_inst_addr, cause_bin_inst, cause_inst);
+        DPRINTF(FI, "     * inst which cause fetching: %#x: %#x %s\n", cause_inst_addr, cause_bin_inst, cause_inst);
     }
 
     // Golden Target Address
@@ -234,7 +234,7 @@ BranchData::corrupt(const unsigned int loc)
     // Faulty Target Address
     const Addr faulty_target_addr = target.pc();
 
-    DPRINTF(FIReport, "     * Flip target address: %#x -> %#x (%s)\n", golden_target_addr, faulty_target_addr, why_branch);
+    DPRINTF(FI, "     * Flip target address: %#x -> %#x (%s)\n", golden_target_addr, faulty_target_addr, why_branch);
 }
 
 void
@@ -310,17 +310,17 @@ ForwardLineData::corrupt(const unsigned int loc)
     const unsigned int BIT_PER_INST = sizeof(uint32_t) * BIT_PER_BYTE;
 
     /** Print out fault injection informations */
-    DPRINTF(FIReport, "--- Fault Injection ---\n");
-    DPRINTF(FIReport, "     @ForwardLineData\n");
+    DPRINTF(FI, "--- Fault Injection ---\n");
+    DPRINTF(FI, "     @ForwardLineData\n");
 
     /**
      *  Bit Flip Procss: Do fault injection if and only if
      *                   the line is neither bubble nor fault
      */
     if(bubbleFlag)
-        DPRINTF(FIReport, "     * Injected into BUBBLE\n");
+        DPRINTF(FI, "     * Injected into BUBBLE\n");
     else if(isFault())
-        DPRINTF(FIReport, "     * Injected into FAULT\n");
+        DPRINTF(FI, "     * Injected into FAULT\n");
     else {
         /** 
          *  Do NOT use loc. Use valid_loc instead.
@@ -329,7 +329,7 @@ ForwardLineData::corrupt(const unsigned int loc)
          *  remain undefined
          */
         const unsigned int valid_loc = loc % lineWidth;
-        DPRINTF(FIReport, "     * loc:  %u\n", valid_loc);
+        DPRINTF(FI, "     * loc:  %u\n", valid_loc);
 
         /** To log instruction change */
         ArmISA::Decoder *decoder = new ArmISA::Decoder(nullptr);
@@ -339,7 +339,7 @@ ForwardLineData::corrupt(const unsigned int loc)
 
         /** fault-injected instruction's address */
         Addr inst_addr = lineBaseAddr + offset_to_inst;
-        DPRINTF(FIReport, "     * addr: %#x\n", inst_addr);
+        DPRINTF(FI, "     * addr: %#x\n", inst_addr);
 
         /** original binary instruction */
         const uint32_t golden_bin = *(uint32_t *)&line[offset_to_inst];
@@ -360,7 +360,7 @@ ForwardLineData::corrupt(const unsigned int loc)
         const std::string faulty_inst = decoder->decodeInst(faulty_bin)->generateDisassembly(0, debugSymbolTable);
 
         /* Print out change of instruction by injected soft error */
-        DPRINTF(FIReport, "     * Flip inst: %#x %s -> %#x %s\n", golden_bin, golden_inst, faulty_bin, faulty_inst);
+        DPRINTF(FI, "     * Flip inst: %#x %s -> %#x %s\n", golden_bin, golden_inst, faulty_bin, faulty_inst);
     }
 }
 
@@ -448,12 +448,12 @@ ForwardInstData::corruptInst(const unsigned int loc)
     const unsigned int BIT_PER_INST = sizeof(uint32_t) * BIT_PER_BYTE;
 
     /** Print out fault injection information */
-    DPRINTF(FIReport, "--- Fault Injection ---\n");
-    DPRINTF(FIReport, "     @ForwardInstData\n");
-    DPRINTF(FIReport, "     * target HW component: Pipeline Register [F->D]\n");
+    DPRINTF(FI, "--- Fault Injection ---\n");
+    DPRINTF(FI, "     @ForwardInstData\n");
+    DPRINTF(FI, "     * target HW component: Pipeline Register [F->D]\n");
 
     if(isBubble()) {
-        DPRINTF(FIReport, "     * Injected into BUBBLE@ForwardInstData\n");
+        DPRINTF(FI, "     * Injected into BUBBLE@ForwardInstData\n");
         exit(1);
     }
 
@@ -464,30 +464,30 @@ ForwardInstData::corruptInst(const unsigned int loc)
      *  remain undefined
      */
     const unsigned int valid_loc = loc % (numInsts * BIT_PER_INST);
-    DPRINTF(FIReport, "     * loc:  %u\n", valid_loc);
+    DPRINTF(FI, "     * loc:  %u\n", valid_loc);
 
     /** Select instruction to inject fault into */
     unsigned int inst_index = valid_loc / BIT_PER_INST;
     MinorDynInstPtr target_dynamic_wrapper = insts[inst_index];
 
     if(target_dynamic_wrapper->isBubble()) {
-        DPRINTF(FIReport, "     * Injected into BUBBLE@MinorDynInst\n");
+        DPRINTF(FI, "     * Injected into BUBBLE@MinorDynInst\n");
         exit(1);
     }
 
     if(target_dynamic_wrapper->isFault()) {
-        DPRINTF(FIReport, "     * Injected into FAULT\n");
+        DPRINTF(FI, "     * Injected into FAULT\n");
         exit(1);
     }
 
-    DPRINTF(FIReport, "     * target data: ARM Instruction\n");
+    DPRINTF(FI, "     * target data: ARM Instruction\n");
 
     /*
      *  We can get address only if the instruction is
      *  neither bubble nor fault
      */
     const Addr addr = target_dynamic_wrapper->pc.instAddr();
-    DPRINTF(FIReport, "     * addr: %#x\n", addr);
+    DPRINTF(FI, "     * addr: %#x\n", addr);
 
     /*
      *  Wrapper for original instruction
@@ -504,7 +504,7 @@ ForwardInstData::corruptInst(const unsigned int loc)
     const uint32_t faulty_bin = BITFLIP(golden_bin, valid_loc % BIT_PER_INST);
 
     /* Print C++ typeid of target instruction */
-    DPRINTF(FIReport, "     * typeid: %s\n", typeid(*golden_static_wrapper).name());
+    DPRINTF(FI, "     * typeid: %s\n", typeid(*golden_static_wrapper).name());
 
     ArmISA::Decoder *decoder = new ArmISA::Decoder(nullptr);
     target_dynamic_wrapper->staticInst = decoder->decodeInst(faulty_bin);
@@ -516,7 +516,7 @@ ForwardInstData::corruptInst(const unsigned int loc)
     std::string faulty_inst = target_dynamic_wrapper->staticInst->generateDisassembly(0, debugSymbolTable);
 
     /*  Print out changes of instruction by soft error */
-    DPRINTF(FIReport, "     * Flip inst: %#x %s -> %#x %s\n", golden_bin, golden_inst, faulty_bin, faulty_inst);
+    DPRINTF(FI, "     * Flip inst: %#x %s -> %#x %s\n", golden_bin, golden_inst, faulty_bin, faulty_inst);
 }
 
 // JONGHO
@@ -530,12 +530,12 @@ ForwardInstData::corruptOp(const unsigned int loc)
     DPRINTF(FICallTrace, "corruptOp() @ForwardInstData\n");
 
     /* Print out fault injection information */
-    DPRINTF(FIReport, "--- Fault Injection ---\n");
-    DPRINTF(FIReport, "     @ForwardInstData\n");
-    DPRINTF(FIReport, "     * target HW component: Pipeline Register [D->E]\n");
+    DPRINTF(FI, "--- Fault Injection ---\n");
+    DPRINTF(FI, "     @ForwardInstData\n");
+    DPRINTF(FI, "     * target HW component: Pipeline Register [D->E]\n");
 
     if(isBubble()) {
-        DPRINTF(FIReport, "     * Injected into BUBBLE@ForwardInstData\n");
+        DPRINTF(FI, "     * Injected into BUBBLE@ForwardInstData\n");
         exit(1);
     }
 
@@ -548,18 +548,18 @@ ForwardInstData::corruptOp(const unsigned int loc)
     MinorDynInstPtr dynamic_inst = insts[inst_idx];
 
     if(dynamic_inst->isBubble()) {
-        DPRINTF(FIReport, "     * Injected into BUBBLE@MinorDynInst\n");
+        DPRINTF(FI, "     * Injected into BUBBLE@MinorDynInst\n");
         exit(1);
     }
 
     if(dynamic_inst->isFault()) {
-        DPRINTF(FIReport, "     * Injected into FAULT\n");
+        DPRINTF(FI, "     * Injected into FAULT\n");
         exit(1);
     }
 
     StaticInstPtr static_inst = dynamic_inst->staticInst;
     if(static_inst->numSrcRegs() + static_inst->numDestRegs() == 0) {
-        DPRINTF(FIReport, "     * BUBBLE: NO src nor dest register\n");
+        DPRINTF(FI, "     * BUBBLE: NO src nor dest register\n");
         exit(1);
     }
 
@@ -574,16 +574,16 @@ ForwardInstData::corruptOp(const unsigned int loc)
      * If uop, parent instruction is macro operation that
      * the target uop comes from
      */
-    DPRINTF(FIReport, "     * parent addr: %#x\n", dynamic_inst->pc.instAddr());
+    DPRINTF(FI, "     * parent addr: %#x\n", dynamic_inst->pc.instAddr());
     std::string type = static_inst->isMicroop() ? "ARM instruction" : "ARM uop";
-    DPRINTF(FIReport, "     * target op: %s%s\n", type, static_inst->generateDisassembly(0, debugSymbolTable));
+    DPRINTF(FI, "     * target op: %s%s\n", type, static_inst->generateDisassembly(0, debugSymbolTable));
 
     const unsigned int num_reg_used = static_inst->numSrcRegs() + static_inst->numDestRegs();
     const unsigned int range = num_reg_used * sizeof(RegIndex) * BIT_PER_BYTE;
     unsigned int reg_idx = (loc % range) / (sizeof(RegIndex) * BIT_PER_BYTE);
     const unsigned int bit_idx = loc % (sizeof(RegIndex) * BIT_PER_BYTE);
     const bool corrupt_srcreg = (reg_idx < static_inst->numSrcRegs()) ? true : false;
-    DPRINTF(FIReport, "     * bit index: %u (= 2^%u)\n", bit_idx, bit_idx);
+    DPRINTF(FI, "     * bit index: %u (= 2^%u)\n", bit_idx, bit_idx);
 
     /**/
     std::stringstream srcreg_info, destreg_info;
@@ -600,7 +600,7 @@ ForwardInstData::corruptOp(const unsigned int loc)
         static_inst->_srcRegIdx[reg_idx] = BITFLIP(static_inst->srcRegIdx(reg_idx), bit_idx);
 
         /**/
-        DPRINTF(FIReport, "     * Flip %u-th srcReg (reg idx = %u)\n", reg_idx + 1, reg_idx);
+        DPRINTF(FI, "     * Flip %u-th srcReg (reg idx = %u)\n", reg_idx + 1, reg_idx);
         srcreg_info << " ->  ";
         for(int i=0; i<static_inst->numSrcRegs(); ++i)
             srcreg_info << static_inst->srcRegIdx(i) << " ";
@@ -610,14 +610,14 @@ ForwardInstData::corruptOp(const unsigned int loc)
         static_inst->_destRegIdx[reg_idx] = BITFLIP(static_inst->destRegIdx(reg_idx), bit_idx);
 
         /**/
-        DPRINTF(FIReport, "     * Flip %u-th destReg (reg idx = %u)\n", reg_idx + 1, reg_idx);
+        DPRINTF(FI, "     * Flip %u-th destReg (reg idx = %u)\n", reg_idx + 1, reg_idx);
         destreg_info << " ->  ";
         for(int i=0; i<static_inst->numDestRegs(); ++i)
             destreg_info << static_inst->destRegIdx(i) << " ";
     }
 
-    DPRINTF(FIReport, "     * src reg: %s\n", srcreg_info.str());
-    DPRINTF(FIReport, "     * dest reg: %s\n", destreg_info.str());
+    DPRINTF(FI, "     * src reg: %s\n", srcreg_info.str());
+    DPRINTF(FI, "     * dest reg: %s\n", destreg_info.str());
 }
 
 } // namespace Minor

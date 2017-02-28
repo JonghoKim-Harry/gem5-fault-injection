@@ -4,7 +4,7 @@
 #include "base/vulnerable.hh"
 #include "sim/core.hh"          // curTick()
 #include "base/trace.hh"        // DPRINTF, class Named
-#include "debug/FIReport.hh"
+#include "debug/FI.hh"
 
 namespace
 {
@@ -18,11 +18,11 @@ void
 Vulnerable::registerFi(unsigned int time, unsigned int loc, std::function<void(const unsigned int)> method)
 {
     Vulnerable::FiInfo& fi_info = *new Vulnerable::FiInfo(time, loc, this, method);
-    DPRINTF(FIReport, "--- Fault-injection Registered ---\n");
-    DPRINTF(FIReport, "     * id:          %u\n", fi_info.id);
-    DPRINTF(FIReport, "     * time:        %u\n", time);
-    DPRINTF(FIReport, "     * loc:         %u\n", loc);
-    DPRINTF(FIReport, "     * target type: %s\n", typeid(*this).name());
+    DPRINTF(FI, "--- Fault-injection Registered ---\n");
+    DPRINTF(FI, "     * id:          %u\n", fi_info.id);
+    DPRINTF(FI, "     * time:        %u\n", time);
+    DPRINTF(FI, "     * loc:         %u\n", loc);
+    DPRINTF(FI, "     * target type: %s\n", typeid(*this).name());
     remainingFi.push_back(fi_info);
 }
 
