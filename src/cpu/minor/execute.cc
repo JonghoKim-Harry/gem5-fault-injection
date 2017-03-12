@@ -61,11 +61,8 @@
 #include "debug/Rollback.hh" //YOHAN
 
 // JONGHO
-#include "base/instinfo.hh"
 #include "debug/Completion.hh"
-#include "debug/InstInfo.hh"
 #include "debug/VfpTrace.hh"
-#include "base/softerror.hh"
 
 namespace Minor
 {
@@ -689,20 +686,7 @@ cyclicIndexDec(unsigned int index, unsigned int cycle_size)
 unsigned int
 Execute::issue(ThreadID thread_id)
 {
-    // JONGHO
-    //const ForwardInstData *insts_in = getInput(thread_id);
-    ForwardInstData *insts_in = getInput(thread_id);
-    if(SoftError::timeToInject() && SoftError::injComp == SoftError::DTOE) {
-        SoftError::injDone = true;
-        unsigned int inst_idx = (injLoc%1920) >= 960 ? 1 : 0;
-        const std::string mnemonic = insts_in->insts[inst_idx]->staticInst->mnemonic;
-        if(!mnemonic.empty())
-            DPRINTF(FI, "Fault Injection into dToE @issue - mnemonic: %s\n", mnemonic);
-        else
-            DPRINTF(FI, "Fault Injection into dToE @issue - mnemonic: ?\n");
-        insts_in->insts[inst_idx]->injectFault(injLoc);
-    }
-
+    const ForwardInstData *insts_in = getInput(thread_id);
     ExecuteThreadInfo &thread = executeInfo[thread_id];
 
     /* Early termination if we have no instructions */
@@ -1625,20 +1609,6 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
             }
         }
 		
-        // JONGHO
-        if (SoftError::faulty_inst_id_tracked && (!SoftError::faulty_inst_id_logged) && SoftError::faulty_inst_id.pseudo_equal(inst->id)) {
-            DPRINTF(FI, "Faulty Inst Detected @ Execute\n");
-            if(completed_inst) {
-                SoftError::faulty_inst_id_logged = true;
-                if(!discard_inst)
-                    DPRINTF(FI, "Faulty Inst Executed\n");
-                /*
-                else
-                    DPRINTF(FI, "Faulty Inst Discarded\n");
-                */
-            }
-        }
-
         if (completed_inst && !(issued_mem_ref && fault == NoFault)) {
             /* Note that this includes discarded insts */
             DPRINTF(MinorExecute, "Completed inst: %s\n", *inst);
@@ -1698,9 +1668,6 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     inst->traceData->setWhen(curTick());
                 inst->traceData->dump();
             }
-            
-            // JONGHO
-            InstInfo::print_instinfo(inst);
             
             //YOHAN: validate exeuction
             
@@ -1894,11 +1861,6 @@ Execute::evaluate()
         if (issue_tid != InvalidThreadID) {
             DPRINTF(MinorExecute, "Attempting to issue [tid:%d]\n",
                     issue_tid);
-
-            // JONGHO
-            ForwardInstData *insts_in = getInput(issue_tid);
-            for(int i = 0; i < insts_in->numInsts; ++i)
-                InstInfo::push_execute_addr(insts_in->insts[i]->pc.pc());
 
             num_issued = issue(issue_tid);
         }
@@ -2308,33 +2270,6 @@ Execute::injectFaultToFu() {
     scoreboard[injectThread].injectFault = true;
     scoreboard[injectThread].injectLoc = injectLoc;
     return true;
-}
-
-// JONGHO
-void Execute::registerInj(unsigned int time, unsigned int loc) {
-
-    injRegistered = true;
-    injTime = time;
-    injLoc = loc;
-}
-
-// JONGHO
-bool Execute::injReady() const {
-
-    return injRegistered && (!injDone) && (curTick() >= injTime);
-}
-
-// JONGHO
-void Execute::printAllFU(std::ostream& os) const {
-
-    os << "Number of FU = " << numFuncUnits << std::endl;
-    for(int j=0; j<numFuncUnits; j++) {
-        std::vector<bool> table = funcUnits[j]->description.opClasses->capabilityList;
-        os << "FU" << (j+1) << ":\t";
-        for(int k=0; k<Enums::Num_OpClass; k++)
-            os << table[k];
-        os << std::endl;
-    }
 }
 
 //YOHAN: Exit when corrupted reg is not used

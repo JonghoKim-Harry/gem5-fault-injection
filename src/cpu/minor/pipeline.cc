@@ -51,11 +51,8 @@
 #include "debug/ShsTemp.hh"
 
 // JONGHO
-#include "base/instinfo.hh"
-#include "base/softerror.hh"
 #include "base/vulnerable.hh"
 #include "debug/Bubble.hh"
-#include "debug/PrintAllFU.hh"
 #include "debug/ForwardInstData.hh"
 #include "debug/VfpTrace.hh"
 
@@ -107,11 +104,6 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
     // JONGHO
     registerExitCallback(new MakeCallback<Pipeline, &Pipeline::checkDebugFlags>(this));
     registerExitCallback(new MakeCallback<Pipeline, &Pipeline::checkAssertions>(this));
-
-    // JONGHO: Print all FUs if the debug flag "PrintAllFU" is set
-    if(DTRACE(PrintAllFU)) {
-        execute.printAllFU(debug_file);
-    }
 
     if (params.fetch1ToFetch2ForwardDelay < 1) {
         fatal("%s: fetch1ToFetch2ForwardDelay must be >= 1 (%d)\n",
@@ -655,59 +647,6 @@ Pipeline::evaluate()
     // JONGHO: Input at the start of evaluate()
     if(DTRACE(Bubble))
         drawDataflow(debug_file, DataFlow::INPUT);
-
-/*
-    if(DTRACE(Bubble)) {
-        std::vector<Addr> fetch1_addr_list = InstInfo::fetch1_addr();
-        std::vector<Addr> fetch2_addr_list = InstInfo::fetch2_addr();
-        std::vector<Minor::MinorDynInstPtr> decode_op_list = InstInfo::decode_op();
-        std::vector<Addr> execute_addr_list = InstInfo::execute_addr();
-        unsigned int max_size = std::max(std::max(std::max(fetch1_addr_list.size(), fetch2_addr_list.size()), decode_op_list.size()), execute_addr_list.size());
-        debug_file << std::showbase << std::hex << std::left;
-
-        for(int j=0; j<max_size; ++j) {
-            debug_file.width(20);
-            if(j < fetch1_addr_list.size())
-                debug_file << fetch1_addr_list[j];
-            else
-                debug_file << " ";
-
-            debug_file.width(21);
-            if(j < fetch2_addr_list.size())
-                debug_file << fetch2_addr_list[j];
-            else
-                debug_file << " ";
-
-            debug_file.width(18);
-            if(j < decode_op_list.size()) {
-                if(decode_op_list[j]->staticInst->isMicroop()) {
-                    std::stringstream ss1, ss2;
-                    ss1 << std::hex << decode_op_list[j]->pc.pc();
-                    ss2 << decode_op_list[j]->pc.microPC();
-                    debug_file << "0x" + ss1.str() + "." + ss2.str();
-                }
-                else
-                    debug_file << decode_op_list[j]->pc.pc();
-            }
-            else
-                debug_file << " ";
-
-            if(j < execute_addr_list.size())
-                debug_file << execute_addr_list[j];
-
-            debug_file << std::endl;
-        }
-
-        debug_file << std::noshowbase << std::dec << std::right;
-        debug_file << std::endl;
-
-        InstInfo::clear_fetch1_addr();
-        InstInfo::clear_fetch2_addr();
-        InstInfo::clear_decode_op();
-        InstInfo::clear_execute_addr();
-    }
-
-*/
 
     /* The activity recorder must be be called after all the stages and
      *  before the idler (which acts on the advice of the activity recorder */
