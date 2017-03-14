@@ -354,6 +354,7 @@ class Request
     //HwiSoo
     Addr symptom_pc;
     InstSeqNum symptom_seqNum;
+    std::string symptom_instName;
     
     
     /**

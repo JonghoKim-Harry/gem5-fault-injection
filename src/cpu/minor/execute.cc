@@ -419,15 +419,15 @@ Execute::handleMemResponse(MinorDynInstPtr inst,
             response->fault->name());
             
         //HwiSoo
-        DPRINTF(Symptom, "Exec:Completing fault from DTLB access:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
-            inst->id,inst->pc.instAddr(), inst->id.execSeqNum, response->fault->name());
+        DPRINTF(Symptom, "Exec:Completing fault from DTLB access:id:%s:pc:0x%x:execSeqNum:%d:fault:%s:inst:%s\n",
+            inst->id,inst->pc.instAddr(), inst->id.execSeqNum, response->fault->name(), inst->staticInst->getName());
             
         if (inst->staticInst->isPrefetch()) {
             DPRINTF(MinorMem, "Not taking fault on prefetch: %s\n",
                 response->fault->name());
             //HwiSoo
-            DPRINTF(Symptom, "Exec:Not taking fault on prefetch:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
-                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, response->fault->name());
+            DPRINTF(Symptom, "Exec:Not taking fault on prefetch:id:%s:pc:0x%x:execSeqNum:%d:fault:%s:inst:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, response->fault->name(), inst->staticInst->getName());
 
             /* Don't assign to fault */
         } else {
@@ -435,8 +435,8 @@ Execute::handleMemResponse(MinorDynInstPtr inst,
             fault = response->fault;
 
             //HwiSoo
-            DPRINTF(Symptom, "Exec:Completing fault from DTLB access(Invoke):id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
-                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, response->fault->name());            
+            DPRINTF(Symptom, "Exec:Completing fault from DTLB access(Invoke):id:%s:pc:0x%x:execSeqNum:%d:fault:%s:inst:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, response->fault->name(), inst->staticInst->getName());            
             
             //HwiSoo
             if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
@@ -487,8 +487,8 @@ Execute::handleMemResponse(MinorDynInstPtr inst,
             DPRINTF(MinorMem, "Fault in memory completeAcc: %s\n",
                 fault->name());
             //HwiSoo
-            DPRINTF(Symptom, "Exec:Fault in memory completeAcc:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
-                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name());
+            DPRINTF(Symptom, "Exec:Fault in memory completeAcc:id:%s:pc:0x%x:execSeqNum:%d:fault:%s:inst:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name(), inst->staticInst->getName());
                 
             //HwiSoo
             if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
@@ -629,8 +629,8 @@ Execute::executeMemRefInst(MinorDynInstPtr inst, BranchData &branch,
             DPRINTF(MinorExecute, "Fault on memory inst: %s"
                 " initiateAcc: %s\n", *inst, init_fault->name());
             //HwiSoo. note that it does not invoke exception handler
-            DPRINTF(Symptom, "Exec:Fault on memory inst:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
-                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, init_fault->name());
+            DPRINTF(Symptom, "Exec:Fault on memory inst:id:%s:pc:0x%x:execSeqNum:%d:fault:%s:inst:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, init_fault->name(), inst->staticInst->getName());
             fault = init_fault;
         } else {
             /* Only set this if the instruction passed its
@@ -1078,8 +1078,8 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
         DPRINTF(MinorExecute, "Fault inst reached Execute: %s\n",
             inst->fault->name());
         //HwiSoo
-        DPRINTF(Symptom, "Exec:Fault inst reached Execute:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
-            inst->id,inst->pc.instAddr(), inst->id.execSeqNum, inst->fault->name());
+        DPRINTF(Symptom, "Exec:Fault inst reached Execute:id:%s:pc:0x%x:execSeqNum:%d:fault:%s:inst:%s\n",
+            inst->id,inst->pc.instAddr(), inst->id.execSeqNum, inst->fault->name(), inst->staticInst->getName());
             
         //HwiSoo
         if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
@@ -1134,8 +1134,8 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
                     fault->name());
                     
                 //HwiSoo
-                DPRINTF(Symptom, "Exec:Fault in early executing inst:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
-                    inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name());
+                DPRINTF(Symptom, "Exec:Fault in early executing inst:id:%s:pc:0x%x:execSeqNum:%d:fault:%s:inst:%s\n",
+                    inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name(), inst->staticInst->getName());
                 /* Don't execute the fault, just stall the instruction
                  *  until it gets to the head of inFlightInsts */
                 inst->canEarlyIssue = false;
@@ -1146,8 +1146,8 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
                 DPRINTF(MinorExecute, "Fault in execute: %s\n",
                     fault->name());
                 //HwiSoo
-                DPRINTF(Symptom, "Exec:Fault in execute:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
-                    inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name());
+                DPRINTF(Symptom, "Exec:Fault in execute:id:%s:pc:0x%x:execSeqNum:%d:fault:%s:inst:%s\n",
+                    inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name(), inst->staticInst->getName());
                 
                 //HwiSoo
                 if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {
@@ -1240,8 +1240,8 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
             DPRINTF(MinorExecute, "Fault in execute of inst: %s fault: %s\n",
                 *inst, fault->name());
             //HwiSoo
-            DPRINTF(Symptom, "Exec:Fault in execute of inst:id:%s:pc:0x%x:execSeqNum:%d:fault:%s\n",
-                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name());
+            DPRINTF(Symptom, "Exec:Fault in execute of inst:id:%s:pc:0x%x:execSeqNum:%d:fault:%s:inst:%s\n",
+                inst->id,inst->pc.instAddr(), inst->id.execSeqNum, fault->name(), inst->staticInst->getName());
             
             //HwiSoo
             if(cpu.injectReadSN != -1 && !cpu.readSymptom[1]) {

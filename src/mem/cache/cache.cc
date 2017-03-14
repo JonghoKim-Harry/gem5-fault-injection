@@ -333,7 +333,7 @@ Cache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
 
     //HwiSoo
     if(!blk&&!pkt->req->isInstFetch())
-        DPRINTF(Symptom, "CacheMiss:PC:%x:seqNum:%d\n", pkt->req->symptom_pc, pkt->req->symptom_seqNum);
+        DPRINTF(Symptom, "CacheMiss:PC:%x:seqNum:%d:inst:%s\n", pkt->req->symptom_pc, pkt->req->symptom_seqNum, pkt->req->symptom_instName);
 
     if (pkt->isEviction()) {
         // We check for presence of block in above caches before issuing
