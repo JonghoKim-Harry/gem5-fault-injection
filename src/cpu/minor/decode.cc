@@ -43,9 +43,7 @@
 #include "debug/FI.hh" //YOHAN
 
 // JONGHO
-#include "base/instinfo.hh"
 #include "debug/ForwardInstData.hh"
-#include "debug/InstInfo.hh"
 #include "debug/Bubble.hh"
 
 namespace Minor
@@ -220,10 +218,6 @@ Decode::evaluate()
                         decode_info.microopPC.microPC(),
                         *output_inst);
 
-                    // JONGHO
-                    if(Debug::InstInfo || Debug::Bubble)
-                        InstInfo::push_decode_op(output_inst);
-
                     /* Acknowledge that the static_inst isn't mine, it's my
                      * parent macro-op's */
                     parent_static_inst = static_inst;
@@ -251,10 +245,6 @@ Decode::evaluate()
                         " %d output_index: %d\n",
                         bin,
                         *output_inst, decode_info.inputIndex, output_index);
-
-                    // JONGHO:
-                    if(Debug::InstInfo || Debug::Bubble)
-                        InstInfo::push_decode_op(output_inst);
 
                     parent_static_inst = static_inst;
 

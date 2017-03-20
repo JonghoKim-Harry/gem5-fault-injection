@@ -86,6 +86,9 @@ class Pipeline : public Ticked
     /* Draw ascii-arted picture of pipeline data flow */
     void drawDataflow(std::ostream& os, DataFlow flow) const;
 
+    /* Printout bubbles in pipeline registers */
+    void pipeRegBubble(std::ostream& os) const;
+
     unsigned long last_snapshot_time = 0;
 
   // JONGHO

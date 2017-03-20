@@ -41,7 +41,7 @@ basicmath )
   bench="automotive/basicmath/basicmath_small_$1"
   options=""
   ;;
-typese )
+typeset )
   bench="/consumer/typeset/lout-3.24/lout_$1"
   options=" -I $bench_home/consumer/typeset/lout-3.24/include -D $bench_home/consumer/typeset/lout-3.24/data -F $bench_home/consumer/typeset/lout-3.24/font -C $bench_home/consumer/typeset/lout-3.24/maps -H $bench_home/consumer/typeset/lout-3.24/hyph $bench_home/consumer/typeset/small.lout"
   ;;
@@ -67,7 +67,14 @@ protection=no_protection								# Protection scheme to be used
 vul_analysis=no								# Enable/Disable vulnerability analysis
 cpu_type=MinorCPU								# CPU Type
 num_procs=1									# Number of processors
-gemv_exec_path=./build/$1/gem5.opt		# Path to gemv executable
+
+if [ "$#" -lt 8 ]
+then
+    gemv_exec_path=./build/$1/gem5.opt		# Path to gemv executable
+else
+    gemv_exec_path=./build/$1/$8		# Path to gemv executable
+fi
+
 config_path=./configs/example/se.py		# Path to config file
 
 #$gemv_exec_path -d $2/$6 -re --stdout-file=simout_$5 --stderr-file=simerr_$5 --debug-file=FI_$5 --stats-file=stats_$5 --debug-flags=FI,Exec,Minor,IntRegs,SyscallAll $config_path --cpu-type=$cpu_type --caches -n $num_procs -c "$bench_home/$bench" -o "$options" --output=$2/$6/result_$5 --injectArch=$6 --injectTime=$3 --injectLoc=$4 -m $7

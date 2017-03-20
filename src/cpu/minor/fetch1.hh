@@ -53,9 +53,6 @@
 #include "cpu/base.hh"
 #include "mem/packet.hh"
 
-// JONGHO
-#include "base/softerror.hh"
-
 namespace Minor
 {
 
@@ -63,24 +60,6 @@ namespace Minor
  *  them to Fetch2 */
 class Fetch1 : public Named
 {
-    // JONGHO
-  public:
-    bool injReady() { return injRegistered && (!injDone) && curTick() >= injTime; }
-    void registerInj(unsigned int time, unsigned int loc, SoftError::InjComp comp)
-    {
-        injRegistered = true;
-        injTime = time;
-        injLoc = loc % 32;
-        injComp = comp;
-    }
-
-    bool injRegistered = false;
-    bool injDone = false;
-    bool injReallyDone = false;
-    unsigned int injTime;
-    unsigned int injLoc;
-    SoftError::InjComp injComp;
-
   protected:
     /** Exposable fetch port */
     class IcachePort : public MinorCPU::MinorCPUPort

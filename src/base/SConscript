@@ -92,15 +92,12 @@ CompoundFlag('AnnotateAll', ['Annotate', 'AnnotateQ', 'AnnotateVerbose'],
     desc="All Annotation flags")
 
 # JONGHO: Soft Error
-Source('softerror.cc')
 Source('vulnerable.cc')
 DebugFlag('FIFaultTrace', 'Trace fault injected into hardware component along pipeline')
 DebugFlag('FICallTrace', 'Trace function call used for fault injection')
 
 # JONGHO: Tracking Information
-Source('instinfo.cc') 
 DebugFlag('Completion', 'Completed Instruction')
 DebugFlag('InstInfo', 'Instruct Information such as *OpClass*')
-DebugFlag('PrintAllFU', 'Print all FU at the initialization stage')
 DebugFlag('ForwardLineData', 'Check information about *class ForwardLineData* declared in cpu/minor/pipe_data.hh')
 DebugFlag('ForwardInstData', 'Check information about *class ForwardInstData* declared in cpu/minor/pipe_data.hh')

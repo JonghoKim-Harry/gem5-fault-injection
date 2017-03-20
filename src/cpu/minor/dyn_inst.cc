@@ -230,9 +230,4 @@ MinorDynInst::~MinorDynInst()
         delete traceData;
 }
 
-// JONGHO
-bool MinorDynInst::injectFault(unsigned int loc) {
-    return staticInst->injectFault(loc);
-}
-
 }

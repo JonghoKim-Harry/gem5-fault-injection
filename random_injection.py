@@ -8,6 +8,9 @@ bench = sys.argv[2]
 injectArch = sys.argv[3]
 start = sys.argv[4]
 end = sys.argv[5]
+gem5_binary = ''
+if(len(sys.argv) >= 7):
+    gem5_binary = sys.argv[6]
 
 if(bench == 'hello'):
 	runtime = 1203432
@@ -69,9 +72,9 @@ for i in range(int(start), int(end)):
 
 	if (injectArch == "Reg"):
 		if(bench == 'susan') or (bench == 'jpeg'):
-			os.system("./inject_output.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + str(i).zfill(5)  + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
+			os.system("./inject_output.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + str(i).zfill(5) + " " + gem5_binary + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
 		else:
-			os.system("./inject.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
+			os.system("./inject.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + gem5_binary + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
 			
 		non_failure = False
 		fi_read = file(bench+"/FI_" + str(injectArch)+ "_" + str(i))
@@ -349,9 +352,9 @@ for i in range(int(start), int(end)):
 			
 	if (injectArch == "FU"):
 		if(bench == 'susan') or (bench == 'jpeg'):
-			os.system("./inject_output.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + str(i).zfill(5)  + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
+			os.system("./inject_output.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + str(i).zfill(5)  + " " + gem5_binary + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
 		else:
-			os.system("./inject.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
+			os.system("./inject.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + gem5_binary + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
 		
 		fi_read = file(bench+"/FI_" + str(injectArch)+ "_" + str(i))
 		for line in fi_read:
@@ -382,9 +385,9 @@ for i in range(int(start), int(end)):
 
         if (injectArch == "LSQ"):
                 if(bench == 'susan') or (bench == 'jpeg'):
-                        os.system("./inject_output.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + str(i).zfill(5)  + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
+                        os.system("./inject_output.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + str(i).zfill(5)  + " " + gem5_binary + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
                 else:
-                        os.system("./inject.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
+                        os.system("./inject.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + gem5_binary + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
 
                 fi_read = file(bench+"/FI_" + str(injectArch)+ "_" + str(i))
                 for line in fi_read:

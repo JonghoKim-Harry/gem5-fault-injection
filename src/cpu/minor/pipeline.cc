@@ -51,11 +51,9 @@
 #include "debug/ShsTemp.hh"
 
 // JONGHO
-#include "base/instinfo.hh"
-#include "base/softerror.hh"
 #include "base/vulnerable.hh"
 #include "debug/Bubble.hh"
-#include "debug/PrintAllFU.hh"
+#include "debug/PipeRegBubble.hh"
 #include "debug/ForwardInstData.hh"
 #include "debug/VfpTrace.hh"
 
@@ -97,21 +95,22 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
     std::ostream& debug_file = Trace::output();
 
     // JONGHO
-    /* See <arch/arm/registers.hh> */
-    if(Debug::VfpTrace) {
+    if(DTRACE(PipeRegBubble)) {
+        debug_file.width(20);
+        debug_file << " ";
         debug_file
-            << "n(float regs) = " << TheISA::NumFloatRegs << std::endl
-            << "FP_Reg_Base = " << TheISA::FP_Reg_Base << std::endl;
+            << "[$->F]   [F->D]   [D->E]   [E->$]   [F->$]" << std::endl;
+        debug_file.width(20);
+        debug_file << " ";
+        debug_file
+            << "=f1ToF2  =f2ToD   =dToE    =eToF1   =f2ToF1" << std::endl;
+        debug_file.width(17);
+        debug_file << "0";
     }
 
     // JONGHO
     registerExitCallback(new MakeCallback<Pipeline, &Pipeline::checkDebugFlags>(this));
     registerExitCallback(new MakeCallback<Pipeline, &Pipeline::checkAssertions>(this));
-
-    // JONGHO: Print all FUs if the debug flag "PrintAllFU" is set
-    if(DTRACE(PrintAllFU)) {
-        execute.printAllFU(debug_file);
-    }
 
     if (params.fetch1ToFetch2ForwardDelay < 1) {
         fatal("%s: fetch1ToFetch2ForwardDelay must be >= 1 (%d)\n",
@@ -162,9 +161,12 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
 void
 Pipeline::checkDebugFlags()
 {
+    /*
     std::ostream& debug_file = Trace::output();
     debug_file << "DEBUG FLAGS" << std::endl;
     debug_file << " - Bubble: " << (Debug::Bubble?"ON":"OFF") << std::endl;
+    debug_file << " - PipeRegBubble: " << (Debug::PipeRegBubble?"ON":"OFF") << std::endl;
+    */
 }
 
 // JONGHO
@@ -301,6 +303,51 @@ Pipeline::drawDataflow(std::ostream& os, DataFlow flow) const
         os  << "[F->$] " << f2ToF1_data << std::endl;
     }
 }
+
+// JONGHO
+void
+Pipeline::pipeRegBubble(std::ostream& os) const
+{
+    const ForwardLineData& f1ToF2_data = f1ToF2.buffer[-1];
+    const ForwardInstData& f2ToD_data = f2ToD.buffer[-1];
+    const ForwardInstData& dToE_data = dToE.buffer[-1];
+    const BranchData& eToF1_data = eToF1.buffer[-1];
+    const BranchData& f2ToF1_data = f2ToF1.buffer[-1];
+
+    std::string f1ToF2_bubble = f1ToF2_data.isBubble()?"BB":"line";
+    std::string f2ToD_bubble = f2ToD_data.isBubble()?"BB":"inst";
+    std::string dToE_bubble = dToE_data.isBubble()?"BB":"op";
+    std::string eToF1_bubble = eToF1_data.isBubble()?"BB":"addr";
+    std::string f2ToF1_bubble = f2ToF1_data.isBubble()?"BB":"addr";
+
+    os.width(8);
+    os << f1ToF2_bubble;
+    os.width(4);
+    os << " ";
+
+    os.width(5);
+    os << f2ToD_bubble;
+    os.width(4);
+    os << " ";
+
+    os.width(5);
+    os << dToE_bubble;
+    os.width(4);
+    os << " ";
+
+    os.width(5);
+    os << eToF1_bubble;
+    os.width(4);
+    os << " ";
+
+    os.width(5);
+    os << f2ToF1_bubble;
+    os << std::endl;
+
+    os.width(17);
+    os << curTick();
+
+} // Pipeline::pipeRegBubble()
 
 // JONGHO
 /*
@@ -634,6 +681,10 @@ Pipeline::evaluate()
     if(DTRACE(Bubble))
         drawDataflow(debug_file, DataFlow::OUTPUT);
 
+    // JONGHO: Print out bubbles in pipeline registers
+    if(DTRACE(PipeRegBubble))
+        pipeRegBubble(debug_file);
+
     /* Note that it's important to evaluate the stages in order to allow
      *  'immediate', 0-time-offset TimeBuffer activity to be visible from
      *  later stages to earlier ones in the same cycle */
@@ -655,59 +706,6 @@ Pipeline::evaluate()
     // JONGHO: Input at the start of evaluate()
     if(DTRACE(Bubble))
         drawDataflow(debug_file, DataFlow::INPUT);
-
-/*
-    if(DTRACE(Bubble)) {
-        std::vector<Addr> fetch1_addr_list = InstInfo::fetch1_addr();
-        std::vector<Addr> fetch2_addr_list = InstInfo::fetch2_addr();
-        std::vector<Minor::MinorDynInstPtr> decode_op_list = InstInfo::decode_op();
-        std::vector<Addr> execute_addr_list = InstInfo::execute_addr();
-        unsigned int max_size = std::max(std::max(std::max(fetch1_addr_list.size(), fetch2_addr_list.size()), decode_op_list.size()), execute_addr_list.size());
-        debug_file << std::showbase << std::hex << std::left;
-
-        for(int j=0; j<max_size; ++j) {
-            debug_file.width(20);
-            if(j < fetch1_addr_list.size())
-                debug_file << fetch1_addr_list[j];
-            else
-                debug_file << " ";
-
-            debug_file.width(21);
-            if(j < fetch2_addr_list.size())
-                debug_file << fetch2_addr_list[j];
-            else
-                debug_file << " ";
-
-            debug_file.width(18);
-            if(j < decode_op_list.size()) {
-                if(decode_op_list[j]->staticInst->isMicroop()) {
-                    std::stringstream ss1, ss2;
-                    ss1 << std::hex << decode_op_list[j]->pc.pc();
-                    ss2 << decode_op_list[j]->pc.microPC();
-                    debug_file << "0x" + ss1.str() + "." + ss2.str();
-                }
-                else
-                    debug_file << decode_op_list[j]->pc.pc();
-            }
-            else
-                debug_file << " ";
-
-            if(j < execute_addr_list.size())
-                debug_file << execute_addr_list[j];
-
-            debug_file << std::endl;
-        }
-
-        debug_file << std::noshowbase << std::dec << std::right;
-        debug_file << std::endl;
-
-        InstInfo::clear_fetch1_addr();
-        InstInfo::clear_fetch2_addr();
-        InstInfo::clear_decode_op();
-        InstInfo::clear_execute_addr();
-    }
-
-*/
 
     /* The activity recorder must be be called after all the stages and
      *  before the idler (which acts on the advice of the activity recorder */

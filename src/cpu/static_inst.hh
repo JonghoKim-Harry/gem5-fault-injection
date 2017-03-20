@@ -46,9 +46,6 @@
 #include "cpu/thread_context.hh"
 #include "enums/StaticInstFlags.hh"
 
-// JONGHO
-#include "base/softerror.hh"        // BITFLIP(data, bit)
-
 // forward declarations
 class Packet;
 
@@ -71,14 +68,6 @@ namespace Trace {
 class StaticInst : public RefCounted, public StaticInstFlags
 {
   public:
-      // JONGHO
-    virtual std::string uop_type() const { return ""; }
-    virtual std::string uop_data_list() const { return ""; }
-    virtual uint8_t uop_data_bitlen() const { return 255; }
-    virtual void *uop_data_byte(unsigned int loc) { return NULL; }
-    virtual std::string uop_data_name(unsigned int loc) { return ""; }
-    bool injectFault(unsigned int loc);
-
     /// Binary extended machine instruction type.
     typedef TheISA::ExtMachInst ExtMachInst;
     /// Logical register index type.

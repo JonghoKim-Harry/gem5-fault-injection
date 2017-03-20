@@ -14,6 +14,14 @@ protection=no_protection								# Protection scheme to be used
 vul_analysis=no								# Enable/Disable vulnerability analysis
 cpu_type=MinorCPU								# CPU Type
 num_procs=1									# Number of processors
+
+if [ "$#" -lt 9 ]
+then
+    gemv_exec_path=./build/$1/gem5.opt		# Path to gemv executable
+else
+    gemv_exec_path=./build/$1/$9		# Path to gemv executable
+fi
+
 gemv_exec_path=./build/$1/gem5.opt		# Path to gemv executable
 config_path=./configs/example/se.py		# Path to config file
 

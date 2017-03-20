@@ -57,7 +57,6 @@
 #include "cpu/base.hh"
 
 // JONGHO
-#include "base/softerror.hh"
 #include "debug/FI.hh"
 #include "base/vulnerable.hh"
 
@@ -316,7 +315,6 @@ class ForwardInstData : public VulnerableData /* : public ReportIF, public Bubbl
     // JONGHO
     /*
      * Fault Injection into Data in f2ToD
-     *   (TODO: Implementation of fault injection into dToE)
      *
      * @loc: Index of a bit flipped by fault injection
      *

@@ -49,8 +49,6 @@
 #include "debug/MinorTrace.hh"
 
 // JONGHO
-#include "base/instinfo.hh"
-#include "debug/InstInfo.hh"
 #include "debug/Bubble.hh"
 
 namespace Minor
@@ -689,14 +687,6 @@ Fetch1::evaluate()
                 response->id);
 
             processResponse(response, line_out);
-
-            // JONGHO
-            /*
-             * Note that attributes of line_out will be filled
-             * in Fetch1::processResponse()
-             */
-            if(Debug::InstInfo || Debug::Bubble)
-                InstInfo::push_fetch1_addr(line_out.lineBaseAddr);
         }
 
         popAndDiscard(transfers);
