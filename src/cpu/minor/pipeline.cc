@@ -623,7 +623,7 @@ Pipeline::evaluate()
 
     //HwiSoo
     execute.getLSQ().injectFaultLSQFunc();
-    execute.getLSQ().FIProfiling();
+    execute.getLSQ().LSQProfiling();
 
     //ybkim: Fault injection on FU
     //TODO: move these flags to the pipeline

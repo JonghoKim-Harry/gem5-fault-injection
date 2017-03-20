@@ -744,8 +744,8 @@ class LSQ : public Named
     void injectFaultLSQFunc();
 
 
-        //HwiSoo
-        void FIProfiling();
+    //HwiSoo
+    void LSQProfiling();
 
 };
 
