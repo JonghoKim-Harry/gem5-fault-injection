@@ -41,7 +41,7 @@ basicmath )
   bench="automotive/basicmath/basicmath_small_$1"
   options=""
   ;;
-typese )
+typeset )
   bench="/consumer/typeset/lout-3.24/lout_$1"
   options=" -I $bench_home/consumer/typeset/lout-3.24/include -D $bench_home/consumer/typeset/lout-3.24/data -F $bench_home/consumer/typeset/lout-3.24/font -C $bench_home/consumer/typeset/lout-3.24/maps -H $bench_home/consumer/typeset/lout-3.24/hyph $bench_home/consumer/typeset/small.lout"
   ;;
