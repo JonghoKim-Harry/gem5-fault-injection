@@ -104,6 +104,8 @@ Pipeline::Pipeline(MinorCPU &cpu_, MinorCPUParams &params) :
         debug_file << " ";
         debug_file
             << "=f1ToF2  =f2ToD   =dToE    =eToF1   =f2ToF1" << std::endl;
+        debug_file.width(17);
+        debug_file << "0";
     }
 
     // JONGHO
@@ -318,12 +320,7 @@ Pipeline::pipeRegBubble(std::ostream& os) const
     std::string eToF1_bubble = eToF1_data.isBubble()?"BB":"addr";
     std::string f2ToF1_bubble = f2ToF1_data.isBubble()?"BB":"addr";
 
-    os.width(17);
-    os << curTick();
-    os.width(3);
-    os << " ";
-
-    os.width(5);
+    os.width(8);
     os << f1ToF2_bubble;
     os.width(4);
     os << " ";
@@ -346,6 +343,10 @@ Pipeline::pipeRegBubble(std::ostream& os) const
     os.width(5);
     os << f2ToF1_bubble;
     os << std::endl;
+
+    os.width(17);
+    os << curTick();
+
 } // Pipeline::pipeRegBubble()
 
 // JONGHO
