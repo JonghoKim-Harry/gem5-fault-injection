@@ -59,7 +59,8 @@ class Vulnerable
      *  so you just register fault injections with registerFi() and it's done
      */
     virtual void injectFault(const unsigned int loc, std::function<void(unsigned int)> method=NULL) = 0;
- 
+    static int getRemainingFiSize(); //HwiSOo
+    
     class FiInfo {
       public:
         friend class Vulnerable;

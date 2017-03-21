@@ -60,3 +60,9 @@ Vulnerable::evaluate()
             ++iter;
     }
 }
+
+int
+Vulnerable::getRemainingFiSize() //HwiSoo
+{
+    return remainingFi.size();
+}

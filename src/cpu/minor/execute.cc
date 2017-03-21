@@ -64,6 +64,9 @@
 #include "debug/Completion.hh"
 #include "debug/VfpTrace.hh"
 
+// HwiSoo
+#include "base/vulnerable.hh"
+
 namespace Minor
 {
 
@@ -1044,7 +1047,7 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
     
     //YOHAN
     inst->needReExecute = false;
-    if( (cpu.injectReg || cpu.injectLSQ) && cpu.injectEarlySN == -1) {
+    if( (cpu.injectReg || cpu.injectLSQ || Vulnerable::getRemainingFiSize() == 0) && cpu.injectEarlySN == -1) {
         cpu.injectEarlySN = inst->id.execSeqNum;
         DPRINTF(FI, "cpu.injectEarlySN is %d\n", cpu.injectEarlySN);
     }
