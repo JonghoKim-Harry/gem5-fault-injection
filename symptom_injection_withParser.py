@@ -318,8 +318,12 @@ for i in range(int(start), int(end)):
     
     bm_isFirst = False
     bm_firstLength = "None"
+    uselessFlag = False
     
     injectEarlySN = "None"
+    bm_uselessLength = "None"
+    bm_inst = "None"
+    bm_uselessInst = "None"
    
     while True:
         line1 = f1.readline()
@@ -339,39 +343,51 @@ for i in range(int(start), int(end)):
         pc1 = line1_split[0].strip().split(":")
         line2_split = line2.strip().split('\t')
         pc2 = line2_split[0].strip().split(":")
-        if len(pc1) == 3:
-            if bm_isFirst and "Incorrect" in line2:
-                bm_isFirst = False
-                bm_firstLength = str(int(line2_split[5]) - injectSN)
-            if(pc1[2] == pc2[2]):
-                if(line1_split[4] != line2_split[4]):
-                    if("Correct" in line1):
-                        bm_type = "Good"
-                    elif("Incorrect" in line1):
-                        bm_type = "Useless"
+        
+        #find first
+        if bm_isFirst and "Incorrect" in line2:
+            bm_first = False
+            bm_firstLength = str(int(line2_split[5]) - injectSN)
+        
+        if uselessFlag == False:
+            if len(pc1) == 3: #pc1 and pc2 
+                if(pc1[2] == pc2[2]):
+                    if(line1_split[4] != line2_split[4]):
+                        if("Correct" in line1):
+                            bm_type = "Good"
+                            bm_length = str(int(line2_split[5]) - injectSN)
+                            bm_predicted = line2_split[2]
+                            bm_actual = line2_split[3]
+                            bm_inst = line2_split[1]
+                            break
+                        elif("Incorrect" in line1):
+                            bm_type = "Useless"
+                            bm_uselessLength = str(int(line2_split[5]) - injectSN)
+                            bm_uselessInst = line2_split[1]
+                            uselessFlag = True
+                elif("Incorrect" in line2): #if different pc and correct, then we parse next pair
+                    bm_type = "DifferentPC"
+                    bm_length = str(int(line1_split[5]) - injectSN)
+                    bm_predicted = line2_split[2]
+                    bm_actual = line2_split[3]
+                    bm_inst = line2_split[1]
+                    break
+            else: #if only original ended. we only consider additional incorrect.
+                if("Incorrect" in line2):
+                    bm_type = "Good"
                     bm_length = str(int(line2_split[5]) - injectSN)
                     bm_predicted = line2_split[2]
                     bm_actual = line2_split[3]
+                    bm_inst = line2_split[1]
                     break
-            else:
-                bm_type = "DifferentPC"
-                bm_length = str(int(line1_split[5]) - injectSN)
-                bm_predicted = line2_split[2]
-                bm_actual = line2_split[3]
-                break
-        elif len(pc2) == 3:
-            if bm_isFirst:
-                bm_isFirst = False
-                bm_firstLength = str(int(line2_split[5]) - injectSN)
-            if("Incorrect" in line2):
-                bm_type = "Good"
-            elif("Correct" in line2):
-                bm_type = "Useless"
+        elif "Incorrect" in line2: #After useless. we only consider incorrect
+            bm_type = "Real after usless"
             bm_length = str(int(line2_split[5]) - injectSN)
             bm_predicted = line2_split[2]
             bm_actual = line2_split[3]
+            bm_inst = line2_split[1]
             break
-
+            
     f1.close()
     f2.close()
     
@@ -384,6 +400,8 @@ for i in range(int(start), int(end)):
     
     ex_isFirst = False
     ex_firstLength = "None"
+    
+    ex_inst = "None"
     
     while True:
         line1 = f1.readline()
@@ -403,6 +421,7 @@ for i in range(int(start), int(end)):
         if not line1 and line2:
             line2_split = line2.strip().split(':')
             ex_type = line2_split[11]
+            ex_inst = line2_split[13]
             ex_length = str(int(line2_split[9])-injectSN)
             if ex_isFirst:
                 ex_isFirst = False
@@ -421,6 +440,7 @@ for i in range(int(start), int(end)):
             continue
         
         ex_type = line2_split[11]
+        ex_inst = line2_split[13]
         ex_length = str(int(line2_split[9])-injectSN)
         break
 
@@ -437,6 +457,8 @@ for i in range(int(start), int(end)):
     
     cm_isFirst = False
     cm_firstLength = "None"
+    
+    cm_inst = "None"
     
     while True:
         line1 = f1.readline()
@@ -456,6 +478,7 @@ for i in range(int(start), int(end)):
         if not line1 and line2:
             line2_split = line2.strip().split(':')
             cm_length = str(int(line2_split[6])-injectSN)
+            cm_inst = line2_split[8]
             if cm_isFirst:
                 cm_isFirst = False
                 cm_firstLength = str(int(line2_split[6])-injectSN)
@@ -473,6 +496,7 @@ for i in range(int(start), int(end)):
             continue
         
         cm_length = str(int(line2_split[6])-injectSN)
+        cm_inst = line2_split[8]
         break
 
     f1.close()
@@ -485,6 +509,7 @@ for i in range(int(start), int(end)):
     #print str(i) + "\t" + str(injectTime) + "\t" + str(injectLoc) + "\t" + ("F" if failure else "NF") + "\t" + valRuntime + "\t" + bm_type + "\t" + bm_length + "\t" + bm_predicted + "\t" + bm_actual + "\t" + ex_type + "\t" + ex_length + "\t" + cm_length
     #symptomf.write(str(i) + "\t" + str(injectTime) + "\t" + str(injectLoc) + "\t" + ("F" if failure else "NF") + "\t" + valRuntime + "\t" + injectEarlySN + "\t" + bm_type + "\t" + bm_length + "\t" + bm_predicted + "\t" + bm_actual + "\t" + ex_type + "\t" + ex_length + "\t" + cm_length + "\t" + bm_firstLength + "\t" + ex_firstLength + "\t" + cm_firstLength + "\n")
     
+        
     symptomf.write(bench + "\t")
     symptomf.write(str(i) + "\t")
     symptomf.write(injectEarlySN + "\t")
@@ -501,7 +526,13 @@ for i in range(int(start), int(end)):
     symptomf.write(cm_firstLength + "\t")
     symptomf.write(bm_predicted + "\t")
     symptomf.write(bm_actual + "\t")
-    symptomf.write(ex_type + "\n")
+    symptomf.write(bm_type + "\t")
+    symptomf.write(bm_uselessLength + "\t")
+    symptomf.write(bm_inst + "\t")
+    symptomf.write(ex_type + "\t")
+    symptomf.write(ex_inst + "\t")
+    symptomf.write(cm_inst + "\n")
+    
     
     
     

@@ -70,7 +70,7 @@ if 'MinorCPU' in env['CPU_MODELS']:
 
     DebugFlag('ShsTemp', 'Temporal Debug Flag')
     DebugFlag('FI', 'Fault injection')
-    DebugFlag('FIProfiling', 'Profiling for LSQ')
+    DebugFlag('LSQProfiling', 'Profiling for LSQ fault injection')
     DebugFlag('Symptom', 'Trace symptoms')              # YOHAN: Symptom event log
     DebugFlag('SymptomFI', 'Trace symptoms after FI')   # YOHAN: Symptom event log
     DebugFlag('Rollback', 'Estimating overhead from re-execution')   # YOHAN: Symptom event log

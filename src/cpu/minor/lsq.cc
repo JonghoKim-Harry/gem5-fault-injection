@@ -49,7 +49,7 @@
 #include "cpu/minor/pipeline.hh"
 #include "debug/Activity.hh"
 #include "debug/FI.hh"
-#include "debug/FIProfiling.hh"
+#include "debug/LSQProfiling.hh"
 #include "debug/MinorMem.hh"
 
 namespace Minor
@@ -1069,6 +1069,7 @@ LSQ::tryToSend(LSQRequestPtr request)
         //HwiSoo
         packet->req->symptom_pc = request->inst->pc.instAddr();
         packet->req->symptom_seqNum = request->inst->id.execSeqNum;
+        packet->req->symptom_instName = request->inst->staticInst->getName();
         
         DPRINTF(MinorMem, "Trying to send request: %s addr: 0x%x\n",
             *(request->inst), packet->req->getVaddr());
@@ -1951,7 +1952,7 @@ faultInjectionToFragments(uint32_t element, uint32_t loc)
 }
 
 void
-LSQ::FIProfiling()
+LSQ::LSQProfiling()
 {
     for (int i=0; i<requests.size(); i++)
     {
@@ -1963,7 +1964,7 @@ LSQ::FIProfiling()
                 continue;
         }
 
-        DPRINTF(FIProfiling, "\t%lld\trequests\t%d\t%s\t%d"
+        DPRINTF(LSQProfiling, "\t%lld\trequests\t%d\t%s\t%d"
         "\t%d\t%d\t%d\t%d\t%d\n"
         ,curTick(),i,target->state, target->isLoad,
         target->packet->hasData(), target->hasDataInFragments(0),
@@ -1981,7 +1982,7 @@ LSQ::FIProfiling()
                 continue;
         }
 
-        DPRINTF(FIProfiling, "\t%lld\ttransfers\t%d\t%s\t%d"
+        DPRINTF(LSQProfiling, "\t%lld\ttransfers\t%d\t%s\t%d"
         "\t%d\t%d\t%d\t%d\t%d\n"
         ,curTick(),i,target->state, target->isLoad,
         target->packet->hasData(), target->hasDataInFragments(0),
@@ -1998,7 +1999,7 @@ LSQ::FIProfiling()
                 continue;
         }
 
-        DPRINTF(FIProfiling, "\t%lld\tstoreBuffer\t%d\t%s\t%d"
+        DPRINTF(LSQProfiling, "\t%lld\tstoreBuffer\t%d\t%s\t%d"
         "\t%d\t%d\t%d\t%d\t%d\n"
         ,curTick(),i,target->state, target->isLoad,
         target->packet->hasData(), target->hasDataInFragments(0),
