@@ -314,7 +314,15 @@ Pipeline::pipeRegBubble(std::ostream& os) const
     const BranchData& eToF1_data = eToF1.buffer[-1];
     const BranchData& f2ToF1_data = f2ToF1.buffer[-1];
 
-    std::string f1ToF2_bubble = f1ToF2_data.isBubble() ? "BB" : "line";
+    std::string f1ToF2_bubble;
+
+    if(f1ToF2_data.isBubble())
+        f1ToF2_bubble = "BB";
+    else if(f1ToF2_data.isFault())
+        f1ToF2_bubble = "FF";
+    else
+        f1ToF2_bubble = "line";
+
     std::string f2ToD_bubble = f2ToD_data.isBubble() ? "BB" : "inst";
     std::string dToE_bubble = dToE_data.isBubble() ? "BB" : "op";
     std::string eToF1_bubble
