@@ -679,6 +679,9 @@ Pipeline::evaluate()
 
 	//YOHAN: Inject fault into register file
     cpu.injectFaultRegFunc();
+	
+	//YOHAN: Inject fault (hard error) into register file
+    cpu.injectFaultRegFuncHard();
 
     //HwiSoo
     execute.getLSQ().injectFaultLSQFunc();

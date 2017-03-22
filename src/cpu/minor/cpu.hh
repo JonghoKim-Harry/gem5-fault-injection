@@ -118,12 +118,16 @@ class MinorCPU : public BaseCPU
 
     //HwiSoo, variables for injecting faults
     unsigned injectFaultReg;
+    unsigned injectFaultRegHard;
     uint64_t injectTime;
     unsigned injectLoc;
     bool injectReg;
+    bool injectRegHard;
     bool checkReg;
+    bool checkRegHard;
     //bool traceReg; // Trace behaviors of fault injected register
     unsigned checkFaultReg;
+    unsigned checkFaultRegHard;
 
     //ybkim
     unsigned injectFaultFu;
@@ -225,6 +229,7 @@ class MinorCPU : public BaseCPU
 
     //HwiSoo
     void injectFaultRegFunc(); 
+    void injectFaultRegFuncHard(); 
     uint64_t originalRegData;
 };
 

@@ -597,9 +597,13 @@ class BaseCPU : public MemObject
     int injectReadSN; //YOHAN: Sequnce number of instruction which is corrupted
     int injectEarlySN; //YOHAN: Sequnce number of instruction which is corrupted
 
-	bool readSymptom[NumOfSymptom]; //YOHAN: Symptom is detected
-	bool earlySymptom[NumOfSymptom]; //YOHAN: Symptom is detected. HwiSoo: [0] = Branch misprediction, [1] = Exception
-
+    bool readSymptom[NumOfSymptom]; //YOHAN: Symptom is detected
+    bool earlySymptom[NumOfSymptom]; //YOHAN: Symptom is detected. HwiSoo: [0] = Branch misprediction, [1] = Exception
+    
+    //YOHAN
+    int regHardBit;
+    int regHardIdx;
+    int regHardLoc;
     
   public:
     void armMonitor(ThreadID tid, Addr address);

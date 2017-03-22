@@ -279,6 +279,7 @@ class MinorCPU(BaseCPU):
 
     #HwiSoo, parameter for injecting faults
     injectFaultReg = Param.Unsigned(0, "Inject a single-bit fault in Register or not (0: NO, 1: Yes)")
+    injectFaultRegHard = Param.Unsigned(0, "Inject a single-bit fault in Register or not (0: NO, 1: Yes)")
     injectTime = Param.UInt64(0, "Time to inject fault")
     injectLoc = Param.Unsigned(0, "Bit location to inject fault")
 

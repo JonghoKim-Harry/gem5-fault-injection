@@ -250,6 +250,33 @@ SimpleThread::flipRegFile (uint64_t injectLoc, uint64_t *originalRegData)
     return false;    
 }
 
+//YOHAN
+bool
+SimpleThread::flipRegFileHard (uint64_t injectLoc, uint64_t *originalRegData)
+{
+    if(injectLoc < TheISA::NumIntRegs*32) {
+        *originalRegData = intRegs[injectLoc/32];
+        uint64_t bit_flip = intRegs[injectLoc/32] ^ (1UL << (injectLoc%32));
+        DPRINTF(FI, "Flipping int reg %d from %#x to %#x\n", injectLoc/32, intRegs[injectLoc/32], bit_flip);
+		baseCpu->regHardIdx = injectLoc/32;
+		baseCpu->regHardLoc = injectLoc%32;
+		baseCpu->regHardBit = (bit_flip & (1 << injectLoc%32)) >> injectLoc%32;
+        //DPRINTF(FI, "int reg %d %d bit is %d\n", injectLoc/32, injectLoc%32, (bit_flip & (1 << injectLoc%32)) >> injectLoc%32);
+        //DPRINTF(FI, "TheISA::NumIntRegs is %d\n", TheISA::NumIntRegs);
+        intRegs[injectLoc/32] = bit_flip;
+        injectIdx = injectLoc/32;
+        return true;
+    } else {
+        *originalRegData = floatRegs.i[injectLoc/32];  //.i? .f?
+        uint32_t temp = floatRegs.i[injectLoc/32];
+        uint32_t bit_flip = temp ^ (1UL << (injectLoc%32));
+        DPRINTF(FI, "Flipping float reg %d from %#x to %#x\n", injectLoc/32, floatRegs.i[injectLoc/32], bit_flip);
+        floatRegs.i[injectLoc/32] = bit_flip;
+        return true;
+    }
+    return false;    
+}
+
 //YOHAN: readIntReg for analysis
 uint64_t
 SimpleThread::readIntReg2(int reg_idx)
