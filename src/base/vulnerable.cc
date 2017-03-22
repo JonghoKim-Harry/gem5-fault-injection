@@ -10,6 +10,7 @@ namespace
 {
     std::vector<Vulnerable::FiInfo> remainingFi;
     unsigned int fi_count = 0;
+    bool injectPipeReg = false;
 } // anonymous namespace
 
 
@@ -55,14 +56,17 @@ Vulnerable::evaluate()
         if(iter->injTime < curTick()) {
             iter->target->injectFault(iter->injLoc, iter->method);
             iter = remainingFi.erase(iter);
+            if(remainingFi.size()==0)
+                injectPipeReg=true;
        }
         else
             ++iter;
     }
 }
 
-int
-Vulnerable::getRemainingFiSize() //HwiSoo
+
+bool
+Vulnerable::checkInjectPipeReg()
 {
-    return remainingFi.size();
+    return injectPipeReg;
 }
