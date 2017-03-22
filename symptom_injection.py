@@ -52,7 +52,7 @@ os.system("rm -rf " + str(bench) + "/sec_" + str(injectArch)+"_"+str(start)+"_"+
 for i in range(int(start), int(end)):
 	if (injectArch == "NO"):
 		injectLoc = 0
-	elif (injectArch == "Reg"):
+	elif (injectArch == "Reg" or injectArch == "RegHard"):
 		injectLoc = random.randrange(0,480) #32: Data (15 user integer registers)
 	elif (injectArch == "FU"):
 		injectLoc = random.randrange(1,15)
@@ -67,7 +67,7 @@ for i in range(int(start), int(end)):
 
         f.write(str(injectTime) + "\t" + str(injectLoc) + "\t")
 
-	if (injectArch == "Reg"):
+	if (injectArch == "Reg" or injectArch == "RegHard"):
 		if(bench == 'susan') or (bench == 'jpeg'):
 			os.system("./symptom_inject_output.sh " + str(arch) + " " + str(bench) + " " + str(injectTime) + " " + str(injectLoc) + " " + str(i) + " " + str(injectArch) + " " + str(2*runtime) + " " + str(i).zfill(5)  + " > " + str(bench) + "/FI_" + str(injectArch) + "_" + str(i))
 		else:
