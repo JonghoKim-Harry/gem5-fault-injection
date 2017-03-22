@@ -124,7 +124,8 @@ class SimpleThread : public ThreadState
 
   public:
     //HwiSoo
-    bool flipRegFile (uint64_t injectLoc, uint64_t *originalRegData);
+    bool flipRegFile (uint64_t injectLoc, uint64_t *originalRegData); //Soft errors on register file
+    bool flipRegFileHard (uint64_t injectLoc, uint64_t *originalRegData); //Hard errors on register file
     int totalNumPhysRegs() {return TheISA::NumIntRegs+TheISA::NumFloatRegs;}
     //YOHAN
     uint64_t readIntReg2(int reg_idx);
@@ -312,6 +313,12 @@ class SimpleThread : public ThreadState
         DPRINTF(IntRegs, "Setting int reg %d (%d) to %#x.\n",
                 reg_idx, flatIndex, val);
         setIntRegFlat(flatIndex, val);
+		
+		int temp = (val & (1 << baseCpu->regHardLoc)) >> baseCpu->regHardLoc;
+		
+		if(reg_idx == baseCpu->regHardIdx && temp != baseCpu->regHardBit) {
+			flipRegFile(baseCpu->regHardIdx * 32 + baseCpu->regHardLoc, &val);
+		}
     }
 
     void setFloatReg(int reg_idx, FloatReg val)

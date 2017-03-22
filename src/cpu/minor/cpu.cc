@@ -52,9 +52,11 @@ MinorCPU::MinorCPU(MinorCPUParams *params) :
     BaseCPU(params),
     threadPolicy(params->threadPolicy),
     injectFaultReg(params->injectFaultReg), //HwiSoo: 0-> No injection, 1-> Fault injection
+    injectFaultRegHard(params->injectFaultRegHard), //Yohan: 0-> No injection, 1-> Fault injection
     injectTime(params->injectTime),         //HwiSoo: Injection time
     injectLoc(params->injectLoc),           //HwiSoo: Injection location
     injectReg(false),
+    injectRegHard(false),
     checkReg(false),
     //traceReg(false),
     checkFaultReg(params->checkFaultReg),    //HwiSoo: 0->No check, 1-> Check
@@ -397,7 +399,29 @@ MinorCPU::injectFaultRegFunc()
                 injectLoc = injectLoc - threads[0]->totalNumPhysRegs()*32;
         }
     }
+}
 
+//YOHAN: Fault injection (hard error) into register file
+void
+MinorCPU::injectFaultRegFuncHard()
+{
+    if((checkFaultRegHard ==1 || injectFaultRegHard ==1)&&curTick()>=injectTime) {        
+        if(injectFaultRegHard == 1) {
+            injectRegHard = threads[0]->flipRegFileHard(injectLoc, &originalRegData);
+        }
+        else {
+            checkRegHard = true;
+        }
+
+        if(injectRegHard)
+        {
+            injectFaultRegHard = 0;
+        }
+        else {
+            if(injectLoc >= threads[0]->totalNumPhysRegs()*32)
+                injectLoc = injectLoc - threads[0]->totalNumPhysRegs()*32;
+        }
+    }
 }
 
 //YOHAN: Exit when corrupted reg is not used

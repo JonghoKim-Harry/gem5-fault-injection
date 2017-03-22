@@ -561,6 +561,8 @@ def run(options, root, testsys, cpu_class):
                 switch_cpus[i].injectFaultReg = 1
             if options.checkArch == "Reg":
                 switch_cpus[i].checkFaultReg = 1
+            if options.injectArch == "RegHard":
+                switch_cpus[i].injectFaultRegHard = 1
 
         testsys.switch_cpus = switch_cpus
         testsys.switch_cpus_1 = switch_cpus_1

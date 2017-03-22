@@ -140,7 +140,8 @@ BaseCPU::BaseCPU(Params *p, bool is_checker)
       correctStore (p->correctStore), //YOHAN
       correctLoad (p->correctLoad), //YOHAN
       injectReadSN (-1), //YOHAN
-      injectEarlySN (-1) //YOHAN
+      injectEarlySN (-1), //YOHAN
+      regHardIdx (-1) //YOHAN
 {
     // if Python did not provide a valid ID, do it here
     if (_cpuId == -1 ) {

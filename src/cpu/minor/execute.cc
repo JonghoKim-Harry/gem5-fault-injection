@@ -1050,6 +1050,7 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
     if( (cpu.injectReg || cpu.injectLSQ || Vulnerable::checkInjectPipeReg()) && cpu.injectEarlySN == -1) {
         cpu.injectEarlySN = inst->id.execSeqNum;
         DPRINTF(FI, "cpu.injectEarlySN is %d\n", cpu.injectEarlySN);
+        //DPRINTF(FI, "cpu.injectEarlySN is %d\n", Vulnerable::getRemainingFiSize());
     }
 
     /* Is the thread for this instruction suspended?  In that case, just
